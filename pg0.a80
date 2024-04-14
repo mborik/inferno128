@@ -1,0 +1,31 @@
+		device	NOSLOT64K
+		org	#6000
+		define isFX 5
+		display "Composing parts into #6000~#C000"
+
+@_fxpage = #10
+@_fxpage_start
+
+;;-----------------------------------------------------------------------------
+; Every part is defined with this descriptor:
+;
+; fx_part: incbin "demo-part-folder/final.pak"
+; .pg = _fxpage     ; current fx 128k page
+;                   ; (set bit.7 to just ldir given length, not decompress)
+; .length           ; optional when data transfer (ldir) needed
+
+;;-----------------------------------------------------------------------------
+	if $ > #C000
+		display "Too long! ",/D,($-#C000)," bytes out!"
+		end
+	else
+		display /D,(#C000-$)," bytes free before #C000"
+	endif
+
+		savebin "bank0",(_fxpage_start),$-(_fxpage_start)
+
+;;-----------------------------------------------------------------------------
+; Every part descriptor values should be exported:
+;
+;		export fx_part
+;		export fx_part.pg

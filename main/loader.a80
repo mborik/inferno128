@@ -1,0 +1,222 @@
+		device	zxspectrum128
+		emptytap OUTPUT
+
+		include "constants.inc"
+
+	module loader
+		display "Composing bank 0 & loader"
+
+		org	#6000
+
+begin = $
+
+numberOfBanks = 5
+unpackpage:	di
+		ld	hl,#8000
+		ld	de,#C000
+		ld	a,(hl)
+		call	introzx0.depack
+		ei
+		ret
+
+run:		ld	hl,kernelblock
+		ld	de,#8000
+		call	introzx0.depack
+		jp	kernel
+
+	module introzx0
+depack
+	opt push listoff
+		include "dzx0_fast.a80"
+	opt pop
+	endmodule
+
+kernelblock	incbin "final.pak"
+
+; LOADER auto-detect/test HW (positioned after kernelblock, free to overwrite by later blocks)
+
+introseq:	di
+		ld	hl,introseq.dat
+		ld	de,#4000
+		call	introzx0.depack
+
+test48		ld	hl,#C000
+		ld	a,#56		; #56 and #57 used for test
+		out	(#fd),a
+		ld	(hl),a
+		inc	a
+		out	(#fd),a
+		ld	(hl),a
+		dec	a
+		out	(#fd),a
+		cp	(hl)
+		ei
+		ret	z
+	; 128k memory test failed
+printout	ld	a,#F4
+		ld	(23739),a
+		ld	a,2
+		call	#1601
+		ld	hl,ERR
+.loop		ld	a,(hl)
+		and	127
+		rst	16
+		bit	7,(hl)
+		jr	z,.loop
+		jr	$	; infinite loop after message is printed
+
+ERR		db	22, 21, 1
+		db	16, 2
+		dc	"this game does not work on 48k"
+
+introseq.dat:	incbin "loading.pak"
+
+total = $-begin
+	endmodule
+
+
+		display "Composing BASIC"
+		include "sinclairBASIC.inc"
+
+		org	23755-17
+
+; BASIC header
+	tapout OUTPUT,0
+
+		db	0
+		db	"INFERNO   "
+		dw	bas.total
+		dw	1 ; start line
+		dw	bas.total
+
+	tapend
+
+; BASIC block
+	tapout OUTPUT
+
+	module bas
+line1:		db	0, 1
+		dw	line1.len
+line1.cmds	; POKE VAL "23624",NOT PI:
+		db	C_POKE
+		VAL	23624, ','
+		db	C_NOT, C_PI, ':'
+		; POKE VAL "23693",NOT PI:
+		db	C_POKE
+		VAL	23693, ','
+		db	C_NOT, C_PI, ':'
+		; CLEAR VAL "x":
+		db	C_CLEAR
+		VAL	loader.begin - 1, ':'
+		; POKE VAL "23739",CODE "o":
+		db	C_POKE
+		VAL	23739, ','
+		db	C_CODE, '"o":'
+		; POKE VAL "23388",VAL "16":
+		db	C_POKE
+		VAL	23388, ','
+		VAL	16, ':'
+		; OUT VAL "32765",VAL "16"
+		db	C_OUT
+		VAL	32765, ','
+		VAL	16, ':'
+		; LOAD _"block0" CODE:
+		db	C_LOAD, ' "block0"', C_CODE, ':'
+		; RANDOMIZE USR VAL "x"
+		db	C_RANDOMIZE, C_USR
+		VAL	loader.introseq, EOL
+line1.len = $ - line1.cmds
+
+line2:		db	0, 2
+		dw	line2.len
+line2.cmds	; READ s
+		db	C_READ, 's:'
+		; POKE VAL "23388",s+VAL "16":
+		db	C_POKE
+		VAL	23388, ','
+		db	's+'
+		VAL	16, ':'
+		; OUT VAL "32765",s+VAL "16":
+		db	C_OUT
+		VAL	32765, ','
+		db	's+'
+		VAL	16, ':'
+		; LOAD _"page"+(STR$ s) CODE:
+		db	C_LOAD, ' "block"+(', C_STRS, 's)', C_CODE, ':'
+		; RANDOMIZE USR VAL "x":
+		db	C_RANDOMIZE, C_USR
+		VAL	loader.unpackpage, ':'
+		; IF s <> VAL "7" THEN
+		db	C_IF, 's', C_NOTEQ
+		VAL	7, C_THEN
+		; GO TO VAL "2"
+		db	C_GOTO
+		VAL	2, EOL
+line2.len = $ - line2.cmds
+
+line3:		db	0, 3
+		dw	line3.len
+line3.cmds	; PAUSE VAL "42"
+		db	C_PAUSE
+		VAL	42, ":"
+		; RANDOMIZE USR VAL "x"
+		db	C_RANDOMIZE, C_USR
+		VAL	loader.run, EOL
+line3.len = $ - line3.cmds
+
+line9:		db	0, 9
+		dw	line9.len
+line9.cmds	; DATA...
+		db	C_DATA
+		VAL	1, ','
+		VAL	3, ','
+		VAL	4, ','
+		VAL	6, ','
+		VAL	7, EOL
+line9.len = $ - line9.cmds
+
+total = $ - line1
+	endmodule
+	tapend
+
+; loader block
+		display "Storing loader into output tape"
+		savetap OUTPUT, CODE, "block0", loader.begin, loader.total
+
+;;-----------------------------------------------------------------------------
+	macro putBank number?, filename?
+@__putBank_number = number?
+		lua allpass
+			_pl("putBank"..tostring(_c('__putBank_number')))
+		endlua
+
+		tapout OUTPUT,0
+			org	0
+			db	3 ;; BYTES
+		lua allpass
+			_pc("db 'block"..tostring(_c('__putBank_number')).."    '")
+		endlua
+
+			dw	.filelength
+			dw	#8000 ;; block start address
+			dw	#8000
+		tapend
+
+		tapout OUTPUT
+			org #C000,(__putBank_number)
+.filedata		incbin filename?
+.filelength = $-.filedata
+
+	if .filelength > #4000
+		display "Packed bank ",/D,__putBank_number," is too long!"
+	endif
+		tapend
+	endm
+;;-----------------------------------------------------------------------------
+		display "Storing banks into output tape"
+
+		putBank 1,"../bank1.pak"
+		putBank 3,"../bank3.pak"
+		putBank 4,"../bank4.pak"
+		putBank 6,"../bank6.pak"
+		putBank 7,"../bank7.pak"
