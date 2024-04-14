@@ -1,5 +1,6 @@
 {
 	"explorer.excludeGitIgnore": true,
+	"debug.javascript.autoAttachFilter": "always",
 	"files.eol": "\n",
 	"files.associations": {
 		"*.{a80,inc}": "z80-macroasm"
