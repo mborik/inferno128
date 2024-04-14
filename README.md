@@ -6,8 +6,7 @@ This project is aimed to decompile ZX-Spectrum game "Inferno", translate into En
 
 - **Original Publisher:** Proxima Software (Czech)
 - **Original Release Date:** 1993
-- **Author:** Ji¯Ì Koudelka (Universum)
-- **Graphics:** Tom·ö VilÌm (George K.)
+- **Author:** Tom√°≈° Vil√≠m (Universum)
+- **Screens:** Ji≈ô√≠ Koudelka (George K.)
 - **Genre:** Arcade Shoot-em-up
 - **Copyright Status:** Public Domain (not copyrighted anymore)
-
