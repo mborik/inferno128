@@ -1,75 +1,89 @@
 		device	zxspectrum128
 		emptytap OUTPUT
 
-		include "constants.inc"
+		include "../main/pg0.inc"
+		include "../main/constants.inc"
 
 	module loader
-		display "Composing bank 0 & loader"
+		display "Composing loader"
 
-		org	#6000
+		org	COREZONE
 
 begin = $
 
 numberOfBanks = 5
-unpackpage:	di
+unpackpage:	ld	hl,#56E1
+		ld	bc,((30 / numberOfBanks) << 8) | #FF
+.pgprog:	ld	(hl),c	; draw progress
+		inc	l
+		djnz	.pgprog
+		ld	(unpackpage+1),hl
+		di
 		ld	hl,#8000
 		ld	de,#C000
 		ld	a,(hl)
-		call	introzx0.depack
+		call	loaderzx0.depack
 		ei
 		ret
 
-run:		ld	hl,kernelblock
-		ld	de,#8000
-		call	introzx0.depack
-		jp	kernel
+fadeoutandrun:	ld	a,25
+.loop:		ei
+		halt
+		halt
+		ex	af,af'
+		call	attrhide
+		ex	af,af'
+		dec	a
+		jr	nz,.loop
+		di
+		ld	hl,fx_main_mover
+		ld	de,COREZONE
+		push	de
+		jp	loaderzx0.depack
 
-	module introzx0
+attrhide:	ld	hl,22528
+		ld	c,24
+.atthd2:	ld	b,32
+		push	bc
+.atthd3:	ld	a,(hl)
+		and	7
+		jr	z,.atthd4
+		dec	a
+.atthd4:	push	af
+		ld	a,(hl)
+		and	56
+		jr	z,.atthd5
+		ld	c,8
+		sub	c
+		ld	c,a
+		pop	af
+		or	c
+		jr	.atthd6
+.atthd5:	ld	a,(hl)
+		and	248
+		ld	c,a
+		pop	af
+		or	c
+.atthd6:	ld	(hl),a
+		inc	hl
+		djnz	.atthd3
+		pop	bc
+		dec	c
+		jr	nz,.atthd2
+		ret
+
+introseq:	di
+		ld	hl,titlescreen
+		ld	de,#4000
+
+	module loaderzx0
 depack
 	opt push listoff
 		include "dzx0_fast.a80"
 	opt pop
 	endmodule
 
-kernelblock	incbin "final.pak"
-
-; LOADER auto-detect/test HW (positioned after kernelblock, free to overwrite by later blocks)
-
-introseq:	di
-		ld	hl,introseq.dat
-		ld	de,#4000
-		call	introzx0.depack
-
-test48		ld	hl,#C000
-		ld	a,#56		; #56 and #57 used for test
-		out	(#fd),a
-		ld	(hl),a
-		inc	a
-		out	(#fd),a
-		ld	(hl),a
-		dec	a
-		out	(#fd),a
-		cp	(hl)
-		ei
-		ret	z
-	; 128k memory test failed
-printout	ld	a,#F4
-		ld	(23739),a
-		ld	a,2
-		call	#1601
-		ld	hl,ERR
-.loop		ld	a,(hl)
-		and	127
-		rst	16
-		bit	7,(hl)
-		jr	z,.loop
-		jr	$	; infinite loop after message is printed
-
-ERR		db	22, 21, 1
-		db	16, 2
-		dc	"this game does not work on 48k"
-
-introseq.dat:	incbin "loading.pak"
+titlescreen	incbin "screen.pak"
 
 total = $-begin
 	endmodule
@@ -120,8 +134,8 @@ line1.cmds	; POKE VAL "23624",NOT PI:
 		db	C_OUT
 		VAL	32765, ','
 		VAL	16, ':'
-		; LOAD _"block0" CODE:
-		db	C_LOAD, ' "block0"', C_CODE, ':'
+		; LOAD _"loader" CODE:
+		db	C_LOAD, ' "loader"', C_CODE, ':'
 		; RANDOMIZE USR VAL "x"
 		db	C_RANDOMIZE, C_USR
 		VAL	loader.introseq, EOL
@@ -156,12 +170,19 @@ line2.len = $ - line2.cmds
 
 line3:		db	0, 3
 		dw	line3.len
-line3.cmds	; PAUSE VAL "42"
-		db	C_PAUSE
-		VAL	42, ":"
+line3.cmds	; POKE VAL "23388",VAL "16":
+		db	C_POKE
+		VAL	23388, ','
+		VAL	16, ':'
+		; OUT VAL "32765",VAL "16"
+		db	C_OUT
+		VAL	32765, ','
+		VAL	16, ':'
+		; LOAD _"block0" CODE:
+		db	C_LOAD, ' "block0"', C_CODE, ':'
 		; RANDOMIZE USR VAL "x"
 		db	C_RANDOMIZE, C_USR
-		VAL	loader.run, EOL
+		VAL	loader.fadeoutandrun, EOL
 line3.len = $ - line3.cmds
 
 line9:		db	0, 9
@@ -181,11 +202,12 @@ total = $ - line1
 
 ; loader block
 		display "Storing loader into output tape"
-		savetap OUTPUT, CODE, "block0", loader.begin, loader.total
+		savetap OUTPUT, CODE, "loader", loader.begin, loader.total
 
 ;;-----------------------------------------------------------------------------
-	macro putBank number?, filename?
+	macro putBank number?, filename?, address?
 @__putBank_number = number?
+@__putBank_address = address?
 		lua allpass
 			_pl("putBank"..tostring(_c('__putBank_number')))
 		endlua
@@ -198,7 +220,7 @@ total = $ - line1
 		endlua
 
 			dw	.filelength
-			dw	#8000 ;; block start address
+			dw	__putBank_address
 			dw	#8000
 		tapend
 
@@ -215,8 +237,9 @@ total = $ - line1
 ;;-----------------------------------------------------------------------------
 		display "Storing banks into output tape"
 
-		putBank 1,"../bank1.pak"
-		putBank 3,"../bank3.pak"
-		putBank 4,"../bank4.pak"
-		putBank 6,"../bank6.pak"
-		putBank 7,"../bank7.pak"
+		putBank 1,"../bank1.pak",#8000
+		putBank 3,"../bank3.pak",#8000
+		putBank 4,"../bank4.pak",#8000
+		putBank 6,"../bank6.pak",#8000
+		putBank 7,"../bank7.pak",#8000
+		putBank 0,"../bank0",fx_main_mover

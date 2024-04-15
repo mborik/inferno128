@@ -11,6 +11,8 @@ popd
 
 subdirs=(
 	main
+	loader
+	intro
 )
 
 for D in "${subdirs[@]}"; do

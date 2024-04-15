@@ -1,67 +1,37 @@
 		device	zxspectrum128
 
-		include "pg0.inc"
 		include "pg1.inc"
 		include "pg3.inc"
 		include "pg4.inc"
 		include "pg6.inc"
 		include "pg7.inc"
 
-@page128	equ	#7FFD
-@act128page	equ	#5B5C
-@actborder	equ	#5C48
-@FRAMES		equ	#5C78
-@RUNZONE	equ	#8400
-@basesp		equ	RUNZONE
+@COREZONE	equ	24200
+@RUNZONE	equ	44000
+@BASESP		equ	COREZONE
 
 
-		display "Composing kernel"
+		display "Composing game engine"
 
-		org	#8000
+		org	COREZONE
 		output	"final.bin"
 
-@xchg.vram:	ld	a,#1D
-		xor	#0A
-		ld	(xchg.vram+1),a
-@xchg.bnk:	ld	(act128page),a
-		ld	bc,page128
-		out	(c),a
+		jp	start
+
+font_small:	incbin "console.font.bin"
+wpg_0_COBRA:	incbin "gfx.equipment.bin"
+
+@start:		di
+		halt
+
+@music_init
+@music_play
 		ret
-
-;;-----------------------------------------------------------------------------
-
-@kernel:	di
-		ld	(backsp+1),sp
-		ld	sp,basesp
-; clear vram
-		ld	hl,#4000
-		ld	de,#4001
-		ld	bc,#1AFF
-		ld	(hl),l
-		ldir
-		ld	a,#10
-		call	xchg.bnk
-		di
-		im	1
-		ld	iy,#5C3A
-		ld	hl,#2758
-backsp		ld	sp,0
-		exx
-		ei
-		ret
-
-
-		display /D,(RUNZONE-$)," bytes free for stack"
-		block	(RUNZONE-$),0
 
 		outend
 
-		export page128
-		export act128page
-		export actborder
-		export FRAMES
-		export basesp
-		export kernel
+		export COREZONE
 		export RUNZONE
-		export xchg.vram
-		export xchg.bnk
+		export BASESP
+		export music_init
+		export music_play

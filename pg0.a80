@@ -1,7 +1,8 @@
 		device	NOSLOT64K
 		org	#6000
 		define isFX 5
-		display "Composing parts into #6000~#C000"
+		display "Composing main part mover"
+
 
 @_fxpage = #10
 @_fxpage_start
@@ -14,13 +15,16 @@
 ;                   ; (set bit.7 to just ldir given length, not decompress)
 ; .length           ; optional when data transfer (ldir) needed
 
+	phase	$10000 - (fx_main_mover.blockend - fx_main_mover.block)
+fx_main_mover
+
+.block		incbin "main/final.pak"
+.blockend
+
+.length = $-fx_main_mover
+	dephase
+
 ;;-----------------------------------------------------------------------------
-	if $ > #C000
-		display "Too long! ",/D,($-#C000)," bytes out!"
-		end
-	else
-		display /D,(#C000-$)," bytes free before #C000"
-	endif
 
 		savebin "bank0",(_fxpage_start),$-(_fxpage_start)
 
@@ -29,3 +33,5 @@
 ;
 ;		export fx_part
 ;		export fx_part.pg
+
+		export fx_main_mover

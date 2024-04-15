@@ -29,6 +29,10 @@ rm -f ${OUTPUT}
 #> ASM part.a80 -DisFX --lst=part.lst
 #> PAK final.bin final.pak
 
+cd ../main
+ASM main.a80 -DisFX --lst=main.lst --exp=constants.inc
+PAK final.bin final.pak
+
 # banks composition
 cd ..
 rm -f bank*
@@ -44,8 +48,6 @@ PAK bank6 bank6.pak
 ASM pg7.a80 --lst=main/pg7.lst --exp=main/pg7.inc
 PAK bank7 bank7.pak
 
-cd main
-PAK loading.scr loading.pak
-ASM main.a80 --lst=main.lst --exp=constants.inc
-PAK final.bin final.pak
+cd loader
+PAK screen.scr screen.pak
 ASM loader.a80 -DOUTPUT="\"../build/${OUTPUT}\"" --lst=loader.lst
