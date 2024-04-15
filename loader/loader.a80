@@ -26,7 +26,11 @@ unpackpage:	ld	hl,#56E1
 		ei
 		ret
 
-fadeoutandrun:	ld	a,25
+fadeoutandrun:	ld	b,100
+.waitfor:	ei
+		halt
+		djnz	.waitfor
+		ld	a,25
 .loop:		ei
 		halt
 		halt
@@ -126,14 +130,6 @@ line1.cmds	; POKE VAL "23624",NOT PI:
 		db	C_POKE
 		VAL	23739, ','
 		db	C_CODE, '"o":'
-		; POKE VAL "23388",VAL "16":
-		db	C_POKE
-		VAL	23388, ','
-		VAL	16, ':'
-		; OUT VAL "32765",VAL "16"
-		db	C_OUT
-		VAL	32765, ','
-		VAL	16, ':'
 		; LOAD _"loader" CODE:
 		db	C_LOAD, ' "loader"', C_CODE, ':'
 		; RANDOMIZE USR VAL "x"
