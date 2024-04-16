@@ -1,3 +1,4 @@
+music_pg: EQU 0x00000017
 soundtrack.intro: EQU 0x0000C000
 soundtrack.level1: EQU 0x0000C3A1
 soundtrack.level2: EQU 0x0000C986

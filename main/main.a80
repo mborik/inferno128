@@ -101,17 +101,17 @@ interrupt	push	af
 		push	de
 		push	hl
 
+@IMCALL		ld	bc,#0101
+
 @music_page	ld	a,0
 		or	a
-		jr	z,IMCALL
+		jr	z,.disabled
 		call	xchg.keeper
 		call	music_play
 		xor	a
 		call	xchg.keeper
 
-@IMCALL		ld	bc,#0101
-
- 		pop	hl
+.disabled:	pop	hl
 		pop	de
 		pop	bc
 		pop	af
@@ -134,6 +134,11 @@ interrupt	push	af
 		display /D,(RUNZONE-$)," bytes free before RUNZONE"
 	    endif
 	endif
+
+	module intro
+		org	RUNZONE
+		include "../intro/intro.a80"
+	endmodule
 
 		savebin "final.bin",COREZONE,$-COREZONE
 

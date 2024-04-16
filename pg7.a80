@@ -28,6 +28,8 @@ outro2:		incbin "outro/song2.stc"
 
 	endmodule
 
+music_pg = _fxpage
+
 ;;-----------------------------------------------------------------------------
 	if $ > #10000
 		display "Too long! ",/D,($-#10000)," bytes out!"
@@ -45,6 +47,7 @@ outro2:		incbin "outro/song2.stc"
 ;		export fx_part
 ;		export fx_part.pg
 
+		export music_pg
 		export soundtrack.intro
 		export soundtrack.level1
 		export soundtrack.level2
