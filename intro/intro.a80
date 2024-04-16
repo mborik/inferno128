@@ -1,10 +1,3 @@
-		device	zxspectrum48
-	ifdef isFX
-		display	"Compiling 'intro'"
-	endif
-
-; ---------------------------------------------------------------------------
-
 intro		ld	a,music_pg
 		ld	(music_page+1),a
 		call	xchg.bnk
@@ -54,7 +47,7 @@ loc_CD56	ld	(de),a
 		inc	e
 		djnz	loc_CD56
 		pop	de
-		call	sub_CE4A
+		call	downde
 		dec	c
 		jr	nz,loc_CD52
 		ld	b,0C0h
@@ -65,7 +58,7 @@ loc_CD69	ld	(hl),e
 		inc	hl
 		ld	(hl),d
 		inc	hl
-		call	sub_CE4A
+		call	downde
 		djnz	loc_CD69
 		ld	ix,0EA00h
 		ld	b,0
@@ -132,7 +125,7 @@ loc_CE00	ld	(hl),e
 		inc	hl
 		ld	(hl),d
 		inc	hl
-		call	sub_CE4A
+		call	downde
 		djnz	loc_CE00
 		xor	a
 
@@ -170,7 +163,7 @@ loc_CE38	cp	0
 		jr	nc,introend
 		jr	loc_CDDF
 
-sub_CE4A	inc	d
+downde		inc	d
 		ld	a,d
 		and	7
 		ret	nz
@@ -178,11 +171,10 @@ sub_CE4A	inc	d
 		add	a,20h ; ' '
 		ld	e,a
 		ld	a,d
-		jr	c,loc_CE59
+		jr	c,downde2
 		sub	8
 		ld	d,a
-
-loc_CE59	cp	58h ; 'X'
+downde2		cp	58h ; 'X'
 		ret	c
 		ld	d,40h ; '@'
 		ret
@@ -347,7 +339,6 @@ loc_CF57	ld	de,0
 		ld	l,b
 		ld	de,0E200h
 		ld	a,80h
-
 loc_CF67	ex	de,hl
 		ld	(hl),d
 		set	7,l
@@ -368,7 +359,6 @@ loc_CF67	ex	de,hl
 		ld	l,b
 		ld	de,0E300h
 		ld	a,80h
-
 loc_CF88	ex	de,hl
 		ld	(hl),d
 		set	7,l
@@ -383,7 +373,6 @@ loc_CF88	ex	de,hl
 		ld	a,1
 		ld	(sub_D1CC+1),a
 		ld	hl,earthdata
-
 loc_CFA1	ld	b,(hl)
 		inc	hl
 		ld	a,(hl)
@@ -395,14 +384,11 @@ loc_CFA1	ld	b,(hl)
 		xor	80h
 		jr	nz,loc_CFAF
 		inc	hl
-
 loc_CFAF	push	hl
 		ld	a,1
 		jr	z,loc_CFB5
 		dec	a
-
 loc_CFB5	ld	(loc_D1CE+1),a
-
 loc_CFB8	ld	a,0
 		or	a
 		jr	z,loc_CFC5
@@ -412,9 +398,7 @@ loc_CFB8	ld	a,0
 		ld	a,c
 		xor	80h
 		ld	c,a
-
 loc_CFC5	ld	h,0E3h
-
 loc_CFC7	ld	yl,0
 		ld	de,0
 		ld	l,b
@@ -425,7 +409,6 @@ loc_CFC7	ld	yl,0
 ; ---------------------------------------------------------------------------
 
 loc_CFD5	ld	e,(hl)
-
 loc_CFD6	ld	l,c
 		dec	h
 		ld	a,c
@@ -440,7 +423,6 @@ loc_CFD6	ld	l,c
 
 loc_CFE4	add	a,d
 		ld	d,a
-
 loc_CFE6	push	de
 		ld	de,0
 		ld	l,c
@@ -452,7 +434,6 @@ loc_CFE6	push	de
 ; ---------------------------------------------------------------------------
 
 loc_CFF3	ld	e,(hl)
-
 loc_CFF4	ld	l,b
 		dec	h
 		ld	a,b
@@ -467,7 +448,6 @@ loc_CFF4	ld	l,b
 
 loc_D002	add	a,d
 		ld	d,a
-
 loc_D004	ld	a,e
 		cp	80h
 		jr	nc,loc_D01A
@@ -483,11 +463,8 @@ loc_D014	ld	a,d
 		sub	e
 		cp	80h
 		jr	c,loc_D01C
-
 loc_D01A	ld	a,7Fh
-
 loc_D01C	or	80h
-
 loc_D01E	ld	c,a
 		pop	de
 		ld	a,e
@@ -505,15 +482,11 @@ loc_D030	ld	a,d
 		sub	e
 		cp	80h
 		jr	c,loc_D038
-
 loc_D036	ld	a,7Fh
-
 loc_D038	or	80h
-
 loc_D03A	ld	b,xh
 		ld	xh,a
 		ld	h,0E5h
-
 loc_D040	ld	yl,0
 		ld	de,0
 		ld	l,b
@@ -524,7 +497,6 @@ loc_D040	ld	yl,0
 ; ---------------------------------------------------------------------------
 
 loc_D04E	ld	e,(hl)
-
 loc_D04F	ld	l,c
 		dec	h
 		ld	a,c
@@ -539,7 +511,6 @@ loc_D04F	ld	l,c
 
 loc_D05D	add	a,d
 		ld	d,a
-
 loc_D05F	push	de
 		ld	de,0
 		ld	l,c
@@ -551,7 +522,6 @@ loc_D05F	push	de
 ; ---------------------------------------------------------------------------
 
 loc_D06C	ld	e,(hl)
-
 loc_D06D	ld	l,b
 		dec	h
 		ld	a,b
@@ -566,7 +536,6 @@ loc_D06D	ld	l,b
 
 loc_D07B	add	a,d
 		ld	d,a
-
 loc_D07D	ld	a,e
 		cp	80h
 		jr	nc,loc_D093
@@ -582,11 +551,8 @@ loc_D08D	ld	a,d
 		sub	e
 		cp	80h
 		jr	c,loc_D095
-
 loc_D093	ld	a,7Fh
-
 loc_D095	or	80h
-
 loc_D097	ld	c,a
 		pop	de
 		ld	a,e
@@ -604,11 +570,8 @@ loc_D0A9	ld	a,d
 		sub	e
 		cp	80h
 		jr	c,loc_D0B1
-
 loc_D0AF	ld	a,7Fh
-
 loc_D0B1	or	80h
-
 loc_D0B3	ld	b,a
 		bit	7,c
 		jr	z,loc_D0BF
@@ -629,7 +592,6 @@ loc_D0BF	ld	a,xh
 ; ---------------------------------------------------------------------------
 
 loc_D0CE	sub	(hl)
-
 loc_D0CF	push	af
 		ld	l,b
 		bit	7,b
@@ -640,7 +602,6 @@ loc_D0CF	push	af
 ; ---------------------------------------------------------------------------
 
 loc_D0DA	sub	(hl)
-
 loc_D0DB	pop	bc
 		ld	c,b
 		ld	b,a
@@ -693,7 +654,6 @@ loc_D104	ld	e,(hl)
 ; ---------------------------------------------------------------------------
 
 loc_D11D	ld	hl,word_D3A2+1
-
 loc_D120	ld	e,(hl)
 		inc	e
 		jr	z,loc_D13B
@@ -718,7 +678,6 @@ loc_D120	ld	e,(hl)
 ; ---------------------------------------------------------------------------
 
 loc_D13B	ld	hl,word_D3A2+1
-
 loc_D13E	ld	e,(hl)
 		inc	e
 		jr	z,loc_D15B
@@ -745,10 +704,9 @@ loc_D13E	ld	e,(hl)
 ; ---------------------------------------------------------------------------
 
 loc_D15B	ld	hl,word_D3A2+1
-
 loc_D15E	ld	e,(hl)
 		inc	e
-		jr	z,locret_D179
+		ret	z
 		dec	e
 		ld	a,(de)
 		add	a,45h ; 'E'
@@ -768,8 +726,6 @@ loc_D15E	ld	e,(hl)
 		pop	hl
 		jr	loc_D15E
 ; ---------------------------------------------------------------------------
-
-locret_D179	ret
 
 sub_D17A	ld	hl,word_D3A2+26h
 		ld	c,(hl)
@@ -832,10 +788,8 @@ sub_D194	ld	a,c
 		ret
 
 sub_D1CC	ld	a,0
-
 loc_D1CE	or	0
 		jr	nz,sub_D194
-
 loc_D1D2	ld	hl,0
 		ld	a,c
 		sub	39h ; '9'
@@ -869,7 +823,6 @@ loc_D1F0	ld	b,a
 		ld	de,12h
 
 loc_D1FE	ld	hl,0EC10h
-
 loc_D201	ld	c,80h
 		exx
 		ld	d,b
@@ -906,20 +859,17 @@ loc_D21F	add	hl,de
 ; ---------------------------------------------------------------------------
 
 loc_D22B	rra
-
 loc_D22C	add	a,e
 		jr	c,loc_D234
 		cp	d
 		exx
 		jr	c,loc_D23B
 		exx
-
 loc_D234	sub	d
 		exx
 		rrc	c
 		jr	nc,loc_D23B
 		inc	hl
-
 loc_D23B	add	hl,de
 		ld	b,a
 		ld	a,(hl)
@@ -932,27 +882,22 @@ loc_D23B	add	hl,de
 ; ---------------------------------------------------------------------------
 
 loc_D247	ccf
-
 loc_D248	jp	z,loc_D269
 		ld	b,e
 		ld	a,e
 		rra
-
 loc_D24E	add	a,d
 		jr	c,loc_D256
 		cp	e
 		exx
 		jr	c,loc_D259
 		exx
-
 loc_D256	sub	e
 		exx
 		add	hl,de
-
 loc_D259	rlc	c
 		jr	nc,loc_D25E
 		dec	hl
-
 loc_D25E	ld	b,a
 		ld	a,(hl)
 		or	c
@@ -966,22 +911,18 @@ loc_D25E	ld	b,a
 loc_D269	ld	b,e
 		ld	a,e
 		rra
-
 loc_D26C	add	a,d
 		jr	c,loc_D274
 		cp	e
 		exx
 		jr	c,loc_D277
 		exx
-
 loc_D274	sub	e
 		exx
 		add	hl,de
-
 loc_D277	rrc	c
 		jr	nc,loc_D27C
 		inc	hl
-
 loc_D27C	ld	b,a
 		ld	a,(hl)
 		or	c
@@ -989,7 +930,6 @@ loc_D27C	ld	b,a
 		ld	a,b
 		exx
 		djnz	loc_D26C
-
 loc_D284	exx
 		ld	(loc_D1FE+1),hl
 		ld	a,c
@@ -1003,7 +943,6 @@ sub_D291	ld	(loc_D2B2+1),sp
 		ld	hl,0EC10h
 		ld	a,8Bh
 		ld	bc,12h
-
 loc_D29E	add	hl,bc
 		ld	sp,hl
 		ex	de,hl
@@ -1033,7 +972,6 @@ loc_D2B7	di
 		ld	(loc_D316+1),sp
 		ld	sp,0E600h
 		ld	a,5
-
 loc_D2C7	pop	de
 		ldi
 		ldi
@@ -1056,7 +994,6 @@ loc_D2C7	pop	de
 		dec	a
 		jr	nz,loc_D2C7
 		ld	a,82h
-
 loc_D2EE	pop	de
 		ldi
 		ldi
@@ -1088,8 +1025,7 @@ loc_D316	ld	sp,0
 
 sub_D325	ld	hl,4056h
 		ld	(loc_D341+1),hl
-		ld	hl,asc_D398	; "00:00:00"
-
+		ld	hl,counter	; "00:00:00"
 loc_D32E	ld	a,(hl)
 		or	a
 		jr	z,loc_D357
@@ -1112,7 +1048,7 @@ loc_D341	ld	de,0
 loc_D347	ld	a,(hl)
 		ld	(de),a
 		inc	hl
-		call	sub_CE4A
+		call	downde
 		djnz	loc_D347
 		pop	hl
 		inc	l
@@ -1121,8 +1057,7 @@ loc_D347	ld	a,(hl)
 		jr	loc_D32E
 ; ---------------------------------------------------------------------------
 
-loc_D357	ld	hl,asc_D398+7
-
+loc_D357	ld	hl,counter+7
 loc_D35A	ld	a,1
 		rra
 		ld	a,0
@@ -1703,10 +1638,7 @@ loc_E014	djnz	loc_DFD0
 ; ---------------------------------------------------------------------------
 
 txt_briefing	incbin	"briefing.desktop.bin"
-asc_D398	db	'00:00:00',0
-
-font_intro	incbin	"intro.font.bin"
-gfx_numerals	incbin	"numerals.bin"
+counter		db	'00:00:00',0
 
 byte_D3A1	db	0
 word_D3A2	dw	0B7Fh,177Eh,217Dh,2C7Bh,3678h,3F74h,4A6Fh,5369h
@@ -1728,3 +1660,14 @@ byte_D45A	db	0,4,8,0Dh,11h,16h,1Ah,1Fh,23h,28h,2Ch,30h,35h,39h,3Dh,42h,46h,4Ah,4
 
 earthdata	incbin	"earthdata.bin"
 buffer
+
+; clear buffer section #E000 ~ #EC00
+		block	(0EC00h - $), 0
+
+dot_rotations	db	80h, 40h, 20h, 10h, 8, 4, 2, 1
+		db	0C0h, 60h, 30h, 18h, 0Ch, 6, 3, 3
+
+		block	(0F680h - 126) - $, 0
+
+font_intro	incbin	"intro.font.bin"
+gfx_numerals	incbin	"numerals.bin"

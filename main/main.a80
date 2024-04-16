@@ -46,6 +46,7 @@ wpg_0_COBRA:	incbin "gfx.equipment.bin"
 		ld	a,h
 		ldir
 		ld	i,a
+		call	intro
 		di:halt
 
 @mainblock.end
@@ -72,9 +73,7 @@ wpg_0_COBRA:	incbin "gfx.equipment.bin"
 		display "Too long! ",/D,(mainblock.end-music_init)," bytes out!"
 		end
 	else
-	    ifndef isFX
 		display /D,(music_init-mainblock.end)," bytes free for game engine"
-	    endif
 	endif
 
 	if $ > interrupt
@@ -88,7 +87,8 @@ wpg_0_COBRA:	incbin "gfx.equipment.bin"
 
 		org	#ABAB
 
-interrupt	push	af
+interrupt	di
+		push	af
 		push	bc
 		push	de
 		push	hl
@@ -135,8 +135,9 @@ interrupt	push	af
 	    endif
 	endif
 
-	module intro
 		org	RUNZONE
+intro
+	module _INTRO_WRAPPER
 		include "../intro/intro.a80"
 	endmodule
 

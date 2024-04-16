@@ -491,8 +491,6 @@ divfadeout1:	ld	(divfadeout+1),a
 		ld	(countfadeout+1),a
 		ret
 
-empty_pattern:	db	#FF
-
 ;------------------------------------------------------------------------------
 freqtable:	dw	#0EF8, #0E10, #0D60, #0C80, #0BD8, #0B28, #0A88, #09F0
 		dw	#0960, #08E0, #0858, #07E0, #077C, #0708, #06B0, #0640
@@ -519,9 +517,10 @@ speed:		db	0
 tempo_cnt:	db	0
 song_length:	db	0
 
-chn1_pattptr:	dw	0
-chn2_pattptr:	dw	0
-chn3_pattptr:	dw	0
+chn1_pattptr:	dw	empty_pattern
+chn2_pattptr:	dw	empty_pattern
+chn3_pattptr:	dw	empty_pattern
+empty_pattern:	db	#FF
 
 VARS
 CHN1:		ds	10

@@ -1,7 +1,8 @@
 		device	NOSLOT64K
-		org	#6000
 		define isFX 5
-		display "Composing main part mover"
+		display "Composing main part"
+
+		include "main/constants.inc"
 
 
 @_fxpage = #10
@@ -15,18 +16,47 @@
 ;                   ; (set bit.7 to just ldir given length, not decompress)
 ; .length           ; optional when data transfer (ldir) needed
 
-	phase	$10000 - (fx_main_mover.blockend - fx_main_mover.block)
+
+	org $10000 - (fx_main_mover.blockend - fx_main_mover.start)
 fx_main_mover
 
-.block		incbin "main/final.pak"
-.blockend
+.start		ld	hl,.block
+		ld	de,COREZONE
+		push	de
+		exx
+		ld	hl,dzx0_to_move
+		ld	de,dzx0_aside
+		ld	bc,dzx0_length
+		push	de
+		ldir
+		exx
+		ret
 
-.length = $-fx_main_mover
+dzx0_to_move
+	phase dzx0_aside
+	module dzx0
+		include "loader/dzx0_fast.a80"
+	endmodule
 	dephase
+dzx0_length = $-dzx0_to_move
+dzx0_aside = $5C00 - dzx0_length ; end of printbuffer
+
+fx_main_mover.block
+		incbin "main/final.pak"
+fx_main_mover.blockend
+
+fx_main_mover.length = $-fx_main_mover
 
 ;;-----------------------------------------------------------------------------
+available = $10000 - COREZONE
+	if fx_main_mover.length > available
+		display "Too long! ",/D,(fx_main_mover.length-available)," bytes out!"
+		end
+	else
+		display /D,(available-fx_main_mover.length)," bytes free for compressed main block in memory"
+	endif
 
-		savebin "bank0",(_fxpage_start),$-(_fxpage_start)
+		savebin "bank0",(fx_main_mover),$-(fx_main_mover)
 
 ;;-----------------------------------------------------------------------------
 ; Every part descriptor values should be exported:

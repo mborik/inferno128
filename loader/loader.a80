@@ -12,7 +12,8 @@
 begin = $
 
 numberOfBanks = 5
-unpackpage:	ld	hl,#56E1
+progressBarPosition = #56E1
+unpackpage:	ld	hl,progressBarPosition
 		ld	bc,((30 / numberOfBanks) << 8) | #FF
 .pgprog:	ld	(hl),c	; draw progress
 		inc	l
@@ -21,12 +22,16 @@ unpackpage:	ld	hl,#56E1
 		di
 		ld	hl,#8000
 		ld	de,#C000
-		ld	a,(hl)
 		call	loaderzx0.depack
 		ei
 		ret
 
-fadeoutandrun:	ld	b,100
+fadeoutandrun:	ld	hl,progressBarPosition
+		ld	de,progressBarPosition+1
+		ld	bc,30
+		ld	(hl),b
+		ldir
+		ld	b,100
 .waitfor:	ei
 		halt
 		djnz	.waitfor
@@ -40,10 +45,7 @@ fadeoutandrun:	ld	b,100
 		dec	a
 		jr	nz,.loop
 		di
-		ld	hl,fx_main_mover
-		ld	de,COREZONE
-		push	de
-		jp	loaderzx0.depack
+		jp	fx_main_mover
 
 attrhide:	ld	hl,22528
 		ld	c,24
