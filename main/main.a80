@@ -6,32 +6,144 @@
 		include "pg6.inc"
 		include "pg7.inc"
 
+@page128	equ	7FFDh
+@act128page	equ	5B5Ch
+
 @COREZONE	equ	24200
 @RUNZONE	equ	44000
-@BASESP		equ	COREZONE
+@BASESP		equ	interrupt
+
+@interrupt	equ	#ABAB
+@im2vector = ((high interrupt) - 1) << 8
 
 
+	ifdef isFX
 		display "Composing game engine"
+	endif
 
 		org	COREZONE
-		output	"final.bin"
 
-		jp	start
+		jp	mainblock.start
 
 font_small:	incbin "console.font.bin"
 wpg_0_COBRA:	incbin "gfx.equipment.bin"
 
-@start:		di
-		halt
+@mainblock.start:
+		di
+		im	1
+		ld	sp,BASESP
+		ld	hl,4000h
+		ld	de,4001h
+		ld	bc,1BFFh
+		ld	(hl),l
+		ldir
+		xor	a
+		out	(254),a
+		ld	hl,im2vector
+		ld	de,im2vector+1
+		ld	b,1
+		ld	(hl),high interrupt
+		ld	a,h
+		ldir
+		ld	i,a
+		di:halt
 
-@music_init
-@music_play
+@mainblock.end
+
+;;-----------------------------------------------------------------------------
+
+		org	im2vector - (im2vector_space - music_init)
+		include "stc.a80"
+
+@xchg.keeper:	and	#17
+		ld	c,a
+		ld	a,(act128page)
+		jr	nz,1F
+		ld	c,a
+1		and	#F8
+		or	c
+		jr	1F
+@xchg.bnk:	ld	(act128page),a
+1		ld	bc,page128
+		out	(c),a
 		ret
 
-		outend
+	if mainblock.end > music_init
+		display "Too long! ",/D,(mainblock.end-music_init)," bytes out!"
+		end
+	else
+	    ifndef isFX
+		display /D,(music_init-mainblock.end)," bytes free for game engine"
+	    endif
+	endif
 
+	if $ > interrupt
+		display "Too long! ",/D,($-interrupt)," bytes out!"
+		end
+	else
+	    ifndef isFX
+		display /D,(interrupt-$)," bytes free for stack"
+	    endif
+	endif
+
+		org	#ABAB
+
+interrupt	push	af
+		push	bc
+		push	de
+		push	hl
+		exx
+		ex	af,af'
+		push	ix
+		push	iy
+		push	af
+		push	bc
+		push	de
+		push	hl
+
+@music_page	ld	a,0
+		or	a
+		jr	z,IMCALL
+		call	xchg.keeper
+		call	music_play
+		xor	a
+		call	xchg.keeper
+
+@IMCALL		ld	bc,#0101
+
+ 		pop	hl
+		pop	de
+		pop	bc
+		pop	af
+		pop	iy
+		pop	ix
+		ex	af,af'
+		exx
+		pop	hl
+		pop	de
+		pop	bc
+		pop	af
+		ei
+		ret
+
+	if $ > RUNZONE
+		display "Too long! ",/D,($-RUNZONE)," bytes out!"
+		end
+	else
+	    ifndef isFX
+		display /D,(RUNZONE-$)," bytes free before RUNZONE"
+	    endif
+	endif
+
+		savebin "final.bin",COREZONE,$-COREZONE
+
+	ifdef isFX
 		export COREZONE
 		export RUNZONE
 		export BASESP
+		export IMCALL
 		export music_init
 		export music_play
+		export music_page
+		export music_setup
+	endif
