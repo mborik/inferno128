@@ -1,0 +1,9 @@
+soundtrack.intro: EQU 0x0000C000
+soundtrack.level1: EQU 0x0000C3A1
+soundtrack.level2: EQU 0x0000C986
+soundtrack.level3: EQU 0x0000CCD2
+soundtrack.level4: EQU 0x0000D131
+soundtrack.level5: EQU 0x0000D70A
+soundtrack.level6: EQU 0x0000DC6C
+soundtrack.outro1: EQU 0x0000E12B
+soundtrack.outro2: EQU 0x0000E48B
