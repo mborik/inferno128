@@ -1,4 +1,4 @@
-		device	zxspectrum128
+		device	NOSLOT64K
 		emptytap OUTPUT
 
 		include "../main/pg0.inc"
@@ -203,9 +203,8 @@ total = $ - line1
 		savetap OUTPUT, CODE, "loader", loader.begin, loader.total
 
 ;;-----------------------------------------------------------------------------
-	macro putBank number?, filename?, address?
+	macro putBank number?, filename?
 @__putBank_number = number?
-@__putBank_address = address?
 		lua allpass
 			_pl("putBank"..tostring(_c('__putBank_number')))
 		endlua
@@ -218,7 +217,7 @@ total = $ - line1
 		endlua
 
 			dw	.filelength
-			dw	__putBank_address
+			dw	#8000
 			dw	#8000
 		tapend
 
@@ -235,9 +234,25 @@ total = $ - line1
 ;;-----------------------------------------------------------------------------
 		display "Storing banks into output tape"
 
-		putBank 1,"../bank1.pak",#8000
-		putBank 3,"../bank3.pak",#8000
-		putBank 4,"../bank4.pak",#8000
-		putBank 6,"../bank6.pak",#8000
-		putBank 7,"../bank7.pak",#8000
-		putBank 0,"../bank0",fx_main_mover
+		putBank 1,"../bank1.pak"
+		putBank 3,"../bank3.pak"
+		putBank 4,"../bank4.pak"
+		putBank 6,"../bank6.pak"
+		putBank 7,"../bank7.pak"
+
+putBank0
+		tapout OUTPUT,0
+			org	0
+			db	3 ;; BYTES
+			db	'block0    '
+
+			dw	.filelength
+			dw	fx_main_mover
+			dw	#8000
+		tapend
+
+		tapout OUTPUT
+			org	#8000,0
+.filedata		incbin	"../bank0"
+.filelength = $-.filedata
+		tapend

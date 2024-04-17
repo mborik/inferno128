@@ -28,6 +28,31 @@
 font_small:	incbin "console.font.bin"
 wpg_0_COBRA:	incbin "gfx.equipment.bin"
 
+wpt_0_COBRA	db	'€4xKOBRA, dopˆedu odpalovanŽ raketa\r'
+wpt_1_VIPER	db	'€4xZMIJE, vzhšru odpalovanŽ raketa\r'
+wpt_2_MOLE	db	'€4xKRTEK, dolš odpalovanŽ raketa\r'
+wpt_3_SKUNK	db	'€4xSKUNK, dozadu odpalovanŽ raketa\r'
+txt_slot1	db	'€Pumovnice †. 1\r'
+wpt_4_GLIDER	db	'€8xPADAVKA, klouzajc tˆ„tivŽ bomba\r'
+wpt_5_SUPERBOMB	db	'€1xSUPERBOMBA, plo„nŒ disruptor\r'
+wpt_6_CLUSTER	db	'€8xDIKOBRAZ, levitujc nŽrazov€ miny\r'
+wpt_7_GLADIATOR	db	'€1xGLADIATOR, pˆdavnŽ bitevn stanice\r'
+txt_slot2	db	'€Pumovnice †. 2\r'
+wpt_8_AUREOLE	db	'€2xAUREOLA, pˆdavnŒ kontaktn „tt\r'
+wpt_9_SPARKLER	db	'€6xPRSKAVKA, bodovŒ disruptor\r'
+wpt_A_ENERGY	db	'€1xENERGO, pˆdavnŒ energetickŒ zdroj\r'
+wpt_B_CHAMELEON	db	'€4xCHAMELEON, ru„i†ka navŽd‚n raket\r'
+txt_slot3	db	'€Pumovnice †. 3\r'
+wpt_C_RESONANCE	db	'€2xREZONANCE, zesilova† energie vŒbojš\r'
+wpt_D_TRIDENT	db	'€2xTROJZUBEC, kvantovŒ nŽsobi† vŒbojš\r'
+wpt_E_WALLABY	db	'€1xKLOKAN, hyperprostorovŒ syst€m\r'
+wpt_F_FUEL	db	'€1xPALIVO, pˆdavnŽ palivovŽ nŽdrŠ\r'
+txt_slot4	db	'€Pumovnice †. 4\r'
+txt_weapon_off	db	'€Volba zbran ukon†ena\r'
+drt_linear	db	'€LineŽrn pohon lodi\r'
+drt_quantum	db	'€KvantovŒ pohon lodi\r'
+		db	'€\r'
+
 @mainblock.start:
 		di
 		im	1
@@ -47,7 +72,4972 @@ wpg_0_COBRA:	incbin "gfx.equipment.bin"
 		ldir
 		ld	i,a
 		call	intro
-		di:halt
+
+		call	sub_6E27
+		ld	iy,5C3Ah
+		ld	(iy+30h),0
+		ld	(iy+1),0CCh
+		ld	(iy+7),0
+		ld	(iy-30h),3
+		ld	(iy-31h),14h
+		ld	hl,txt_kempston
+		call	sub_7F71
+		call	sub_742B
+		ld	a,(5B15h+1)
+		cp	41h ; 'A'
+		jr	z,loc_6DBB
+		cp	59h ; 'Y'
+		jr	nz,loc_6DC0
+
+loc_6DBB	ld	a,20h ; ' '
+		ld	(loc_7533+1),a
+
+loc_6DC0	ei
+		ld	de,5B00h
+		ld	bc,15h
+		ldir
+		call	sub_82C1
+		ld	a,(3D09h)	; is Didaktik ROM?
+		cp	10h
+		jr	z,loc_6DE6
+		xor	a		; disable bold font
+		ld	(loc_8231),a
+
+loc_6DE6	ld	sp,BASESP
+		call	sub_6E27
+
+loc_6DEC	ld	a,0
+		ld	sp,(loc_6DE6+1)
+		or	a
+		call	nz,sub_82C1
+		xor	a
+		ld	(loc_6DEC+1),a
+		call	sub_742B
+		jp	nz,loc_6E46
+		ld	a,(loc_7108+1)
+		inc	a
+		jr	z,loc_6DEC
+		call	demoheader
+		ld	a,r
+		call	sub_73FF
+		call	sub_6E19
+		jr	nc,loc_6DE6
+		call	sub_6E27
+		jp	loc_6DEC
+
+sub_6E19	ld	bc,0Eh
+		add	hl,bc
+		push	hl
+		pop	ix
+		xor	a
+		call	sub_8EF8
+		jp	1F54h
+
+sub_6E27	ld	hl,4000h
+		ld	bc,1820h
+		xor	a
+		out	(0FEh),a
+		ld	a,78h ; 'x'
+		ld	(loc_7F0E+1),a
+		ld	a,9
+		ld	(loc_80C3+1),a
+		call	sub_7E94
+		call	sub_8131
+		ld	hl,unk_751B
+		jp	sub_7F71
+
+; ---------------------------------------------------------------------------
+
+loc_6E46	ld	a,(5B15h)
+		or	a
+		jp	z,loc_6DEC
+		ld	hl,commands
+
+loc_6E50	ld	e,(hl)
+		inc	hl
+		ld	d,(hl)
+		inc	hl
+		ld	a,e
+		or	d
+		jr	z,loc_6E79
+		push	de
+		ld	de,5B15h
+		ld	a,(5B15h)
+		inc	de
+		cp	4
+		jr	c,loc_6E66
+		ld	a,3
+
+loc_6E66	push	hl
+		ld	b,a
+
+loc_6E68	ld	a,(de)
+		cp	(hl)
+		jr	nz,loc_6E72
+		inc	hl
+		inc	de
+		djnz	loc_6E68
+		pop	hl
+		ret
+; ---------------------------------------------------------------------------
+
+loc_6E72	pop	hl
+		inc	hl
+		inc	hl
+		inc	hl
+		pop	de
+		jr	loc_6E50
+; ---------------------------------------------------------------------------
+
+loc_6E79	ld	hl,txt_unknown_cmd
+		call	sub_7F71
+		jp	loc_6DEC
+; ---------------------------------------------------------------------------
+txt_kempston	db	14h
+		db	'hKempston? (vloŠte A/N)\r'
+		db	0FFh
+txt_unknown_cmd	dw	5014h
+		db	'NeznŽmŒ povel\r'
+		db	0FFh
+commands	dw	cmd_password
+		db	"HES"
+		dw	cmd_report
+		db	"RAP"
+		dw	cmd_redefine
+		db	"RED"
+		dw	cmd_info
+		db	"INF"
+		dw	cmd_start
+		db	"STA"
+		dw	cmd_weapons
+		db	"ZBR"
+		dw	cmd_exit
+		db	"KON"
+		dw	cmd_help
+		db	"POM"
+		dw	cmd_demo
+		db	"IDE"
+		dw	cmd_save
+		db	"SAV"
+		dw	cmd_load
+		db	"LOA"
+		dw	cmd_pilot
+		db	"PIL"
+		dw	cmd_sat
+		db	"SAT"
+		dw	0
+
+cmd_sat		ld	hl,loc_7790+1
+		ld	a,(hl)
+		xor	2
+		ld	(hl),a
+		jp	loc_6DEC
+
+; ---------------------------------------------------------------------------
+
+cmd_report	ld	hl,txt_pilot
+		call	sub_7F71
+		ld	a,(byte_8302)
+		ld	hl,txt_pilot_ranks
+		call	sub_77DE
+		call	sub_7F71
+		ld	a,20h ; ' '
+		call	sub_7F91
+		ld	hl,c_pilotname
+		call	sub_7F71
+		ld	hl,txt_pilot_stat1
+		call	sub_7F71
+		ld	hl,(word_82FE)
+		call	sub_7A9C
+		call	sub_7F8F
+		ld	hl,txt_pilot_stat2
+		call	sub_7F71
+		ld	a,(byte_82FD)
+		dec	a
+		call	sub_7A99
+		call	sub_7F8F
+		ld	hl,txt_pilot_stat3
+		call	sub_7F71
+		ld	hl,(word_8300)
+		call	sub_7A9C
+		call	sub_7F8F
+		call	sub_7A48
+		jp	loc_6DEC
+; ---------------------------------------------------------------------------
+txt_pilot	dw	7014h
+		db	'Pilot:  '
+		db	0FFh
+txt_pilot_stat1	dw	6014h
+		db	'Po†et nal€tanŒch mis: '
+		db	0FFh
+txt_pilot_stat2	db	'Po†et spln‚nŒch mis: '
+		db	0FFh
+txt_pilot_stat3	db	'Po†et zni†enŒch objektš: '
+		db	0FFh
+		db	'VyznamenŽn:\r'
+		db	0FFh
+; ---------------------------------------------------------------------------
+
+cmd_demo	xor	a
+		ld	(loc_71A7+1),a
+		ld	a,(byte_82FD)
+		push	af
+loc_6FB7	ld	a,r
+loc_6FB9	cp	18h
+		jr	c,loc_6FC1
+		sub	18h
+		jr	loc_6FB9
+; ---------------------------------------------------------------------------
+
+loc_6FC1	inc	a
+		ld	(byte_82FD),a
+		call	sub_73D3
+		ld	b,0
+
+loc_6FCA	ei
+		call	1F54h
+		jr	nc,loc_6FE4
+		halt
+		halt
+		djnz	loc_6FCA
+		call	demoheader
+		call	sub_73F8
+		call	sub_6E19
+		jr	nc,loc_6FE4
+		call	sub_6E27
+		jr	loc_6FB7
+; ---------------------------------------------------------------------------
+
+loc_6FE4	pop	af
+		ld	(byte_82FD),a
+		ld	a,1
+		ld	(loc_71A7+1),a
+		jp	loc_6DE6
+; ---------------------------------------------------------------------------
+
+cmd_help	ld	hl,txt_help
+		call	sub_7F71
+		jp	loc_6DEC
+; ---------------------------------------------------------------------------
+txt_memslot	dw	4E49h
+txt_memslot_n	db	'pozice',0
+		db	0
+		db	0
+		db	0
+		db	0
+		db	0
+		db	0
+		db	0
+		db	0
+		db	0
+
+sub_700B	or	a
+		jr	nz,loc_7011
+		ld	hl,txt_memslot
+
+loc_7011	ld	de,txt_memslot_n+6
+
+loc_7014	ld	b,8
+
+loc_7016	ld	a,(hl)
+		inc	hl
+		or	a
+		jr	z,loc_702F
+		cp	80h
+		jr	c,loc_7023
+		res	7,a
+		jr	loc_7032
+; ---------------------------------------------------------------------------
+
+loc_7023	cp	41h ; 'A'
+		jr	c,loc_7032
+		cp	5Bh ; '['
+		jr	nc,loc_7032
+		add	a,20h ; ' '
+		jr	loc_7032
+; ---------------------------------------------------------------------------
+
+loc_702F	ld	a,20h ; ' '
+		dec	hl
+
+loc_7032	ld	(de),a
+		inc	de
+		djnz	loc_7016
+		ld	a,20h ; ' '
+		ld	(de),a
+		inc	de
+		ld	(de),a
+		ret
+
+; ---------------------------------------------------------------------------
+
+cmd_pilot	call	sub_82C1
+		call	sub_70B8
+		or	a
+		jp	z,cmd_report
+		ld	de,c_pilotname
+
+loc_7049	ld	a,(hl)
+		ld	(de),a
+		inc	hl
+		inc	de
+		or	a
+		jr	nz,loc_7049
+		dec	de
+		ld	a,0Dh
+		ld	(de),a
+		jp	cmd_report
+; ---------------------------------------------------------------------------
+
+cmd_save	call	sub_70B8
+		call	sub_700B
+		call	sub_7118
+		ld	a,r
+		ld	hl,c_pilotname
+		ld	de,5B15h
+		ld	b,30h ; '0'
+		ld	(de),a
+		inc	de
+		ld	c,a
+
+loc_706D	ld	a,(hl)
+		xor	c
+		ld	(de),a
+		inc	hl
+		inc	de
+		djnz	loc_706D
+		ld	hl,txt_memslot_n+6
+		ld	de,31h	; '1'
+		ld	ix,5B15h
+		call	basic_c_save
+		jp	loc_6DE6
+; ---------------------------------------------------------------------------
+
+cmd_load	call	sub_70B8
+		call	sub_700B
+		call	sub_7118
+		ld	hl,txt_block_load
+		call	sub_7F71
+		ld	hl,txt_memslot_n+6
+		ld	de,31h	; '1'
+		ld	ix,5B15h
+		call	basic_c_load
+		xor	a
+		ld	(loc_739F+1),a
+		ld	hl,5B15h
+		ld	de,c_pilotname
+		ld	b,30h ; '0'
+		ld	c,(hl)
+		inc	hl
+
+loc_70AE	ld	a,(hl)
+		xor	c
+		ld	(de),a
+		inc	hl
+		inc	de
+		djnz	loc_70AE
+		jp	loc_6DE6
+
+sub_70B8	ld	hl,5B15h
+
+loc_70BB	ld	a,(hl)
+		inc	hl
+		cp	20h ; ' '
+		jr	z,loc_70C5
+		or	a
+		jr	nz,loc_70BB
+		ret
+; ---------------------------------------------------------------------------
+
+loc_70C5	ld	a,(hl)
+		cp	20h ; ' '
+		ret	nz
+		inc	hl
+		jr	loc_70C5
+
+; ---------------------------------------------------------------------------
+
+cmd_password	xor	a
+		ld	(loc_739F+1),a
+		call	sub_70B8
+		xor	a
+
+loc_70D4	push	af
+		push	hl
+		call	sub_79B3
+		pop	hl
+		push	hl
+		ld	b,0Ah
+		ld	de,txt_passkey+0Dh
+
+loc_70E0	ld	a,(de)
+		cp	(hl)
+		inc	hl
+		inc	de
+		jr	nz,loc_70EA
+		djnz	loc_70E0
+		jr	loc_70FB
+; ---------------------------------------------------------------------------
+
+loc_70EA	pop	hl
+		pop	af
+		inc	a
+		cp	1Ah
+		jr	c,loc_70D4
+		ld	hl,txt_strange
+		call	sub_7F71
+		ld	a,1
+		jr	loc_70FD
+; ---------------------------------------------------------------------------
+
+loc_70FB	pop	hl
+		pop	af
+
+loc_70FD	ld	(byte_82FD),a
+		or	a
+		jr	z,loc_7104
+		dec	a
+
+loc_7104	rrca
+		rrca
+		and	3Fh
+
+loc_7108	cp	0FFh
+		jr	nz,loadblock
+		call	sub_739C
+		jp	loc_6DEC
+; ---------------------------------------------------------------------------
+
+loc_7112	call	sub_739C
+		jp	loc_6DE6
+
+sub_7118	ld	(iy+0Eh),47h ;	'G'
+		ld	hl,4000h
+		ld	de,4001h
+		ld	bc,1800h
+		ld	(hl),0FFh
+		ldir
+		ld	(hl),78h ; 'x'
+		ld	bc,2FFh
+		ldir
+		ret
+
+loadblock	ld	hl,loc_7112
+		push	hl
+
+loadblock_exe	add	a,30h ; '0'
+		ld	(c_blockname+6),a
+		ld	a,61h ; 'a'
+		ld	(c_blockname+7),a
+		xor	a
+		out	(0FEh),a
+		ld	(loc_739F+1),a
+		inc	a
+		ld	(loc_7241+1),a
+		ld	a,0FFh
+		ld	(loc_7108+1),a
+		call	sub_7118
+		ld	hl,txt_block_load
+		call	sub_7F71
+		ld	hl,c_blockname
+		ld	ix,RUNZONE+1770h
+		ld	de,1B00h
+		ld	a,1
+		call	basic_c_load
+		call	RUNZONE+1770h
+		ld	a,62h ; 'b'
+		ld	(c_blockname+7),a
+		ld	hl,c_blockname
+		ld	ix,RUNZONE
+		ld	de,5420h
+		xor	a
+		call	basic_c_load
+		ld	hl,RUNZONE
+		ld	a,(hl)
+		cp	0CDh
+		jr	nz,loc_718F
+		ld	a,(loc_71A7+1)
+		or	a
+		jr	nz,loc_718C
+		ld	(hl),21h ; '!'
+
+loc_718C	call	RUNZONE
+
+loc_718F	ld	a,(c_blockname+6)
+		sub	30h ; '0'
+		ld	hl,RUNZONE+63h
+		cp	(hl)
+		ret	nz
+		ld	(loc_7108+1),a
+		ld	a,(RUNZONE+60h)
+		cp	0C3h
+		ld	hl,c_pilotname
+		call	z,RUNZONE+60h
+
+loc_71A7	ld	a,1
+		xor	a
+		ret
+
+sub_71AB	xor	a
+		in	a,(0FEh)
+		cpl
+		and	1Fh
+		jr	nz,loc_71BA
+		call	sub_7731
+		ld	a,d
+		or	a
+		jr	z,sub_71AB
+
+loc_71BA	xor	a
+		ret
+
+sub_71BC	ld	hl,5CCFh
+
+loc_71BF	ld	a,(hl)
+		cp	0Dh
+		ret	z
+		push	hl
+		ld	de,unk_732A
+		ld	b,5
+
+loc_71C9	ld	a,(de)
+		cp	(hl)
+		inc	de
+		inc	hl
+		jr	nz,loc_71D1
+		djnz	loc_71C9
+
+loc_71D1	pop	hl
+		inc	hl
+		jr	nz,loc_71BF
+		inc	h
+		dec	h
+		ret
+
+; ---------------------------------------------------------------------------
+
+basic_c_save	ld	a,0F8h
+		jr	basic_exe
+; ---------------------------------------------------------------------------
+
+basic_c_load	ld	(loc_7241+1),a
+		ld	a,0EFh
+
+basic_exe	ld	(basic_load_seq+1),a
+		ld	(basic_ptr_load),ix
+		ld	(basic_ptr_usr),de
+		ld	(loc_7389+1),hl
+		call	sub_71BC
+		jr	nz,loc_7235
+		call	loc_7389
+		call	basic_exe_2
+; ---------------------------------------------------------------------------
+basic_load_seq	db	26h,0EFh,2Ah,22h,20h,20h,20h,20h,20h,20h,20h,20h,22h,0AFh; 0
+		db	30h,0Eh,0,0	; 0Eh
+basic_ptr_load	dw	0
+		db	0,2Ch,30h,0Eh,0,0; 0
+basic_ptr_usr	dw	0
+		db	0,3Ah,0F9h,0C0h,30h,0Eh,0,0; 0
+word_721E	dw	7368h
+		db	0
+		db	0D0h	; Ð
+; ---------------------------------------------------------------------------
+		ld	hl,txt_err_disk
+		jr	loc_722A
+; ---------------------------------------------------------------------------
+
+loc_7227	ld	hl,txt_err_tape
+
+loc_722A	push	hl
+		call	sub_6E27
+		pop	hl
+		call	sub_7F71
+		jp	loc_6DEC
+; ---------------------------------------------------------------------------
+
+loc_7235	ld	a,(basic_load_seq+1)
+		cp	0F8h
+		jr	z,loc_7286
+
+loc_723C	call	sub_7308
+		jr	nc,loc_723C
+
+loc_7241	ld	a,0
+		or	a
+		jr	z,loc_7270
+		ld	hl,block_filename ; ""
+		ld	de,txt_block_found+0Ah
+		ld	b,0Ah
+
+loc_724E	ld	a,(hl)
+		cp	20h ; ' '
+		jr	c,loc_7263
+		cp	80h
+		jr	nc,loc_7263
+		cp	61h ; 'a'
+		jr	c,loc_7265
+		cp	7Bh ; '{'
+		jr	nc,loc_7263
+		sub	20h ; ' '
+		jr	loc_7265
+; ---------------------------------------------------------------------------
+
+loc_7263	ld	a,3Fh ; '?'
+
+loc_7265	ld	(de),a
+		inc	hl
+		inc	de
+		djnz	loc_724E
+		ld	hl,txt_block_found
+		call	sub_7F71
+
+loc_7270	call	sub_72BF
+		jr	nz,loc_7235
+		ld	ix,(basic_ptr_load)
+		ld	de,(block_length)
+		scf
+		sbc	a,a
+		call	loc_7311
+		jp	nc,loc_7227
+		ret
+; ---------------------------------------------------------------------------
+
+loc_7286	ld	hl,(loc_7389+1)
+		ld	de,block_header
+		ld	a,3
+		ld	(de),a
+		push	de
+		inc	de
+		ld	bc,8
+		ldir
+		ex	de,hl
+		ld	(hl),20h ; ' '
+		inc	hl
+		ld	(hl),20h ; ' '
+		ld	hl,(basic_ptr_usr)
+		ld	(block_length),hl
+		pop	ix
+		ld	de,11h
+		xor	a
+		call	block_save
+		ld	ix,(basic_ptr_load)
+		ld	de,(block_length)
+		ld	a,0FFh
+
+block_save	call	4C6h
+		ld	b,14h
+
+waitfor	ei
+		halt
+		djnz	waitfor
+		ret
+
+sub_72BF	ld	b,8
+		ld	hl,block_filename ; ""
+		ld	de,(loc_7389+1)
+
+loc_72C8	ld	a,(de)
+		cp	(hl)
+		ret	nz
+		inc	hl
+		inc	de
+		djnz	loc_72C8
+		ret
+
+; ---------------------------------------------------------------------------
+txt_block_load	db	16h
+		db	12h
+		db	10h
+		db	'NahrŽvŽm... \r'
+		db	0FFh
+txt_block_found	db	'Nalezeno: ',0,0,0,0,0,0,0,0,0,0,'\r'
+
+		db	0FFh
+block_header	db	0
+block_filename	db	0,0,0,0,0,0,0,0,0,0
+block_length	dw	0
+		db	0
+		db	0
+		db	0
+		db	0
+
+sub_7308	ld	ix,block_header
+		ld	de,11h
+		xor	a
+		scf
+
+loc_7311	inc	d
+		ex	af,af'
+		dec	d
+		di
+		ld	a,9
+		out	(0FEh),a
+		call	562h
+		ex	af,af'
+		ld	a,7Fh
+		in	a,(0FEh)
+		rra
+		jp	nc,loc_6DE6
+		xor	a
+		out	(0FEh),a
+		ex	af,af'
+		ret
+
+; ---------------------------------------------------------------------------
+unk_732A	db	"65082"
+c_blockname	db	"level 1b"
+; ---------------------------------------------------------------------------
+
+basic_exe_2	pop	hl
+		ld	de,5B51h
+		push	de
+		ld	c,(hl)
+		ld	b,0
+		inc	hl
+		ldir
+		ld	a,3Ah ; ':'
+		ld	(de),a
+		inc	de
+		ld	a,3Fh ; '?'
+		ld	(de),a
+		pop	de
+		push	hl
+		ld	hl,(5C5Dh)
+		push	hl
+		ld	(loc_7378+1),sp
+		ld	sp,(5C3Dh)
+		ld	hl,loc_736B
+		ex	(sp),hl
+		ld	(loc_7370+1),hl
+		im	1
+		ei
+		ld	a,1
+		ex	de,hl
+		dec	hl
+		jp	1BD5h
+; ---------------------------------------------------------------------------
+		xor	a
+		jr	loc_736C
+; ---------------------------------------------------------------------------
+
+loc_736B	scf
+
+loc_736C	ld	sp,(5C3Dh)
+
+loc_7370	ld	hl,0
+		ex	(sp),hl
+		ld	hl,1B76h
+		push	hl
+
+loc_7378	ld	sp,0
+		pop	hl
+		ld	(5C5Dh),hl
+		ld	hl,5C3Ah
+		ld	a,(hl)
+		ld	(hl),0FFh
+		ld	(5C81h),a
+		ret
+; ---------------------------------------------------------------------------
+
+loc_7389	ld	hl,c_blockname
+		ld	de,basic_load_seq+4
+		ld	bc,8
+		ldir
+
+loc_7394	dec	de
+		ld	a,(de)
+		sub	20h ; ' '
+		ret	nz
+		ld	(de),a
+		jr	loc_7394
+
+sub_739C	call	sub_73F8
+
+loc_739F	ld	a,0
+		or	a
+		ret	nz
+		ld	bc,6
+		add	hl,bc
+		ld	de,5C26h
+		inc	bc
+		inc	bc
+		ldir
+		ld	a,1
+		ld	(loc_739F+1),a
+		ret
+
+sub_73B4	ld	a,(byte_82FD)
+		or	a
+		jr	z,loc_73BB
+		dec	a
+
+loc_73BB	rrca
+		rrca
+		and	3Fh ; '?'
+		ld	hl,loc_7108+1
+		cp	(hl)
+		call	nz,loadblock_exe
+		jp	nz,loc_6DE6
+		call	sub_739C
+		jp	sub_6E27
+
+; ---------------------------------------------------------------------------
+
+cmd_info	ld	hl,loc_6DEC
+		push	hl
+
+sub_73D3	ld	a,30h ; '0'
+		ld	(loc_7F0E+1),a
+		call	sub_73B4
+		ld	a,(byte_82FD)
+		dec	a
+		and	3
+		ld	hl,(RUNZONE)
+		call	z,sub_7F71
+		call	sub_73F8
+		ld	a,68h ; 'h'
+		ld	(loc_7F0E+1),a
+		ld	a,(hl)
+		inc	hl
+		ld	h,(hl)
+		ld	l,a
+		jp	sub_7F71
+
+; ---------------------------------------------------------------------------
+
+cmd_exit	rst	0
+		rst	0
+
+sub_73F8	ld	a,(byte_82FD)
+		or	a
+		jr	z,sub_73FF
+		dec	a
+
+sub_73FF	and	3
+		ld	c,a
+		ld	b,15h
+
+loc_7404	add	a,c
+		djnz	loc_7404
+		ld	c,a
+		ld	b,0
+		ld	hl,RUNZONE+2
+		add	hl,bc
+		or	h
+		ret
+
+; ---------------------------------------------------------------------------
+c_somedata	db	8Fh,0,87h,93h,81h,83h,0,0,91h,0,0,0,0,95h,97h,0; 0
+		db	0,89h,85h,99h,9Dh,9Bh,0,0,8Dh,8Bh,0; 10h
+
+sub_742B	call	sub_80BB
+		res	5,(iy+1)
+		ld	a,38h ; '8'
+		ld	(loc_7F0E+1),a
+		xor	a
+		ld	(5B15h),a
+		ld	a,(loc_8160+2)
+		push	af
+		sub	0Ah
+		rrca
+		rrca
+		rrca
+		rrca
+		and	0Fh
+		ld	c,a
+		ld	a,8
+		sub	c
+		ld	(loc_80C3+1),a
+		pop	af
+		ld	c,10h
+		call	22B0h
+		ld	b,1
+
+loc_7456	call	sub_7ED1
+		djnz	loc_7456
+		xor	a
+
+loc_745C	push	hl
+		push	af
+		ld	(loc_8212+1),hl
+		ld	a,3Eh ; '>'
+		call	sub_81EE
+		ld	hl,5B15h
+		ld	c,(hl)
+		ld	b,1Bh
+
+loc_746C	ld	a,c
+		or	a
+		jr	z,loc_747C
+		inc	hl
+		dec	b
+		dec	c
+		ld	a,(hl)
+		call	sub_81EE
+		jr	loc_746C
+; ---------------------------------------------------------------------------
+
+loc_7479	pop	hl
+		xor	a
+		ret
+; ---------------------------------------------------------------------------
+
+loc_747C	ld	a,0
+		ld	hl,(loc_8212+1)
+		ld	(loc_750A+1),hl
+		call	sub_81EE
+
+loc_7487	ld	a,20h ; ' '
+		call	sub_81EE
+		djnz	loc_7487
+		pop	af
+		ei
+
+loc_7490	ld	hl,7D0h
+
+loc_7493	halt
+		dec	hl
+		ld	a,h
+		or	l
+		jr	z,loc_7479
+		bit	5,(iy+1)
+		jr	z,loc_7493
+		res	5,(iy+1)
+		ld	a,(5C08h)
+		cp	0Ch
+		jr	z,loc_74DB
+		cp	0Dh
+		jr	z,loc_74DB
+		cp	20h ; ' '
+		jr	z,loc_74DB
+		cp	30h ; '0'
+		jr	c,loc_7490
+		cp	3Ah ; ':'
+		jr	c,loc_74DB
+		cp	41h ; 'A'
+		jr	c,loc_74D1
+		cp	5Bh ; '['
+		jr	nc,loc_74D1
+		sub	41h ; 'A'
+		ld	c,a
+		ld	b,0
+		ld	hl,c_somedata
+		add	hl,bc
+		ld	a,(hl)
+		or	a
+		jr	z,loc_7490
+		jr	loc_74DB
+; ---------------------------------------------------------------------------
+
+loc_74D1	cp	61h ; 'a'
+		jr	c,loc_7490
+		cp	7Bh ; '{'
+		jr	nc,loc_7490
+		and	0DFh
+
+loc_74DB	call	sub_7C13
+		ld	hl,5B15h
+		cp	0Ch
+		jr	nz,loc_74ED
+		ld	a,(hl)
+		or	a
+		jr	z,loc_74FE
+		dec	(hl)
+		xor	a
+		jr	loc_74FE
+; ---------------------------------------------------------------------------
+
+loc_74ED	cp	0Dh
+		jr	z,loc_7502
+		ld	c,a
+		ld	a,(hl)
+		cp	1Ah
+		jr	z,loc_74FE
+		ld	a,c
+		inc	(hl)
+		ld	c,(hl)
+		ld	b,0
+		add	hl,bc
+		ld	(hl),a
+
+loc_74FE	pop	hl
+		jp	loc_745C
+; ---------------------------------------------------------------------------
+
+loc_7502	ld	c,(hl)
+		inc	c
+		xor	a
+		ld	b,0
+		add	hl,bc
+		ld	(hl),a
+		pop	hl
+
+loc_750A	ld	hl,0
+		ld	(loc_8212+1),hl
+		ld	a,20h ; ' '
+		call	sub_81EE
+		call	sub_7F8F
+		xor	a
+		inc	a
+		ret
+
+; ---------------------------------------------------------------------------
+unk_751B	db	16h
+		db	12h
+		db	10h
+		db	15h
+		db	10h
+		db	17h
+		db	0F0h	; ð
+		db	0
+		db	0FFh
+; ---------------------------------------------------------------------------
+
+cmd_redefine	ld	hl,3E8h
+		ld	c,0
+
+loc_7529	in	a,(1Fh)
+		or	c
+		ld	c,a
+		dec	hl
+		ld	a,h
+		or	l
+		jr	nz,loc_7529
+		ld	a,c
+
+loc_7533	cp	0
+		ld	a,8
+		adc	a,0
+		ld	(loc_75BD+2),a
+		ld	hl,txt_redf_intro
+		ld	de,5B00h
+		ld	b,7
+
+loc_754A	push	bc
+		push	de
+		push	hl
+		ld	hl,txt_redf_for
+		call	sub_7F71
+		pop	hl
+		call	sub_7F71
+		pop	de
+		push	hl
+		push	de
+		ld	b,14h
+
+loc_755C	halt
+		djnz	loc_755C
+		call	loc_75BA
+		call	sub_7C13
+		pop	hl
+		ld	(hl),c
+		inc	hl
+		ld	(hl),b
+		inc	hl
+		ld	(hl),a
+		inc	hl
+		ld	a,e
+		push	hl
+		ld	hl,c_symbols
+		inc	e
+
+loc_7572	dec	e
+		jr	z,loc_758B
+
+loc_7575	inc	hl
+		ld	a,(hl)
+		call	sub_768E
+		jr	nz,loc_7575
+		jr	loc_7572
+
+sub_757E	ld	(5B79h),a
+		ld	(loc_803C+1),a
+		ld	(loc_813B+1),a
+		ld	(loc_8160+1),a
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_758B	ld	bc,0
+		ld	(loc_8160+1),bc
+		ld	a,7Bh ; '{'
+		call	sub_757E
+		ld	a,60h ; '`'
+		ld	(loc_7F0E+1),a
+		call	sub_7F84
+		ld	a,10h
+		call	sub_757E
+		ld	a,30h ; '0'
+		ld	(loc_7F0E+1),a
+		pop	de
+		pop	hl
+		pop	bc
+		djnz	loc_754A
+		ld	b,0Ah
+
+loc_75B0	ei
+		halt
+		djnz	loc_75B0
+		call	sub_7F8F
+		jp	loc_6DEC
+; ---------------------------------------------------------------------------
+
+loc_75BA	ld	hl,c_key_ports
+
+loc_75BD	ld	de,900h
+
+loc_75C0	ld	c,(hl)
+		inc	hl
+		ld	b,(hl)
+		inc	hl
+		in	a,(c)
+		bit	7,c
+		jr	z,loc_75CB
+		cpl
+
+loc_75CB	and	1Fh
+		jr	nz,loc_75D8
+		ld	a,e
+		add	a,5
+		ld	e,a
+		dec	d
+		jr	nz,loc_75C0
+		jr	loc_75BA
+; ---------------------------------------------------------------------------
+
+loc_75D8	push	hl
+		push	bc
+		ld	hl,c_key_bits
+		ld	b,5
+
+loc_75DF	cp	(hl)
+		jr	z,loc_75EA
+		inc	hl
+		inc	e
+		djnz	loc_75DF
+		pop	bc
+		pop	hl
+		jr	loc_75BA
+; ---------------------------------------------------------------------------
+
+loc_75EA	pop	bc
+		pop	hl
+		ret
+; ---------------------------------------------------------------------------
+c_key_ports	db	0FEh,0F7h,0FEh,0EFh,0FEh,0FEh,0FEh,0FDh,0FEh,0FBh,0FEh,0DFh,0FEh,0BFh,0FEh,7Fh,1Fh,0
+c_key_bits	db	1,2,4,8,10h
+
+c_symbols	db	"12345"
+		db	"09876"
+		db	"Caps shift"
+		db	"ZXCVASDFG"
+		db	"QWERTPOIUY"
+		db	"Enter"
+		db	"LKJH"
+		db	"Space"
+		db	"Symbol shift"
+		db	"MNB"
+		db	"Kempston vpravo"
+		db	"Kempston vlevo"
+		db	"Kempston dolš"
+		db	"Kempston nahoru"
+		db	"Kempston pal"
+		db	41h ; A
+
+sub_768E	cp	30h ; '0'
+		ret	c
+		cp	3Ah ; ':'
+		jr	c,loc_769D
+		cp	41h ; 'A'
+		ret	c
+		cp	5Ah ; 'Z'
+		jr	z,loc_769D
+		ret	nc
+
+loc_769D	cp	a
+		ret
+
+; ---------------------------------------------------------------------------
+txt_redf_intro	db	'Stiskni klŽvesu nebo pohni joystickem:'
+		dw	7014h
+		db	0Dh
+txt_redf_right	db	'pohyb vpravo:'
+		dw	3814h
+		db	0Dh
+txt_redf_left	db	'pohyb vlevo:\r'
+txt_redf_down	db	'pohyb dolš:\r'
+txt_redf_up	db	'pohyb nahoru:\r'
+txt_redf_fire	db	'stˆelbu:\r'
+txt_redf_weps	db	'volbu zbran‚:\r'
+txt_redf_wepa	db	'aktivaci zbran‚:\r'
+txt_redf_for	db	'     Pro '
+		db	0FFh
+
+; ---------------------------------------------------------------------------
+sub_7731	ld	hl,5B00h
+		ld	de,7
+
+loc_7737	ld	c,(hl)
+		inc	hl
+		ld	b,(hl)
+		inc	hl
+		in	a,(c)
+		bit	7,c
+		jr	z,loc_7742
+		cpl
+
+loc_7742	and	(hl)
+		inc	hl
+		jr	z,loc_7748
+		set	7,d
+
+loc_7748	srl	d
+		dec	e
+		jr	nz,loc_7737
+		ret
+
+; ---------------------------------------------------------------------------
+
+cmd_start	call	sub_73B4
+		ld	a,(loc_7108+1)
+		inc	a
+		jp	z,loc_6DE6
+		ld	b,12h
+
+loc_775A	push	bc
+		ld	hl,40A0h
+		ld	a,20h ; ' '
+		ld	b,12h
+		call	sub_8263
+		pop	bc
+		djnz	loc_775A
+		ld	a,38h ; '8'
+		ld	(loc_7F0E+1),a
+		ld	hl,4000h
+		ld	bc,620h
+		call	sub_7E94
+		ld	hl,txt_statusbar
+		call	sub_7F71
+		ld	hl,4027h
+		ld	c,20h ; ' '
+
+loc_7781	ld	b,0Dh
+		ld	a,l
+
+loc_7784	ld	(hl),0
+		inc	l
+		djnz	loc_7784
+		ld	l,a
+		call	sub_7ED1
+		dec	c
+		jr	nz,loc_7781
+
+loc_7790	ld	c,3
+		ld	a,c
+		xor	2
+		ld	e,a
+		ld	hl,RUNZONE+23Ah
+		ld	b,64h ; 'd'
+
+loc_779B	ld	a,(hl)
+		inc	hl
+		cp	0FEh
+		jr	nz,loc_77A8
+		ld	a,(hl)
+		cp	e
+		jr	nz,loc_77A8
+		ld	(hl),c
+		jr	loc_77AA
+; ---------------------------------------------------------------------------
+
+loc_77A8	djnz	loc_779B
+
+loc_77AA	ld	hl,5827h
+		ld	de,c_colorbar
+		ld	c,4
+
+loc_77B2	ld	b,0Dh
+
+loc_77B4	ld	a,(de)
+		ld	(hl),a
+		inc	de
+		inc	hl
+		djnz	loc_77B4
+		ld	a,l
+		add	a,13h
+		ld	l,a
+		dec	c
+		jr	nz,loc_77B2
+		ld	hl,c_txtptr
+		call	sub_7F71
+		ld	hl,5C26h
+		ld	b,4
+
+loc_77CC	ld	a,(hl)
+		push	hl
+		push	bc
+		ld	hl,byte_7BC3
+		ld	b,14h
+
+loc_77D4	cp	(hl)
+		jr	z,loc_77EF
+		inc	hl
+		inc	hl
+		djnz	loc_77D4
+		jp	loc_6DE6
+
+sub_77DE	or	a
+		ret	z
+		ld	c,a
+
+loc_77E1	ld	a,(hl)
+		inc	hl
+		cp	0FFh
+		jr	z,loc_77EB
+		cp	0Dh
+		jr	nz,loc_77E1
+
+loc_77EB	dec	c
+		jr	nz,loc_77E1
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_77EF	ld	a,14h
+		sub	b
+		ld	hl,wpt_0_COBRA
+		call	sub_77DE
+		inc	hl
+		inc	hl
+
+loc_77FA	ld	a,(hl)
+		call	sub_7F91
+		inc	hl
+		ld	a,(hl)
+		cp	2Ch ; ','
+		jr	nz,loc_77FA
+		call	sub_7F8F
+		pop	bc
+		pop	hl
+		inc	hl
+		inc	hl
+		djnz	loc_77CC
+		ld	a,44h ; 'D'
+		ld	(loc_7F0E+1),a
+		ld	hl,4021h
+		call	sub_7993
+		ld	hl,403Eh
+		call	sub_7993
+		call	sub_73F8
+		push	hl
+		ld	bc,0Eh
+		add	hl,bc
+		push	hl
+		pop	ix
+		ld	a,c
+		call	sub_8EF8
+		pop	hl
+		push	af
+		call	sub_6E27
+		pop	af
+		jp	nc,loc_79FB
+		push	af
+		ld	hl,(word_82FE)
+		inc	hl
+		ld	(word_82FE),hl
+		ld	hl,(word_8300)
+		push	hl
+		ld	bc,(5CB1h)
+		ld	b,0
+		add	hl,bc
+		ld	(word_8300),hl
+		call	sub_7986
+		pop	hl
+		push	de
+		call	sub_7986
+		pop	hl
+		or	a
+		sbc	hl,de
+		jr	z,loc_785F
+		ld	hl,byte_8304+6
+		set	7,(hl)
+
+loc_785F	pop	af
+		or	a
+		jp	z,loc_79E5
+		ld	hl,txt_mission_end
+		call	sub_7F71
+		ld	a,70h ; 'p'
+		ld	(loc_7F0E+1),a
+		call	sub_73F8
+		inc	hl
+		inc	hl
+		ld	a,(5C81h)
+		inc	a
+		ld	e,(hl)
+		inc	hl
+		ld	d,(hl)
+		inc	hl
+		jr	z,loc_7882
+		ld	e,(hl)
+		inc	hl
+		ld	d,(hl)
+		inc	hl
+
+loc_7882	ex	de,hl
+		push	af
+		call	sub_7F71
+		ld	hl,txt_enem_total
+		call	sub_7F71
+		ld	a,(5CB0h)
+		call	sub_7A99
+		call	sub_7F8F
+		ld	hl,txt_enem_kill
+		call	sub_7F71
+		ld	a,(5CB1h)
+		call	sub_7A99
+		call	sub_7F8F
+		ld	hl,txt_danger
+		call	sub_7F71
+		ld	a,(5CB1h)
+		ld	e,a
+		ld	d,0
+		ld	hl,64h	; 'd'
+		call	30A9h
+		ld	bc,(5CB0h)
+		ld	b,0
+		ld	a,0FFh
+
+loc_78BF	or	a
+		inc	a
+		sbc	hl,bc
+		jr	nc,loc_78BF
+		push	af
+		call	sub_7A99
+		ld	hl,txt_percent
+
+sub_78CC	call	sub_7F71
+		pop	af
+		ld	hl,txt_result_1
+		cp	14h
+		jr	c,loc_78F8
+		ld	hl,txt_result_2
+		cp	28h ; '('
+		jr	c,loc_78F8
+		ld	hl,txt_result_3
+		cp	3Ch ; '<'
+		jr	c,loc_78F8
+		ld	hl,txt_result_4
+		cp	50h ; 'P'
+		jr	c,loc_78F8
+		cp	5Ah ; 'Z'
+		jr	c,loc_78F5
+		ld	hl,byte_8304
+		set	7,(hl)
+
+loc_78F5	ld	hl,txt_result_5
+
+loc_78F8	call	sub_7F71
+		pop	af
+		ld	a,(byte_82FD)
+		jp	nz,loc_7978
+		inc	a
+		ld	(byte_82FD),a
+		dec	a
+		push	af
+		ld	ix,unk_8303
+		cp	18h
+		jr	nz,loc_7914
+		set	7,(ix+5)
+
+loc_7914	cp	0Ch
+		jr	nz,loc_791C
+		set	7,(ix+6)
+
+loc_791C	cp	4
+		jr	nz,loc_7924
+		set	7,(ix+4)
+
+loc_7924	push	af
+		and	3
+		jr	nz,loc_792D
+		set	7,(ix+3)
+
+loc_792D	pop	af
+		ld	hl,unk_797E
+		ld	b,8
+
+loc_7933	cp	(hl)
+		jr	z,loc_793B
+		inc	hl
+		djnz	loc_7933
+		jr	loc_793F
+; ---------------------------------------------------------------------------
+
+loc_793B	set	7,(ix+2)
+
+loc_793F	pop	af
+
+loc_7940	sub	3
+		jr	c,loc_795D
+		jr	nz,loc_7940
+		ld	hl,txt_ranked
+		call	sub_7F71
+		ld	hl,byte_8302
+		inc	(hl)
+		ld	a,(hl)
+		ld	hl,txt_pilot_ranks
+		call	sub_77DE
+		call	sub_7F71
+		call	sub_7F8F
+
+loc_795D	call	sub_7A04
+		xor	a
+		ld	(loc_739F+1),a
+		call	sub_739C
+
+loc_7967	call	sub_7F8F
+		ld	a,(byte_82FD)
+		cp	19h
+		jp	c,loc_6DEC
+		call	sub_71AB
+		jp	cmd_start
+; ---------------------------------------------------------------------------
+
+loc_7978	xor	a
+		call	sub_7A04
+		jr	loc_7967
+
+; ---------------------------------------------------------------------------
+unk_797E	db	2
+		db	5
+		db	9
+		db	0Bh
+		db	0Dh
+		db	0Fh
+		db	11h
+		db	12h
+
+sub_7986	ld	bc,64h	; 'd'
+		ld	de,0FFFFh
+
+loc_798C	or	a
+		inc	de
+		sbc	hl,bc
+		jr	nc,loc_798C
+		ret
+
+sub_7993	ld	c,4
+
+loc_7995	ld	b,8
+		ld	de,byte_79AB
+		push	hl
+		call	sub_7F05
+		pop	hl
+
+loc_799F	ld	a,(de)
+		ld	(hl),a
+		inc	de
+		call	sub_7ED1
+		djnz	loc_799F
+		dec	c
+		jr	nz,loc_7995
+		ret
+
+; ---------------------------------------------------------------------------
+byte_79AB	db	0,3Ch,7Eh,7Ah,7Ah,72h,3Ch,0
+
+sub_79B3	ld	c,a
+		add	a,a
+		add	a,a
+		add	a,c
+		ld	c,a
+		ld	b,0
+		ld	hl,28Eh
+		add	hl,bc
+		ld	b,5
+		ld	de,txt_passkey+0Dh
+
+loc_79C3	ld	a,(hl)
+		inc	hl
+		xor	99h
+		push	af
+		rrca
+		rrca
+		rrca
+		rrca
+		and	0Fh
+		call	sub_79DA
+		pop	af
+		and	0Fh
+		call	sub_79DA
+		djnz	loc_79C3
+		ret
+
+sub_79DA	add	a,30h ; '0'
+		cp	3Ah ; ':'
+		jr	c,loc_79E2
+		add	a,7
+
+loc_79E2	ld	(de),a
+		inc	de
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_79E5	ld	hl,txt_killed
+		call	sub_7F71
+		ld	a,1
+		ld	(loc_6DEC+1),a
+		ld	a,80h
+		ld	(byte_830B),a
+		call	sub_7A04
+		jp	cmd_report
+; ---------------------------------------------------------------------------
+
+loc_79FB	ld	hl,txt_aborted
+		call	sub_7F71
+		jp	loc_6DEC
+
+sub_7A04	ld	hl,byte_8304
+		xor	a
+		ld	(loc_7A14+1),a
+
+loc_7A0B	bit	7,(hl)
+		res	7,(hl)
+		push	hl
+		jr	z,loc_7A40
+		inc	(hl)
+		push	af
+
+loc_7A14	ld	a,0
+		or	a
+		jr	nz,loc_7A23
+		inc	a
+		ld	(loc_7A14+1),a
+		ld	hl,txt_recv_award
+		call	sub_7F71
+
+loc_7A23	ld	a,60h ; '`'
+		ld	(loc_7F0E+1),a
+		ld	b,5
+
+loc_7A2A	ld	a,20h ; ' '
+		call	sub_7F91
+		djnz	loc_7A2A
+		pop	af
+		push	af
+		ld	hl,txt_awards
+		call	sub_77DE
+		call	sub_7F71
+		call	sub_7F8F
+		pop	af
+
+loc_7A40	pop	hl
+		inc	hl
+		inc	a
+		cp	8
+		jr	c,loc_7A0B
+		ret
+
+sub_7A48	ld	hl,byte_8304
+		xor	a
+		ld	(loc_7A56+1),a
+
+loc_7A4F	ld	c,(hl)
+		inc	c
+		dec	c
+		push	hl
+		jr	z,loc_7A91
+		push	af
+
+loc_7A56	ld	a,0
+		or	a
+		jr	nz,loc_7A65
+		inc	a
+		ld	(loc_7A56+1),a
+		ld	hl,txt_prt_award
+		call	sub_7F71
+
+loc_7A65	ld	a,60h ; '`'
+		ld	(loc_7F0E+1),a
+		ld	b,5
+
+loc_7A6C	ld	a,20h ; ' '
+		call	sub_7F91
+		djnz	loc_7A6C
+		pop	af
+		pop	hl
+		push	hl
+		ld	l,(hl)
+		ld	h,0
+		push	af
+		call	sub_7A9C
+		ld	a,78h ; 'x'
+		call	sub_7F91
+		pop	af
+		push	af
+		ld	hl,txt_awards
+		call	sub_77DE
+		call	sub_7F71
+		call	sub_7F8F
+		pop	af
+
+loc_7A91	pop	hl
+		inc	hl
+		inc	a
+		cp	8
+		jr	c,loc_7A4F
+		ret
+
+sub_7A99	ld	l,a
+		ld	h,0
+
+sub_7A9C	ld	c,20h ; ' '
+		ld	de,2710h
+		call	sub_7AB9
+		ld	de,3E8h
+		call	sub_7AB9
+		ld	de,64h	; 'd'
+		call	sub_7AB9
+		ld	e,0Ah
+		call	sub_7AB9
+		ld	e,1
+		ld	c,30h ; '0'
+
+sub_7AB9	ld	a,2Fh ; '/'
+
+loc_7ABB	inc	a
+		or	a
+		sbc	hl,de
+		jr	nc,loc_7ABB
+		add	hl,de
+		cp	30h ; '0'
+		jr	nz,loc_7ACD
+		ld	a,c
+
+loc_7AC7	cp	20h ; ' '
+		ret	z
+		jp	sub_7F91
+; ---------------------------------------------------------------------------
+
+loc_7ACD	ld	c,30h ; '0'
+		jr	loc_7AC7
+
+; ---------------------------------------------------------------------------
+
+cmd_weapons	call	sub_7DBD
+		ld	hl,cmd_weapons
+		push	hl
+		ld	hl,8C3Ch
+		ld	(loc_7C47+1),hl
+		ld	a,0FFh
+		ld	(loc_7D2F+1),a
+		ld	(loc_7B1C+1),a
+		ld	(loc_7D3E+1),a
+		ld	b,4
+		ld	hl,5C2Ch
+
+loc_7AEE	ld	a,b
+		dec	a
+		ld	(loc_7B05+1),a
+		ld	a,(hl)
+		push	bc
+		push	hl
+		call	sub_7B8D
+		pop	hl
+		pop	bc
+		dec	hl
+		dec	hl
+		djnz	loc_7AEE
+		ld	hl,byte_8584
+		call	sub_7F71
+
+loc_7B05	ld	hl,0
+		ld	a,60h ; '`'
+		call	sub_7BEB
+
+loc_7B0D	ld	d,0
+		ld	bc,(loc_7C47+1)
+		call	loc_7CF7
+		call	loc_7C47
+		ld	a,(loc_7D2F+1)
+
+loc_7B1C	cp	0FFh
+		ld	(loc_7B1C+1),a
+		jr	z,loc_7B0D
+		call	sub_7C13
+		ld	a,(loc_7D2F+1)
+		cp	14h
+		jp	z,loc_6DE6
+		cp	15h
+		jr	nz,loc_7B4E
+		ld	hl,5C2Eh
+		ld	a,(hl)
+		xor	1
+		ld	(hl),a
+
+loc_7B39	ld	hl,0
+		jr	z,loc_7B42
+		ld	de,48h	; 'H'
+		add	hl,de
+
+loc_7B42	ex	de,hl
+
+loc_7B43	ld	hl,0
+		ld	bc,204h
+		call	sub_7E43
+		jr	loc_7B0D
+; ---------------------------------------------------------------------------
+
+loc_7B4E	ld	c,a
+		ld	b,0
+		ld	hl,byte_7BC3
+		add	hl,bc
+		add	hl,bc
+		ld	a,(hl)
+		inc	a
+		jr	nz,loc_7B6B
+		inc	hl
+
+loc_7B5B	push	hl
+		ld	hl,(loc_7B05+1)
+		ld	a,70h ; 'p'
+		call	sub_7BEB
+		pop	hl
+		ld	a,(hl)
+		ld	(loc_7B05+1),a
+		jr	loc_7B05
+; ---------------------------------------------------------------------------
+
+loc_7B6B	ex	de,hl
+		ld	a,(loc_7B05+1)
+		add	a,a
+		ld	c,a
+		ld	b,0
+		ld	hl,5C26h
+		add	hl,bc
+		ex	de,hl
+		ld	a,(hl)
+		ldi
+		ldi
+		call	sub_7B8D
+		ld	a,(loc_7B05+1)
+		inc	a
+		and	3
+		ld	hl,unk_7B8C
+		ld	(hl),a
+		jr	loc_7B5B
+; ---------------------------------------------------------------------------
+unk_7B8C	db	0
+
+sub_7B8D	ld	hl,byte_7BC3
+		ld	e,0
+
+loc_7B92	inc	e
+		cp	(hl)
+		inc	hl
+		inc	hl
+		jr	nz,loc_7B92
+		ld	a,e
+
+loc_7B99	dec	e
+		sub	5
+		jr	nc,loc_7B99
+		ld	d,0
+		ld	hl,6Ch	; 'l'
+		call	30A9h
+		ld	de,wpg_0_COBRA
+		add	hl,de
+		push	hl
+		ld	a,(loc_7B05+1)
+		ld	c,a
+		add	a,a
+		add	a,a
+		add	a,c
+		add	a,a
+		add	a,a
+		add	a,a
+		add	a,8
+		ld	c,0D8h
+		call	22B0h
+		pop	de
+		ld	bc,304h
+		jp	sub_7E43
+
+; ---------------------------------------------------------------------------
+byte_7BC3	db	1,4,3,4,2,4,4,4,0FFh,0
+		db	0,8,5,1,9,8,8,1,0FFh,1
+		db	0Ah,2,0Dh,6,0Ch,1,7,8,0FFh,2
+		db	6,2,0Fh,2,0Eh,80h,0Bh,1,0FFh,3
+
+sub_7BEB	ld	de,0A0h
+		push	af
+		call	30A9h
+		ld	de,581Ah
+		add	hl,de
+		pop	af
+		call	sub_7C0C
+		ld	de,1Ah
+		add	hl,de
+		ld	c,3
+
+loc_7C00	ld	(hl),a
+		inc	hl
+		inc	hl
+		inc	hl
+		inc	hl
+		inc	hl
+		ld	(hl),a
+		inc	hl
+		add	hl,de
+		dec	c
+		jr	nz,loc_7C00
+
+sub_7C0C	ld	b,6
+
+loc_7C0E	ld	(hl),a
+		inc	hl
+		djnz	loc_7C0E
+		ret
+
+sub_7C13	push	hl
+		push	de
+		push	bc
+		push	af
+		ld	e,1Eh
+		ld	hl,118h
+		ld	a,10h
+
+loc_7C1E	ld	b,e
+		xor	10h
+
+loc_7C21	out	(0FEh),a
+		djnz	loc_7C21
+		dec	hl
+		inc	h
+		dec	h
+		jr	nz,loc_7C1E
+		pop	af
+		pop	bc
+		pop	de
+		pop	hl
+		ret
+
+sub_7C2F	push	hl
+		push	de
+		push	bc
+		push	af
+		ld	b,0
+		ld	c,2
+
+loc_7C37	ld	a,r
+		and	18h
+		out	(0FEh),a
+		djnz	loc_7C37
+		dec	c
+		jr	nz,loc_7C37
+		pop	af
+		pop	bc
+		pop	de
+		pop	hl
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_7C47	ld	bc,0
+		call	loc_7CF7
+		ld	a,70h ; 'p'
+		ld	(5AD7h),a
+		ld	(5AB7h),a
+		push	bc
+		ld	ix,byte_7D7D
+		exx
+		ld	hl,byte_7D9D
+		exx
+		ld	a,b
+		call	22B1h
+		ld	(loc_7CA5+1),hl
+		ld	(loc_7C7B+1),a
+		ld	b,10h
+
+loc_7C6B	push	bc
+		push	hl
+		push	hl
+		ld	h,0
+		ld	l,(ix+0)
+		ld	d,h
+		ld	e,(ix+10h)
+		inc	ix
+		ld	a,8
+
+loc_7C7B	sub	0
+		ld	b,a
+
+loc_7C7E	add	hl,hl
+		ex	de,hl
+		add	hl,hl
+		ex	de,hl
+		djnz	loc_7C7E
+		ex	(sp),hl
+		pop	bc
+		ld	a,(hl)
+		exx
+		ld	(hl),a
+		inc	hl
+		exx
+		ld	a,d
+		cpl
+		and	(hl)
+		or	b
+		ld	(hl),a
+		call	sub_7D75
+		ld	a,(hl)
+		exx
+		ld	(hl),a
+		inc	hl
+		exx
+		ld	a,e
+		cpl
+		and	(hl)
+		or	c
+		ld	(hl),a
+		pop	hl
+		call	sub_7ED1
+		pop	bc
+		djnz	loc_7C6B
+		halt
+
+loc_7CA5	ld	hl,0
+		ld	b,10h
+		ld	de,byte_7D9D
+
+loc_7CAD	ld	a,(de)
+		ld	(hl),a
+		inc	de
+		push	hl
+		call	sub_7D75
+		ld	a,(de)
+		ld	(hl),a
+		inc	de
+		pop	hl
+		call	sub_7ED1
+		djnz	loc_7CAD
+		call	sub_7731
+		pop	hl
+		bit	4,d
+		ret	nz
+		ld	a,0FFh
+		ld	(loc_7B1C+1),a
+		ld	c,4
+		bit	3,d
+		jr	z,loc_7CD6
+		ld	a,h
+		sub	c
+		ld	h,a
+		jr	nc,loc_7CD6
+		ld	h,0B7h
+
+loc_7CD6	bit	2,d
+		jr	z,loc_7CE3
+		ld	a,h
+		add	a,c
+		ld	h,a
+		cp	0BAh
+		jr	c,loc_7CE3
+		ld	h,0
+
+loc_7CE3	bit	1,d
+		jr	z,loc_7CEA
+		ld	a,l
+		sub	c
+		ld	l,a
+
+loc_7CEA	bit	0,d
+		jr	z,loc_7CF1
+		ld	a,l
+		add	a,c
+		ld	l,a
+
+loc_7CF1	ld	(loc_7C47+1),hl
+		jp	loc_7C47
+; ---------------------------------------------------------------------------
+
+loc_7CF7	ld	a,d
+		or	a
+		ret	nz
+		push	bc
+		push	de
+		push	hl
+		exx
+		push	bc
+		push	de
+		push	hl
+		exx
+		ld	a,b
+		ld	b,0FFh
+
+loc_7D05	inc	b
+		sub	28h ; '('
+		jr	nc,loc_7D05
+		ld	a,b
+		add	a,a
+		add	a,a
+		add	a,b
+		ld	b,a
+		dec	b
+		ld	a,c
+		cp	0C0h
+		jr	c,loc_7D1D
+		cp	0D0h
+		ld	a,0BEh
+		jr	c,loc_7D1D
+		ld	a,0D0h
+
+loc_7D1D	inc	b
+		sub	30h ; '0'
+		jr	nc,loc_7D1D
+		ld	a,b
+		cp	14h
+		jr	c,loc_7D2F
+		cp	18h
+		ld	a,15h
+		jr	nc,loc_7D33
+		ld	a,14h
+
+loc_7D2F	cp	0FFh
+		jr	z,loc_7D6C
+
+loc_7D33	ld	(loc_7D2F+1),a
+		cp	15h
+		jr	c,loc_7D3E
+		ld	hl,5C2Eh
+		add	a,(hl)
+
+loc_7D3E	cp	0FFh
+		jr	z,loc_7D6C
+		ld	(loc_7D3E+1),a
+		push	af
+		ld	hl,50A1h
+		ld	c,10h
+
+loc_7D4B	ld	b,16h
+		ld	e,l
+
+loc_7D4E	ld	(hl),0FFh
+		inc	l
+		djnz	loc_7D4E
+		ld	l,e
+		call	sub_7ED1
+		dec	c
+		jr	nz,loc_7D4B
+		ld	hl,byte_8584
+		call	sub_7F71
+		pop	bc
+		ld	hl,wpt_0_COBRA
+		ld	a,b
+		call	sub_77DE
+		inc	hl
+		call	sub_7F71
+
+loc_7D6C	exx
+		pop	hl
+		pop	de
+		pop	bc
+		exx
+		pop	hl
+		pop	de
+		pop	bc
+		ret
+
+sub_7D75	ld	a,l
+		inc	a
+		xor	l
+		and	1Fh
+		xor	l
+		ld	l,a
+		ret
+
+; ---------------------------------------------------------------------------
+byte_7D7D	db	0,40h,60h,70h,78h,7Ch,7Ah,58h
+		db	0Ch,0Ch,6,6,0,0,0,0
+		db	0C0h,0E0h,0F0h,0F8h,0FCh,0FEh,0FFh,0FAh
+		db	5Eh,1Eh,0Fh,0Fh,7,0,0,0
+byte_7D9D	block	20h,0
+
+sub_7DBD	ld	hl,4000h
+		xor	a
+		out	(0FEh),a
+		ld	a,70h ; 'p'
+		ld	(loc_7F0E+1),a
+		ld	de,wpg_0_COBRA
+		ld	b,4
+
+loc_7DCD	ld	c,4
+
+loc_7DCF	push	bc
+		push	de
+		push	hl
+		ld	bc,506h
+		call	sub_7E94
+		pop	hl
+		pop	de
+		push	hl
+		ld	a,21h ; '!'
+		call	sub_7EE8
+		ld	bc,304h
+		call	sub_7E43
+		pop	hl
+		pop	bc
+		ld	a,6
+		call	sub_7EE8
+		ld	a,c
+		dec	a
+		jr	nz,loc_7E02
+		push	bc
+		ld	c,5
+		call	sub_7E71
+		push	de
+		push	hl
+		ld	bc,506h
+		call	sub_7E94
+		pop	hl
+		pop	de
+		pop	bc
+
+loc_7E02	dec	c
+		jr	nz,loc_7DCF
+		ld	a,86h
+		call	sub_7EE8
+		djnz	loc_7DCD
+		push	de
+		push	hl
+		ld	bc,418h
+		call	sub_7E94
+		pop	hl
+		ld	a,l
+		add	a,18h
+		ld	l,a
+		ld	c,4
+		call	sub_7E71
+		push	hl
+		ld	bc,406h
+		call	sub_7E94
+		pop	hl
+		ld	a,21h ; '!'
+		call	sub_7EE8
+		pop	de
+		push	hl
+		ld	(loc_7B39+1),de
+		ld	(loc_7B43+1),hl
+		ld	a,(5C2Eh)
+		or	a
+		jr	z,loc_7E3F
+		ld	hl,48h	; 'H'
+		add	hl,de
+		ex	de,hl
+
+loc_7E3F	pop	hl
+		ld	bc,204h
+
+sub_7E43	push	bc
+		push	hl
+		ld	a,b
+		add	a,a
+		add	a,a
+		add	a,a
+		ld	b,a
+
+loc_7E4A	push	bc
+		push	hl
+		ld	b,c
+
+loc_7E4D	ld	a,(de)
+		ld	(hl),a
+		inc	l
+		inc	de
+		djnz	loc_7E4D
+		pop	hl
+		call	sub_7ED1
+		pop	bc
+		djnz	loc_7E4A
+		pop	hl
+		pop	bc
+		call	sub_7F05
+
+loc_7E5F	push	bc
+		push	hl
+		ld	b,c
+
+loc_7E62	ld	a,(de)
+		ld	(hl),a
+		inc	l
+		inc	de
+		djnz	loc_7E62
+		pop	hl
+		ld	bc,20h	; ' '
+		add	hl,bc
+		pop	bc
+		djnz	loc_7E5F
+		ret
+
+sub_7E71	push	hl
+
+loc_7E72	push	hl
+		call	sub_7F05
+		inc	l
+		ld	(hl),a
+		pop	hl
+		ld	b,4
+
+loc_7E7B	ld	(hl),0AAh
+		inc	l
+		ld	(hl),0AAh
+		inc	h
+		ld	(hl),55h ; 'U'
+		dec	l
+		ld	(hl),55h ; 'U'
+		inc	h
+		djnz	loc_7E7B
+		dec	h
+		call	sub_7ED1
+		dec	c
+		jr	nz,loc_7E72
+		pop	hl
+		inc	l
+		inc	l
+		ret
+
+sub_7E94	ld	de,gfx_border
+		call	sub_7EAD
+		dec	b
+		dec	b
+		jr	z,loc_7EA5
+
+loc_7E9E	push	de
+		call	sub_7EAD
+		pop	de
+		djnz	loc_7E9E
+
+loc_7EA5	push	bc
+		ld	bc,18h
+		ex	de,hl
+		add	hl,bc
+		ex	de,hl
+		pop	bc
+
+sub_7EAD	push	bc
+		push	hl
+		call	sub_7EF0
+		ld	a,c
+		sub	2
+		jr	z,loc_7EBF
+		ld	b,a
+
+loc_7EB8	push	de
+		call	sub_7EF0
+		pop	de
+		djnz	loc_7EB8
+
+loc_7EBF	ld	bc,8
+		ex	de,hl
+		add	hl,bc
+		ex	de,hl
+		call	sub_7EF0
+		pop	hl
+		ld	b,7
+
+loc_7ECB	call	sub_7ED1
+		djnz	loc_7ECB
+		pop	bc
+
+sub_7ED1	inc	h
+		ld	a,h
+		and	7
+		ret	nz
+		ld	a,l
+		add	a,20h ; ' '
+		ld	l,a
+		ld	a,h
+		jr	c,loc_7EE0
+		sub	8
+		ld	h,a
+
+loc_7EE0	cp	58h ; 'X'
+		jr	c,loc_7EE6
+		ld	h,40h ; '@'
+
+loc_7EE6	or	a
+		ret
+
+sub_7EE8	add	a,l
+		ld	l,a
+		ret	nc
+		ld	a,h
+		add	a,8
+		ld	h,a
+		ret
+
+sub_7EF0	push	hl
+
+loc_7EF1	ld	a,(de)
+		cpl
+		ld	(hl),a
+		inc	de
+		inc	h
+		ld	a,h
+		and	7
+		jr	nz,loc_7EF1
+		ld	a,h
+		sub	8
+		ld	h,a
+		call	sub_7F05
+		pop	hl
+		inc	l
+		ret
+
+sub_7F05	ld	a,h
+		rrca
+		rrca
+		rrca
+		and	1Fh
+		xor	50h ; 'P'
+		ld	h,a
+
+loc_7F0E	ld	a,0
+		ld	(hl),a
+		ret
+
+; ---------------------------------------------------------------------------
+gfx_border	db	55h,0AAh,55h,0AAh,58h,0A4h,52h,0A1h
+		db	55h,0AAh,55h,0AAh,0,0,0,55h
+		db	55h,0AAh,55h,0AAh,5,1Ah,35h,7Ah
+		db	50h,0A1h,50h,0A1h,50h,0A1h,50h,0A1h
+		db	0,0,0,0,0,0,0,0
+		db	0F5h,7Ah,0F5h,7Ah,0F5h,7Ah,0F5h,7Ah
+		db	50h,0A3h,57h,0AFh,55h,0AAh,55h,0AAh
+		db	0AAh,0FFh,0FFh,0FFh,55h,0AAh,55h,0AAh
+		db	0F5h,0BAh,0D5h,0EAh,55h,0AAh,55h,0AAh
+; ---------------------------------------------------------------------------
+
+uphl		ld	a,h
+		dec	h
+		and	7
+		ret	nz
+		ld	a,l
+		sub	20h ; ' '
+		ld	l,a
+		ld	a,h
+		jr	c,loc_7F69
+		add	a,8
+		ld	h,a
+
+loc_7F69	cp	40h ; '@'
+		jr	nc,loc_7F6F
+		ld	h,57h ; 'W'
+
+loc_7F6F	or	a
+		ret
+
+sub_7F71	ld	a,(hl)
+		inc	hl
+		cp	0FFh
+		ret	z
+		cp	0Dh
+		jr	z,sub_7F91
+		cp	0Ch
+		jr	nz,loc_7F7F
+		inc	a
+
+loc_7F7F	call	sub_7F91
+		jr	sub_7F71
+
+sub_7F84	ld	a,(hl)
+		call	sub_7F91
+		inc	hl
+		ld	a,(hl)
+		call	sub_768E
+		jr	nz,sub_7F84
+
+sub_7F8F	ld	a,0Dh
+
+sub_7F91	push	hl
+		push	de
+		push	bc
+		push	af
+		call	loc_7F9D
+		pop	af
+		pop	bc
+		pop	de
+		pop	hl
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_7F9D	ld	c,0
+		inc	c
+		dec	c
+		jr	z,loc_7FEA
+		bit	0,c
+		jr	nz,loc_7FD5
+		bit	1,c
+		jr	nz,loc_7FDC
+		bit	2,c
+		jr	nz,loc_7FC4
+		bit	3,c
+		jr	nz,loc_7FCB
+		bit	5,c
+		jr	nz,loc_7FBF
+		ld	(loc_80F2+1),a
+
+loc_7FBA	xor	a
+		ld	(loc_7F9D+1),a
+		ret
+; ---------------------------------------------------------------------------
+
+loc_7FBF	ld	(loc_7F0E+1),a
+		jr	loc_7FBA
+; ---------------------------------------------------------------------------
+
+loc_7FC4	ld	c,8
+		ld	(loc_7FCB+1),a
+		jr	loc_8009
+; ---------------------------------------------------------------------------
+
+loc_7FCB	ld	a,0
+		ld	(loc_803F+1),a
+		call	sub_8131
+		jr	loc_7FBA
+; ---------------------------------------------------------------------------
+
+loc_7FD5	ld	c,2
+		ld	(loc_7FDC+1),a
+		jr	loc_8009
+; ---------------------------------------------------------------------------
+
+loc_7FDC	ld	h,0
+		ld	l,a
+		ld	(loc_8160+1),hl
+		ld	(loc_813B+1),a
+		call	sub_8131
+		jr	loc_7FBA
+; ---------------------------------------------------------------------------
+
+loc_7FEA	cp	20h ; ' '
+		jr	nc,loc_8019
+		cp	0Dh
+		jr	z,loc_800E
+		sub	14h
+		ld	c,20h ; ' '
+		jr	z,loc_8009
+		dec	a
+		ld	c,10h
+		jr	z,loc_8009
+		dec	a
+		ld	c,1
+		jr	z,loc_8009
+		dec	a
+		ld	c,4
+		jr	z,loc_8009
+		ld	c,0
+
+loc_8009	ld	a,c
+		ld	(loc_7F9D+1),a
+		ret
+; ---------------------------------------------------------------------------
+
+loc_800E	ld	a,0
+		dec	a
+		jp	nz,loc_80EB
+		ld	(loc_800E+1),a
+		jr	loc_808D
+; ---------------------------------------------------------------------------
+
+loc_8019	ld	hl,loc_800E+1
+		ld	(hl),1
+		sub	0A5h
+		jp	nc,0C10h
+		add	a,0A5h
+		cp	9Eh
+		jr	c,loc_802B
+		ld	a,20h ; ' '
+
+loc_802B	ld	hl,5B15h
+		ld	(hl),a
+		inc	hl
+		ld	(hl),0FFh
+		ld	(loc_802B+1),hl
+		ld	c,a
+		ld	b,0
+		ld	hl,font_small-32
+		add	hl,bc
+
+loc_803C	ld	a,0
+		ld	b,a
+
+loc_803F	ld	e,0FEh
+		inc	e
+		dec	e
+		jr	nz,loc_804A
+		add	a,(hl)
+		jr	nc,loc_8050
+		jr	loc_8064
+; ---------------------------------------------------------------------------
+
+loc_804A	add	a,(hl)
+		jr	c,loc_8064
+		cp	e
+		jr	nc,loc_8064
+
+loc_8050	ld	(loc_803C+1),a
+		ld	a,c
+		cp	20h ; ' '
+		ret	nz
+
+sub_8057	ld	hl,5B79h
+		inc	hl
+		ld	(hl),b
+		ld	(sub_8057+1),hl
+		ld	hl,loc_806A+1
+		inc	(hl)
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_8064	ld	a,c
+		cp	20h ; ' '
+		call	z,sub_8057
+
+loc_806A	ld	a,0
+		or	a
+		jr	z,loc_808D
+		ld	b,a
+		ld	hl,5B7Ah
+		dec	b
+		jr	z,loc_808D
+
+loc_8076	inc	(hl)
+		push	bc
+		push	hl
+
+loc_8079	inc	hl
+		inc	(hl)
+		djnz	loc_8079
+		ld	hl,(sub_8057+1)
+		ld	a,(loc_803F+1)
+		cp	(hl)
+		pop	hl
+		pop	bc
+		inc	hl
+		jr	z,loc_808D
+		djnz	loc_8076
+		jr	loc_806A
+; ---------------------------------------------------------------------------
+
+loc_808D	ld	a,(loc_803F+1)
+		ld	(loc_80A0+1),a
+		ld	hl,5B15h
+		ld	de,5B79h
+		ld	a,(hl)
+		cp	20h ; ' '
+		jr	nz,loc_809F
+		inc	de
+
+loc_809F	ld	a,(de)
+
+loc_80A0	cp	0
+		jr	z,loc_80FC
+		inc	de
+		ld	(loc_8160+1),a
+		call	sub_80BB
+		ld	a,(hl)
+
+loc_80AC	inc	hl
+		call	sub_8152
+		ld	a,(hl)
+		cp	0FFh
+		jr	z,loc_80FD
+		cp	20h ; ' '
+		jr	nz,loc_80AC
+		jr	loc_809F
+
+sub_80BB	ld	a,(loc_8160+2)
+		cp	0B2h
+		ret	c
+		push	hl
+		push	de
+
+loc_80C3	ld	a,0
+		inc	a
+		cp	0Ah
+		jr	c,loc_80DA
+		ld	a,0B8h
+		ld	(5ADEh),a
+		ld	a,(loc_71A7+1)
+		or	a
+		call	nz,sub_71AB
+		xor	a
+		ld	(5ADEh),a
+
+loc_80DA	ld	(loc_80C3+1),a
+		ld	a,0A2h
+		ld	(loc_8160+2),a
+		call	sub_825C
+		call	sub_825C
+		pop	de
+		pop	hl
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_80EB	call	sub_80BB
+		ld	hl,loc_8160+2
+		ld	a,(hl)
+
+loc_80F2	add	a,0Ch
+		sub	0C0h
+		ld	(hl),a
+		ret	nc
+		add	a,0C0h
+		ld	(hl),a
+		ret
+; ---------------------------------------------------------------------------
+
+loc_80FC	inc	hl
+
+loc_80FD	ex	de,hl
+		ld	hl,(loc_8160+1)
+		ld	(loc_758B+1),hl
+		call	loc_80EB
+		ld	hl,5B14h
+
+loc_810A	ld	a,(de)
+		inc	hl
+		ld	(hl),a
+		inc	de
+		inc	a
+		jr	nz,loc_810A
+		ld	(loc_802B+1),hl
+		ld	hl,5B15h
+		ld	a,(5B79h)
+
+loc_811A	ld	bc,font_small-32
+		ld	e,(hl)
+		inc	e
+		jr	z,loc_812B
+		dec	e
+		ld	d,0
+		ex	de,hl
+		add	hl,bc
+		add	a,(hl)
+		ex	de,hl
+		inc	hl
+		jr	loc_811A
+; ---------------------------------------------------------------------------
+
+loc_812B	push	af
+		push	bc
+		push	de
+		push	hl
+		jr	loc_8140
+
+sub_8131	push	af
+		push	bc
+		push	de
+		push	hl
+		ld	hl,5B15h
+		ld	(loc_802B+1),hl
+
+loc_813B	ld	a,0Ah
+		ld	(5B79h),a
+
+loc_8140	ld	(loc_803C+1),a
+		ld	hl,5B79h
+		ld	(sub_8057+1),hl
+		xor	a
+		ld	(loc_806A+1),a
+		pop	hl
+		pop	de
+		pop	bc
+		pop	af
+		ret
+
+sub_8152	push	de
+		push	hl
+		call	sub_7C2F
+		ld	hl,font_small-32
+		ld	d,0
+		ld	e,a
+		add	hl,de
+		ld	c,(hl)
+		push	bc
+
+loc_8160	ld	bc,0
+		ld	a,b
+		call	22B0h
+		push	hl
+		call	sub_7F05
+		inc	l
+		ld	(hl),a
+		ld	bc,1Fh
+		add	hl,bc
+		cp	38h ; '8'
+		jr	z,loc_817B
+		cp	78h ; 'x'
+		jr	z,loc_817B
+		add	a,8
+
+loc_817B	ld	(hl),a
+		inc	l
+		ld	(hl),a
+		pop	hl
+		ex	de,hl
+		ld	b,h
+		ld	c,l
+		add	hl,hl
+		add	hl,hl
+		add	hl,hl
+		add	hl,bc
+		ld	bc,font_small-((32*9)-126)
+		add	hl,bc
+		pop	bc
+		ex	de,hl
+		push	bc
+		ld	b,9
+		call	sub_7ED1
+
+loc_8192	ld	a,(de)
+		inc	de
+		push	bc
+		push	de
+		or	a
+		jr	z,loc_81B6
+		ld	e,a
+		ld	d,0
+		ld	a,(loc_8160+1)
+		and	7
+		jr	z,loc_81AA
+
+loc_81A3	srl	e
+		rr	d
+		dec	a
+		jr	nz,loc_81A3
+
+loc_81AA	ld	a,(hl)
+		cpl
+		or	e
+		cpl
+		ld	(hl),a
+		inc	hl
+		ld	a,(hl)
+		cpl
+		or	d
+		cpl
+		ld	(hl),a
+		dec	hl
+
+loc_81B6	call	sub_7ED1
+		pop	de
+		pop	bc
+		djnz	loc_8192
+		pop	bc
+		ld	hl,loc_8160+1
+		ld	a,(hl)
+		add	a,c
+		ld	(hl),a
+		pop	hl
+		pop	de
+
+locret_81C6	ret
+
+; ---------------------------------------------------------------------------
+		db	45h,0
+		db	45h,1
+		db	53h,1
+		db	43h,1
+		db	52h,1
+		db	5Ah,1
+		db	59h,0
+		db	41h,0
+		db	49h,0
+		db	44h,1
+		db	4Eh,1
+		db	4Fh,0
+		db	54h,1
+		db	55h,2
+		db	55h,0
+unk_81E5	db	0F9h
+		db	0F3h
+		db	0FFh
+		db	0C9h
+		db	0E3h
+		db	0FFh
+		db	0E3h
+		db	0C9h
+		db	0E3h
+
+sub_81EE	exx
+		or	a
+		jr	z,loc_8244
+		cp	80h
+		ld	(loc_8222+1),a
+		ld	hl,unk_8250
+		jr	c,loc_8212
+		ld	hl,locret_81C6
+		and	7Fh
+		ld	c,a
+		ld	b,0
+		add	hl,bc
+		ld	a,(hl)
+		ld	(loc_8222+1),a
+		inc	hl
+		ld	a,(hl)
+		add	a,(hl)
+		add	a,(hl)
+		ld	c,a
+		ld	hl,unk_81E5
+		add	hl,bc
+
+loc_8212	ld	de,0
+		push	de
+		ld	b,3
+
+loc_8218	ld	a,(hl)
+		ld	(de),a
+		inc	hl
+		ex	de,hl
+		call	sub_7ED1
+		ex	de,hl
+		djnz	loc_8218
+
+loc_8222	ld	a,0
+		add	a,a
+		ld	l,a
+		sbc	a,a
+		cpl
+		ld	c,a
+		ld	h,0Fh
+		add	hl,hl
+		add	hl,hl
+		inc	hl
+		ld	b,7
+
+loc_8230	ld	a,(hl)
+
+loc_8231	rrca
+		or	(hl)
+		xor	c
+		ld	(de),a
+		ex	de,hl
+		inc	de
+		call	sub_7ED1
+		ex	de,hl
+		djnz	loc_8230
+		pop	hl
+		inc	l
+		ld	(loc_8212+1),hl
+		exx
+		ret
+; ---------------------------------------------------------------------------
+
+loc_8244	ld	b,0Ah
+		ld	hl,unk_8250
+		ld	de,(loc_8212+1)
+		push	de
+		jr	loc_8230
+
+; ---------------------------------------------------------------------------
+unk_8250	block	12,0FFh
+
+sub_825C	ld	a,1Eh
+		ld	b,14h
+		ld	hl,4041h
+
+sub_8263	ld	(loc_8286+1),a
+
+loc_8266	push	hl
+		call	sub_82A6
+		pop	de
+		push	bc
+		push	hl
+		call	loc_8286
+		pop	hl
+		pop	bc
+		djnz	loc_8266
+		ld	c,8
+
+loc_8276	ld	a,(loc_8286+1)
+		ld	b,a
+		ld	e,l
+
+loc_827B	ld	(hl),0FFh
+		inc	l
+		djnz	loc_827B
+		ld	l,e
+		inc	h
+		dec	c
+		jr	nz,loc_8276
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_8286	ld	bc,0
+		push	hl
+		push	de
+		ld	a,8
+
+loc_828D	push	hl
+		push	de
+		push	bc
+		ldir
+		pop	bc
+		pop	de
+		pop	hl
+		inc	h
+		inc	d
+		dec	a
+		jr	nz,loc_828D
+		pop	hl
+		call	sub_7F05
+		ex	de,hl
+		pop	hl
+		call	sub_7F05
+		ldir
+		ret
+
+sub_82A6	ld	a,l
+		add	a,20h ; ' '
+		ld	l,a
+		ret	nc
+		ld	a,h
+		add	a,8
+		ld	h,a
+		cp	58h ; 'X'
+		ret	nz
+		ld	h,40h ; '@'
+		ret
+
+; ---------------------------------------------------------------------------
+c_pilot_def	db	'NoNamePilot\r'
+
+sub_82C1	ld	hl,c_pilot_def
+		ld	de,c_pilotname
+		ld	bc,0Ch
+		ldir
+		ex	de,hl
+		ld	b,14h
+
+loc_82CF	ld	(hl),c
+		inc	hl
+		djnz	loc_82CF
+		ld	(hl),1
+		inc	hl
+		ld	b,0Fh
+
+loc_82D8	ld	(hl),c
+		inc	hl
+		djnz	loc_82D8
+		ret
+
+; ---------------------------------------------------------------------------
+c_pilotname	db	'NoNamePilot\r'
+		block	20,0
+byte_82FD	db	1
+word_82FE	dw	0
+
+word_8300	dw	0
+
+byte_8302	db	0
+
+unk_8303	db	0
+byte_8304	db	0,0,0,0,0,0,0
+
+byte_830B	db	0
+		db	0
+txt_awards	db	'StˆbrnŽ hv‚zda'
+
+		db	0FFh
+		db	'ZlatŽ hv‚zda'
+		db	0FFh
+		db	'‰Žd Slunce'
+		db	0FFh
+		db	'‰Žd za osvobozen Zem‚'
+		db	0FFh
+		db	'‰Žd Vt‚zstv'
+		db	0FFh
+		db	'‰Žd Osvobozen'
+		db	0FFh
+		db	'‹eleznŒ kˆŠ'
+		db	0FFh
+		db	'‰Žd V‚†n€ pam‚ti'
+		db	0FFh
+txt_recv_award	dw	7814h
+		db	'ObdrŠel jste vyznamenŽn:\r'
+txt_prt_award	dw	7814h
+		db	'VyznamenŽn:\r'
+txt_ranked	dw	7814h
+		db	'Byl jste povŒ„en do hodnosti: '
+		db	0FFh
+txt_pilot_ranks	db	'Kadet'
+
+		db	0FFh
+		db	'Pilot 2. tˆdy'
+		db	0FFh
+		db	'Pilot 1. tˆdy'
+		db	0FFh
+		db	'Pilot extra tˆdy'
+		db	0FFh
+		db	'KapitŽn'
+		db	0FFh
+		db	'Major'
+		db	0FFh
+		db	'Poru†k'
+		db	0FFh
+		db	'Plukovnk'
+		db	0FFh
+txt_strange	dw	5014h
+		db	'#?!!...#'
+		db	7Fh
+		db	0Dh
+		dw	7814h
+txt_passkey	db	'Vstupn k–d: ',0,0,0,0,0,0,0,0,0,0
+
+		db	0FFh
+txt_result_1	db	'bdnŽ\r'
+txt_result_2	db	'slabŽ\r'
+txt_result_3	db	'pršm‚rnŽ\r'
+txt_result_4	db	'vŒbornŽ\r'
+txt_result_5	db	'expertn\r'
+txt_percent	db	' % - '
+		db	0FFh
+txt_danger	dw	6814h
+		db	'DosaŠena nebezpe†nost '
+		db	0FFh
+txt_enem_kill	dw	5814h
+		db	'NepˆŽtelskŒch objektš zni†eno: '
+		db	0FFh
+txt_enem_total	dw	5814h
+		db	'NepˆŽtelskŒch objektš v oblasti celkem: '
+		db	0FFh
+txt_mission_end	dw	6014h
+		db	'Mise ukon†ena.\r'
+txt_aborted	dw	5014h
+		db	'Mise pˆeru„ena!\r'
+txt_killed	dw	5014h
+		db	'Bitevnk zni†en - jste mrtev!!\r'
+c_colorbar	db	2,42h,6,6,46h,46h,44h,44h,44h,44h,4,4,4,41h,3,3
+		db	43h,43h,5,5,45h,45h,7,7,47h,47h,42h,6,6,46h,46h,44h
+		db	44h,44h,44h,4,4,4,4,1,1,2,2,3,3,4,4,5
+		db	5,6,6,7
+c_txtptr	db	16h,6,0B0h,0FFh
+txt_statusbar	db	16h,6,11h,15h,8
+		db	'Clona:'
+		db	0Ch
+		db	'Plazma:'
+		db	0Ch
+		db	'Palivo:'
+		db	0Ch
+		db	'Rychlost:'
+		db	0Ch
+		db	0FFh
+byte_8584	db	16h,0AAh,0Ah,14h,71h,17h,0B7h,0,0FFh
+
+txt_help	dw	7014h
+		db	'PouŠiteln€ povely jsou: START, PILOT, SAVE, LOAD, RAPORT, RED'
+		db	'EFINICE, INFORMACE, ZBRANƒ, POMOC a KONEC. Sta† zadat pouze '
+		db	'prvn psmeno.\r'
+		db	0FFh
+txt_err_disk	db	16h,12h,10h,15h,10h,17h,0F0h,0
+		dw	5014h
+		db	'Chyba pˆi †ten z disku!\r'
+txt_err_tape	db	16h,12h,10h,15h,10h,17h,0F0h,0
+		dw	5014h
+		db	'Chyba pˆi †ten z kazety!\r'
+c_sets_default	db	0FEh,0DFh,1
+		db	0FEh,0DFh,2
+		db	0FEh,0FDh,1
+		db	0FEh,0FBh,1
+		db	0FEh,7Fh,4
+		db	0FEh,7Fh,2
+		db	0FEh,7Fh,8
+		block	64h,0
+
+demoheader	ret
+
+sub_8EF8	di
+		ld	(loc_9197+1),a
+		ld	(loc_9019+1),sp
+		ld	hl,09A80h
+loc_8F2B	ld	(hl),l
+		res	7,(hl)
+		inc	l
+		jr	nz,loc_8F2B
+		xor	a
+		ld	(loc_998D+1),a
+		im	2
+		ei
+		ld	a,xh
+		sub	0ABh
+		jr	z,loc_8F45
+		dec	a
+		jr	z,loc_8F45
+		ld	ix,0C200h
+
+loc_8F45	call	sub_91DD
+		ld	a,(loc_9197+1)
+		or	a
+		jr	nz,loc_8F59
+		ld	(RUNZONE+66h),a
+		ld	l,a
+		ld	h,a
+		ld	(RUNZONE+14Fh),hl
+		ld	(RUNZONE+64h),hl
+
+loc_8F59	xor	a
+		out	(0FEh),a
+		ld	(loc_8F6D+1),sp
+		ld	sp,9F80h
+		ld	h,a
+		ld	l,a
+		ld	b,90h
+
+loc_8F67	push	hl
+		push	hl
+		push	hl
+		push	hl
+		djnz	loc_8F67
+
+loc_8F6D	ld	sp,0
+		call	loc_9385
+		call	loc_938E
+		call	loc_93BF
+		ld	yh,4
+		call	sub_9535
+		call	sub_9766
+		call	sub_973D
+		call	loc_953B
+		ld	a,(loc_9197+1)
+		or	a
+		call	nz,sub_90A3
+		call	loc_9306
+		call	sub_9790
+		ld	a,(RUNZONE+69h)
+		or	a
+		jr	nz,loc_8FA6
+		ld	a,(RUNZONE+66h)
+		cp	13h
+		jr	nz,loc_8FA6
+		xor	a
+		ld	(RUNZONE+69h),a
+
+loc_8FA6	ld	a,(loc_9197+1)
+		or	a
+		jr	z,loc_8FEB
+		ld	a,(RUNZONE+69h)
+
+loc_8FAF	cp	0
+		ld	(loc_8FAF+1),a
+		ld	hl,4227h
+		call	nz,sub_902C
+		ld	a,(RUNZONE+153h)
+		add	a,a
+
+loc_8FBE	cp	0
+		ld	(loc_8FBE+1),a
+		ld	hl,4247h
+		call	nz,sub_902C
+		ld	a,(RUNZONE+77h)
+		srl	a
+
+loc_8FCE	cp	0
+		ld	(loc_8FCE+1),a
+		ld	hl,4267h
+		call	nz,sub_902C
+		ld	a,(RUNZONE+154h)
+		add	a,a
+		add	a,a
+		add	a,a
+		add	a,a
+
+loc_8FE0	cp	0
+		ld	(loc_8FE0+1),a
+		ld	hl,4287h
+		call	nz,sub_902C
+
+loc_8FEB	call	1F54h
+		jr	nc,loc_9019
+		ld	a,(5CB0h)
+		dec	a
+		jp	nz,loc_8F59
+
+loc_8FF7	ld	ix,(loc_953B+2)
+		ld	hl,0
+		ld	bc,0Fh
+
+loc_9001	call	sub_92F8
+		jr	z,loc_9012
+		inc	l
+		ld	a,(ix+3)
+		or	a
+		jr	nz,loc_900E
+		inc	h
+
+loc_900E	add	ix,bc
+		jr	loc_9001
+; ---------------------------------------------------------------------------
+
+loc_9012	ld	(5CB0h),hl
+		scf
+		ld	a,(RUNZONE+69h)
+
+loc_9019	ld	sp,0
+		ld	iy,5C3Ah
+		im	1
+		ei
+		ret
+
+; ---------------------------------------------------------------------------
+unk_9024	db	0
+		db	80h
+		db	0C0h
+		db	0E0h
+		db	0F0h
+		db	0F8h
+		db	0FCh
+		db	0FEh
+
+sub_902C	ld	c,0Dh
+		ld	e,a
+		rrca
+		rrca
+		rrca
+		and	1Fh
+		jr	z,loc_904B
+		ld	b,a
+		ld	a,0FFh
+
+loc_9039	cp	(hl)
+		jp	z,loc_9046
+		ld	(hl),a
+		ld	d,h
+		inc	h
+		ld	(hl),a
+		inc	h
+		ld	(hl),a
+		inc	h
+		ld	(hl),a
+		ld	h,d
+
+loc_9046	inc	l
+		dec	c
+		ret	z
+		djnz	loc_9039
+
+loc_904B	ld	a,e
+		and	7
+		exx
+		ld	l,a
+		ld	h,0
+		ld	bc,unk_9024
+		add	hl,bc
+		ld	a,(hl)
+		exx
+		ld	d,h
+		ld	(hl),a
+		inc	h
+		ld	(hl),a
+		inc	h
+		ld	(hl),a
+		inc	h
+		ld	(hl),a
+		ld	h,d
+		inc	l
+		dec	c
+		ret	z
+		ld	b,c
+		xor	a
+
+loc_9066	cp	(hl)
+		jp	z,loc_9073
+		ld	(hl),a
+		ld	d,h
+		inc	h
+		ld	(hl),a
+		inc	h
+		ld	(hl),a
+		inc	h
+		ld	(hl),a
+		ld	h,d
+
+loc_9073	inc	l
+		djnz	loc_9066
+		ret
+
+; ---------------------------------------------------------------------------
+		db	81h
+		db	90h
+		db	88h
+		db	90h
+		db	8Dh
+		db	90h
+		db	90h
+		db	90h
+		db	96h
+		db	90h
+		db	8
+		db	9
+		db	0Ah
+		db	0Bh
+		db	0Dh
+		db	0Fh
+		db	0
+		db	28h
+		db	5
+		db	4
+		db	3
+		db	0
+		db	50h
+		db	0Fh
+		db	0
+		db	0Ch
+		db	0Fh
+		db	12h
+		db	15h
+		db	18h
+		db	0
+		db	80h
+		db	40h
+		db	80h
+		db	80h
+		db	0
+unk_909B	db	21h
+		db	41h
+		db	61h
+		db	81h
+		db	3Eh
+		db	5Eh
+		db	7Eh
+		db	9Eh
+
+sub_90A3	ld	a,0
+		inc	a
+		and	3
+		ld	(sub_90A3+1),a
+		jr	nz,loc_90CB
+
+loc_90AD	ld	a,1
+		xor	43h ; 'C'
+		ld	(loc_90AD+1),a
+		ld	c,a
+		ld	hl,unk_909B
+		ld	b,8
+		ld	d,58h ; 'X'
+
+loc_90BC	ld	e,(hl)
+		inc	hl
+		ld	a,(de)
+		cp	1
+		jr	z,loc_90C7
+		cp	42h ; 'B'
+		jr	nz,loc_90C9
+
+loc_90C7	ld	a,c
+		ld	(de),a
+
+loc_90C9	djnz	loc_90BC
+
+loc_90CB	ld	a,0
+		ld	hl,RUNZONE+153h
+		cp	(hl)
+		jr	nc,loc_90D4
+		ld	(hl),a
+
+loc_90D4	ld	a,0
+		ld	hl,RUNZONE+69h
+		cp	(hl)
+		jr	nc,loc_90DD
+		ld	(hl),a
+
+loc_90DD	ld	a,0
+		or	a
+		jr	z,loc_90F3
+		ld	a,r
+		and	7
+		jr	nz,loc_90F3
+		ld	hl,RUNZONE+77h
+		ld	a,(hl)
+		or	a
+		jr	z,loc_90F3
+		dec	a
+		jr	z,loc_90F3
+		ld	(hl),a
+
+loc_90F3	ld	a,(RUNZONE+69h)
+		or	a
+		ret	nz
+
+loc_90F8	ld	a,0
+		dec	a
+		ret	z
+		ld	(loc_90F8+1),a
+		ld	a,r
+		and	7
+		cp	6
+		jr	c,loc_9112
+		ld	a,r
+		and	18h
+		rrca
+		rrca
+		rrca
+		add	a,4
+		jr	loc_9114
+; ---------------------------------------------------------------------------
+
+loc_9112	and	3
+
+loc_9114	or	0F8h
+		ld	l,a
+		ld	h,5Bh ; '['
+		ld	a,(hl)
+		or	a
+		ld	a,l
+		jr	z,loc_9121
+		inc	a
+		jr	loc_9114
+; ---------------------------------------------------------------------------
+
+loc_9121	and	7
+		jr	z,loc_914A
+		dec	a
+		jr	z,loc_9167
+		ld	(hl),1
+		dec	a
+		jr	z,loc_918B
+		dec	a
+		jr	z,loc_917F
+		push	af
+		dec	a
+		add	a,a
+		ld	c,a
+		ld	b,0
+
+loc_9136	ld	hl,0
+		add	hl,bc
+		inc	hl
+		ld	(hl),0
+		pop	af
+		rrca
+		rrca
+		rrca
+		add	a,1Eh
+		ld	l,a
+		ld	h,58h ; 'X'
+		ld	(hl),42h ; 'B'
+		jr	loc_9161
+; ---------------------------------------------------------------------------
+
+loc_914A	ld	de,loc_90CB+1
+		ld	a,(de)
+		cp	23h ; '#'
+		ld	a,23h ; '#'
+		ld	c,6
+		jr	nz,loc_915C
+		ld	(hl),1
+		ld	a,0Fh
+		ld	c,42h ; 'B'
+
+loc_915C	ld	(de),a
+		ld	hl,5841h
+
+loc_9160	ld	(hl),c
+
+loc_9161	ld	a,1Eh
+		ld	(RUNZONE+69h),a
+		ret
+; ---------------------------------------------------------------------------
+
+loc_9167	ld	de,loc_90D4+1
+		ld	a,(de)
+		cp	46h ; 'F'
+		ld	a,46h ; 'F'
+		ld	c,6
+		jr	nz,loc_9179
+		ld	(hl),1
+		ld	a,23h ; '#'
+		ld	c,42h ; 'B'
+
+loc_9179	ld	(de),a
+		ld	hl,5821h
+		jr	loc_9160
+; ---------------------------------------------------------------------------
+
+loc_917F	ld	a,1
+		ld	(loc_90DD+1),a
+		ld	hl,5861h
+		ld	c,42h ; 'B'
+		jr	loc_9160
+; ---------------------------------------------------------------------------
+
+loc_918B	ld	a,1
+		ld	(loc_919C+1),a
+		ld	hl,5881h
+		ld	c,42h ; 'B'
+		jr	loc_9160
+
+; ---------------------------------------------------------------------------
+
+loc_9197	ld	a,1
+		or	a
+		jr	z,loc_91C7
+
+loc_919C	ld	a,0
+		or	a
+		jr	z,loc_91AA
+		ld	a,r
+		and	3
+		jr	nz,loc_91AA
+		ld	d,0
+		ret
+; ---------------------------------------------------------------------------
+
+loc_91AA	ld	hl,5B00h
+		ld	de,7
+
+loc_91B0	ld	c,(hl)
+		inc	hl
+		ld	b,(hl)
+		inc	hl
+		in	a,(c)
+		bit	7,c
+		jr	z,loc_91BB
+		cpl
+
+loc_91BB	and	(hl)
+		inc	hl
+		jr	z,loc_91C1
+		set	7,d
+
+loc_91C1	srl	d
+		dec	e
+		jr	nz,loc_91B0
+		ret
+; ---------------------------------------------------------------------------
+
+loc_91C7	ld	hl,(RUNZONE+64h)
+		inc	hl
+		ld	(RUNZONE+64h),hl
+		ld	a,l
+		sub	0C8h
+		ld	d,0
+		ret	c
+		set	2,d
+		ret	nz
+		ld	a,3
+		ld	(RUNZONE+66h),a
+		ret
+
+sub_91DD	ld	a,34h ; '4'
+		ld	(loc_90CB+1),a
+		ld	a,68h ; 'h'
+		ld	(loc_90D4+1),a
+		xor	a
+		ld	(loc_90DD+1),a
+		ld	(loc_919C+1),a
+		ld	b,8
+		ld	hl,5BF8h
+
+loc_91F3	ld	(hl),a
+		inc	l
+		djnz	loc_91F3
+		ld	a,8
+		ld	(loc_90F8+1),a
+		ld	hl,RUNZONE+15Ah
+
+loc_91FF	ld	a,(hl)
+		inc	hl
+		cp	3Eh ; '>'
+		jr	nz,loc_91FF
+		ld	a,(hl)
+		cp	0D0h
+		jr	nz,loc_91FF
+		ld	bc,8
+		add	hl,bc
+		ld	a,(hl)
+		inc	hl
+		ld	h,(hl)
+		ld	l,a
+		ld	(loc_9136+1),hl
+		ld	l,(ix+4)
+		ld	h,(ix+5)
+		ld	(loc_93A2+2),hl
+		ld	l,(ix+6)
+		ld	h,(ix+7)
+		ld	(loc_9385+2),hl
+		ld	l,(ix+2)
+		ld	h,(ix+3)
+		ld	(loc_93BF+2),hl
+		ld	bc,4
+
+loc_9233	inc	hl
+		ld	a,(hl)
+		add	hl,bc
+		inc	a
+		jr	nz,loc_9233
+		ld	bc,-10
+		add	hl,bc
+		ld	e,(hl)
+		inc	hl
+		ld	d,(hl)
+		inc	hl
+		inc	hl
+		ld	l,(hl)
+		ld	h,0
+		add	hl,de
+		ld	a,(loc_9197+1)
+		or	a
+		jr	nz,loc_9269
+		ld	a,(RUNZONE+1A2h)
+		push	af
+		ld	a,0C9h
+		ld	(RUNZONE+1A2h),a
+		call	RUNZONE+15Ah
+		ld	hl,RUNZONE+6Ch
+		ld	de,RUNZONE+64h
+		ld	bc,6
+		ldir
+		pop	af
+		ld	(RUNZONE+1A2h),a
+		jr	loc_926C
+; ---------------------------------------------------------------------------
+
+loc_9269	call	RUNZONE+15Ah
+
+loc_926C	ld	hl,loc_9197
+		ld	(RUNZONE+158h),hl
+		ld	hl,RUNZONE+0E4h
+		ld	de,RUNZONE+7Ch
+		ld	b,64h ; 'd'
+		xor	a
+		ld	(5C81h),a
+		ld	(5CB0h),a
+		ld	(loc_8FAF+1),a
+		ld	(loc_8FBE+1),a
+		ld	(loc_8FE0+1),a
+		ld	(loc_8FCE+1),a
+
+loc_928D	ld	(hl),a
+		ld	(de),a
+		inc	hl
+		inc	de
+		djnz	loc_928D
+		dec	a
+		ld	b,4
+
+loc_9296	ld	(hl),a
+		ld	(de),a
+		inc	hl
+		inc	de
+		djnz	loc_9296
+		ld	l,(ix+0)
+		ld	h,(ix+1)
+		ld	(loc_953B+2),hl
+		push	hl
+
+loc_92A6	ld	a,(hl)
+		push	hl
+		inc	hl
+		and	(hl)
+		inc	hl
+		and	(hl)
+		inc	hl
+		and	(hl)
+		pop	hl
+		inc	a
+		jr	z,loc_92C7
+		push	hl
+		pop	de
+		ld	bc,8
+		add	hl,bc
+		ld	bc,6
+		ldir
+		ld	a,(hl)
+		cp	4
+		jr	nc,loc_92C4
+		ld	(hl),4
+
+loc_92C4	inc	hl
+		jr	loc_92A6
+; ---------------------------------------------------------------------------
+
+loc_92C7	pop	ix
+		ld	bc,0Fh
+
+loc_92CC	call	sub_92F8
+		ret	z
+		ld	a,(ix+6)
+		cp	36h ; '6'
+		jr	z,loc_92DB
+		add	ix,bc
+		jr	loc_92CC
+; ---------------------------------------------------------------------------
+
+loc_92DB	ld	l,(ix+0)
+		ld	h,(ix+1)
+		inc	hl
+		ld	(RUNZONE+64h),hl
+		ld	bc,0FFF4h
+		add	hl,bc
+		jr	c,loc_92EE
+		ld	hl,0
+
+loc_92EE	ld	(RUNZONE+14Fh),hl
+		ld	a,(ix+2)
+		ld	(RUNZONE+66h),a
+		ret
+
+sub_92F8	ld	a,(ix+0)
+		and	(ix+1)
+		and	(ix+2)
+		and	(ix+3)
+		inc	a
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_9306	ld	a,yh
+		sub	4
+		rrca
+		rrca
+		and	3Fh ; '?'
+		ret	z
+		ld	(RUNZONE+155h),a
+		ld	b,a
+		ld	a,(RUNZONE+156h)
+		ld	(loc_932E+1),a
+		ld	hl,0 ; loc_9A04 ! TBD ! Nobody knows what is that!
+		ld	(RUNZONE+151h),hl
+
+loc_931F	ld	e,(hl)
+		inc	l
+		ld	d,(hl)
+		inc	l
+		inc	l
+		inc	l
+		push	bc
+		push	hl
+		ld	xh,d
+		ld	xl,e
+		ld	l,(ix+6)
+
+loc_932E	ld	h,0
+		ld	a,(hl)
+		inc	l
+		ld	h,(hl)
+		ld	l,a
+		call	sub_9560
+		pop	hl
+		pop	bc
+		djnz	loc_931F
+		ret
+
+sub_933C	ld	bc,-24
+		push	hl
+		add	hl,bc
+		jr	c,loc_9346
+		ld	hl,0
+
+loc_9346	ex	de,hl
+		ld	bc,-5
+
+loc_934A	ld	h,(ix+1)
+		inc	h
+		jr	z,loc_935E
+		ld	l,(ix+0)
+		dec	h
+		or	a
+		sbc	hl,de
+		jr	c,loc_9363
+		add	ix,bc
+		jp	loc_934A
+; ---------------------------------------------------------------------------
+
+loc_935E	ld	bc,5
+		add	ix,bc
+
+loc_9363	pop	de
+		ld	b,0
+
+loc_9366	ld	h,(ix+1)
+		inc	h
+		jr	z,loc_937F
+		ld	l,(ix+0)
+		dec	h
+		ld	c,(ix+3)
+		inc	c
+		add	hl,bc
+		sbc	hl,de
+		ret	nc
+		ld	c,5
+		add	ix,bc
+		jp	loc_9366
+; ---------------------------------------------------------------------------
+
+loc_937F	ld	bc,0FFFBh
+		add	ix,bc
+		ret
+
+; ---------------------------------------------------------------------------
+
+loc_9385	ld	ix,0
+		xor	a
+		ld	h,a
+		ld	l,a
+		jr	loc_93D1
+; ---------------------------------------------------------------------------
+
+loc_938E	ld	hl,(RUNZONE+14Fh)
+		srl	h
+		rr	l
+		jr	c,loc_93A2
+		ld	de,2C2Ch
+		ld	(word_9411),de
+		ld	(word_94F1),de
+
+loc_93A2	ld	ix,0
+		push	hl
+		call	sub_933C
+		ld	(loc_93A2+2),ix
+		pop	hl
+		xor	a
+		call	loc_93D1
+		ld	de,0
+		ld	(word_9411),de
+		ld	(word_94F1),de
+		ret
+; ---------------------------------------------------------------------------
+
+loc_93BF	ld	ix,0
+		ld	hl,(RUNZONE+14Fh)
+		push	hl
+		call	sub_933C
+		ld	(loc_93BF+2),ix
+		pop	hl
+		ld	a,0FCh
+
+loc_93D1	ld	bc,20h	; ' '
+		add	hl,bc
+		ld	(loc_93EE+1),hl
+		ld	(loc_9418+1),a
+		ld	(byte_94F9),a
+		jr	loc_93E5
+; ---------------------------------------------------------------------------
+
+loc_93E0	ld	bc,5
+		add	ix,bc
+
+loc_93E5	ld	h,(ix+1)
+		inc	h
+		ret	z
+		dec	h
+		ld	l,(ix+0)
+
+loc_93EE	ld	de,0
+		sbc	hl,de
+		ret	nc
+		inc	h
+		jr	nz,loc_93E0
+		ld	a,(ix+3)
+		add	a,l
+		jr	c,loc_9407
+		cp	0E0h
+		jr	c,loc_93E0
+		ld	a,l
+		add	a,20h ; ' '
+		jp	c,loc_94EA
+
+loc_9407	ld	a,l
+		add	a,20h ; ' '
+		ld	yl,a
+		ld	h,0C0h
+		ld	l,(ix+4)
+; ---------------------------------------------------------------------------
+word_9411	dw	0
+; ---------------------------------------------------------------------------
+		ld	a,(hl)
+		inc	l
+		ld	h,(hl)
+		ld	l,a
+		ld	a,(hl)
+
+loc_9418	or	0
+		ld	c,a
+		inc	hl
+
+loc_941C	ld	a,(hl)
+		cp	1
+		jr	c,loc_93E0
+		ld	b,a
+		jp	z,loc_94B5
+		inc	hl
+		ld	a,(hl)
+		inc	hl
+		add	a,yl
+		jp	m,loc_949E
+		cp	20h ; ' '
+		jr	nc,loc_948C
+		ld	e,a
+		add	a,b
+		cp	21h ; '!'
+		jr	nc,loc_9463
+		ld	a,(hl)
+
+loc_9438	inc	hl
+		ex	de,hl
+		add	a,(ix+2)
+		cp	12h
+		jr	nc,loc_945C
+		ld	h,a
+		xor	a
+		srl	h
+		rra
+		srl	h
+		rra
+		add	a,l
+		add	a,l
+		ld	l,a
+		ld	a,h
+		adc	a,9Bh
+		ld	h,a
+
+loc_9450	ld	a,(de)
+		ld	(hl),a
+		inc	de
+		inc	l
+		ld	(hl),c
+		inc	l
+		djnz	loc_9450
+		ex	de,hl
+		jp	loc_941C
+; ---------------------------------------------------------------------------
+
+loc_945C	ld	l,b
+		ld	h,0
+		add	hl,de
+		jp	loc_941C
+; ---------------------------------------------------------------------------
+
+loc_9463	ld	a,20h ; ' '
+		push	hl
+		push	bc
+		sub	e
+		ld	b,a
+		ld	a,(hl)
+		inc	hl
+		ex	de,hl
+		add	a,(ix+2)
+		cp	12h
+		jr	nc,loc_9497
+		ld	h,a
+		xor	a
+		srl	h
+		rra
+		srl	h
+		rra
+		add	a,l
+		add	a,l
+		ld	l,a
+		ld	a,h
+		adc	a,9Bh
+		ld	h,a
+
+loc_9482	ld	a,(de)
+		ld	(hl),a
+		inc	de
+		inc	l
+		ld	(hl),c
+		inc	l
+		djnz	loc_9482
+
+loc_948A	pop	bc
+		pop	hl
+
+loc_948C	inc	b
+		ld	a,l
+		add	a,b
+		ld	l,a
+		jp	nc,loc_941C
+		inc	h
+		jp	loc_941C
+; ---------------------------------------------------------------------------
+
+loc_9497	ld	l,b
+		ld	h,0
+		add	hl,de
+		jp	loc_948A
+; ---------------------------------------------------------------------------
+
+loc_949E	ld	e,a
+		add	a,b
+		jr	z,loc_948C
+		jr	nc,loc_948C
+		ld	b,a
+		ld	a,e
+		ld	e,(hl)
+		neg
+		add	a,l
+		ld	l,a
+		jp	nc,loc_94AF
+		inc	h
+
+loc_94AF	ld	a,e
+		ld	e,0
+		jp	loc_9438
+; ---------------------------------------------------------------------------
+
+loc_94B5	inc	hl
+		ld	a,(hl)
+		inc	hl
+		add	a,yl
+		jp	m,loc_94E5
+		ld	e,a
+		cp	20h ; ' '
+		jr	nc,loc_94E5
+		ld	a,(hl)
+		inc	hl
+		ex	de,hl
+		add	a,(ix+2)
+		cp	12h
+		jp	nc,loc_945C
+		ld	h,a
+		xor	a
+		srl	h
+		rra
+		srl	h
+		rra
+		add	a,l
+		add	a,l
+		ld	l,a
+		ld	a,h
+		adc	a,9Bh
+		ld	h,a
+		ld	a,(de)
+		ld	(hl),a
+		inc	de
+		inc	l
+		ld	(hl),c
+		ex	de,hl
+		jp	loc_941C
+; ---------------------------------------------------------------------------
+
+loc_94E5	inc	hl
+		inc	hl
+		jp	loc_941C
+; ---------------------------------------------------------------------------
+
+loc_94EA	ld	yl,a
+		ld	h,0C0h
+		ld	l,(ix+4)
+; ---------------------------------------------------------------------------
+word_94F1	dw	0
+		db	7Eh,2Ch,66h,6Fh,7Eh,0F6h
+byte_94F9	db	0,4Fh,23h,7Eh,0B7h,0CAh
+		db	0E0h,93h,47h,23h,7Eh,23h
+		db	0FDh,85h,5Fh,7Eh,23h,0EBh
+		db	0DDh,86h,2,0FEh,12h,0D2h
+		db	2Eh,95h,67h,0AFh,0CBh,3Ch
+		db	1Fh,0CBh,3Ch,1Fh,85h,85h
+		db	6Fh,7Ch,0CEh,9Bh,67h,1Ah
+		db	77h,13h,2Ch,71h,2Ch,10h
+		db	0F8h,0EBh,0C3h,0FCh,94h,68h
+		db	26h,0,19h,0C3h,0FCh,94h
+
+sub_9535	ld	ix,RUNZONE+64h
+		jr	loc_953F
+
+; ---------------------------------------------------------------------------
+
+loc_953B	ld	ix,0
+
+loc_953F	ld	hl,(RUNZONE+14Fh)
+		ld	bc,20h	; ' '
+		add	hl,bc
+		ld	(loc_957A+1),hl
+		ld	a,0E4h
+		ld	(loc_957F+1),a
+		ld	a,0D7h
+		ld	(loc_958C+1),a
+		ld	a,0Eh
+		ld	(loc_9584+2),a
+		inc	a
+		ld	(byte_9566),a
+		ld	c,a
+		xor	a
+		jr	loc_956B
+
+sub_9560	jp	(hl)
+
+; ---------------------------------------------------------------------------
+		db	0DDh
+		db	36h
+		db	3
+		db	0
+unk_9565	db	1
+byte_9566	db	0Fh
+		db	0
+		db	78h
+; ---------------------------------------------------------------------------
+
+loc_9569	add	ix,bc
+
+loc_956B	xor	(ix+3)
+		jp	z,loc_9569
+		ld	h,(ix+1)
+		inc	h
+		ret	z
+		dec	h
+		ld	l,(ix+0)
+
+loc_957A	ld	de,0
+		sbc	hl,de
+
+loc_957F	jr	nc,unk_9565
+		inc	h
+		jr	nz,unk_9565
+
+loc_9584	ld	a,(ix+0Eh)
+		add	a,l
+		jr	c,loc_9594
+		cp	0E0h
+
+loc_958C	jr	c,unk_9565
+		ld	a,l
+		add	a,20h ; ' '
+		jp	c,loc_969D
+
+loc_9594	ld	a,l
+		add	a,20h ; ' '
+		ld	yl,a
+		ld	h,0C1h
+		ld	l,(ix+4)
+		ld	a,(hl)
+		inc	l
+		ld	h,(hl)
+		ld	l,a
+		ld	c,(hl)
+		inc	hl
+		push	hl
+		ld	a,yh
+		ld	l,a
+		ld	h,9Ah
+		ld	a,c
+		and	3
+		or	l
+		ld	c,a
+		ld	a,xl
+		ld	(hl),a
+		inc	l
+		ld	a,xh
+		ld	(hl),a
+		ld	a,l
+		add	a,3
+		ld	yh,a
+		pop	hl
+
+loc_95BC	ld	a,(hl)
+		cp	1
+		jr	c,unk_9565
+		ld	b,a
+		jp	z,loc_9661
+		inc	hl
+		ld	a,(hl)
+		inc	hl
+		add	a,yl
+		jp	m,loc_964A
+		cp	20h ; ' '
+		jr	nc,loc_9638
+		ld	e,a
+		add	a,b
+		cp	21h ; '!'
+		jr	nc,loc_9609
+		ld	a,(hl)
+
+loc_95D8	inc	hl
+		ex	de,hl
+		add	a,(ix+2)
+		cp	12h
+		jr	nc,loc_9602
+		ld	h,a
+		xor	a
+		srl	h
+		rra
+		srl	h
+		rra
+		add	a,l
+		add	a,l
+		ld	l,a
+		ld	a,h
+		adc	a,9Bh
+		ld	h,a
+
+loc_95F0	ld	a,(de)
+		ld	(hl),a
+		inc	de
+		inc	l
+		ld	a,(hl)
+		and	0FCh
+		call	nz,sub_9701
+		ld	(hl),c
+		inc	l
+		djnz	loc_95F0
+		ex	de,hl
+		jp	loc_95BC
+; ---------------------------------------------------------------------------
+
+loc_9602	ld	l,b
+		ld	h,0
+		add	hl,de
+		jp	loc_95BC
+; ---------------------------------------------------------------------------
+
+loc_9609	ld	a,20h ; ' '
+		push	hl
+		push	bc
+		sub	e
+		ld	b,a
+		ld	a,(hl)
+		inc	hl
+		ex	de,hl
+		add	a,(ix+2)
+		cp	12h
+		jr	nc,loc_9643
+		ld	h,a
+		xor	a
+		srl	h
+		rra
+		srl	h
+		rra
+		add	a,l
+		add	a,l
+		ld	l,a
+		ld	a,h
+		adc	a,9Bh
+		ld	h,a
+
+loc_9628	ld	a,(de)
+		ld	(hl),a
+		inc	de
+		inc	l
+		ld	a,(hl)
+		and	0FCh
+		call	nz,sub_9701
+		ld	(hl),c
+		inc	l
+		djnz	loc_9628
+
+loc_9636	pop	bc
+		pop	hl
+
+loc_9638	inc	b
+		ld	a,l
+		add	a,b
+		ld	l,a
+		jp	nc,loc_95BC
+		inc	h
+		jp	loc_95BC
+; ---------------------------------------------------------------------------
+
+loc_9643	ld	l,b
+		ld	h,0
+		add	hl,de
+		jp	loc_9636
+; ---------------------------------------------------------------------------
+
+loc_964A	ld	e,a
+		add	a,b
+		jr	z,loc_9638
+		jr	nc,loc_9638
+		ld	b,a
+		ld	a,e
+		ld	e,(hl)
+		neg
+		add	a,l
+		ld	l,a
+		jp	nc,loc_965B
+		inc	h
+
+loc_965B	ld	a,e
+		ld	e,0
+		jp	loc_95D8
+; ---------------------------------------------------------------------------
+
+loc_9661	inc	hl
+		ld	a,(hl)
+		inc	hl
+		add	a,yl
+		jp	m,loc_9698
+		ld	e,a
+		cp	20h ; ' '
+		jr	nc,loc_9698
+		ld	a,(hl)
+		inc	hl
+		ex	de,hl
+		add	a,(ix+2)
+		cp	12h
+		jp	nc,loc_9602
+		ld	h,a
+		xor	a
+		srl	h
+		rra
+		srl	h
+		rra
+		add	a,l
+		add	a,l
+		ld	l,a
+		ld	a,h
+		adc	a,9Bh
+		ld	h,a
+		ld	a,(de)
+		ld	(hl),a
+		inc	de
+		inc	l
+		ld	a,(hl)
+		and	0FCh
+		call	nz,sub_9701
+		ld	(hl),c
+		inc	l
+		ex	de,hl
+		jp	loc_95BC
+; ---------------------------------------------------------------------------
+
+loc_9698	inc	hl
+		inc	hl
+		jp	loc_95BC
+; ---------------------------------------------------------------------------
+
+loc_969D	ld	yl,a
+		ld	h,0C1h
+		ld	l,(ix+4)
+		ld	a,(hl)
+		inc	l
+		ld	h,(hl)
+		ld	l,a
+		ld	c,(hl)
+		inc	hl
+		push	hl
+		ld	a,yh
+		ld	l,a
+		ld	h,9Ah
+		ld	a,c
+		and	3
+		or	l
+		ld	c,a
+		ld	a,xl
+		ld	(hl),a
+		inc	l
+		ld	a,xh
+		ld	(hl),a
+		ld	a,l
+		add	a,3
+		ld	yh,a
+		pop	hl
+
+loc_96C2	ld	a,(hl)
+		or	a
+		jp	z,unk_9565
+		ld	b,a
+		inc	hl
+		ld	a,(hl)
+		inc	hl
+		add	a,yl
+		ld	e,a
+		ld	a,(hl)
+		inc	hl
+		ex	de,hl
+		add	a,(ix+2)
+		cp	12h
+		jp	nc,loc_96FA
+		ld	h,a
+		xor	a
+		srl	h
+		rra
+		srl	h
+		rra
+		add	a,l
+		add	a,l
+		ld	l,a
+		ld	a,h
+		adc	a,9Bh
+		ld	h,a
+
+loc_96E8	ld	a,(de)
+		ld	(hl),a
+		inc	de
+		inc	l
+		ld	a,(hl)
+		and	0FCh
+		call	nz,sub_9701
+		ld	(hl),c
+		inc	l
+		djnz	loc_96E8
+		ex	de,hl
+		jp	loc_96C2
+; ---------------------------------------------------------------------------
+
+loc_96FA	ld	l,b
+		ld	h,0
+		add	hl,de
+		jp	loc_96C2
+
+sub_9701	cp	0FCh
+		jr	nc,loc_9738
+		exx
+		ld	l,a
+		ld	h,9Ah
+		ld	a,(hl)
+		push	iy
+		ld	a,(hl)
+		ld	yl,a
+		inc	l
+		ld	a,(hl)
+		ld	yh,a
+		ld	l,(iy+5)
+		ld	a,l
+		ld	h,(ix+5)
+		or	a
+		jr	z,loc_972F
+		sub	h
+		jr	nc,loc_9721
+		xor	a
+
+loc_9721	ld	(iy+5),a
+		ld	a,h
+		or	a
+		jr	z,loc_972F
+		sub	l
+		jr	nc,loc_972C
+		xor	a
+
+loc_972C	ld	(ix+5),a
+
+loc_972F	pop	iy
+		ld	a,0FFh
+		ld	(RUNZONE+14Dh),a
+		exx
+		ret
+; ---------------------------------------------------------------------------
+
+loc_9738	ld	(ix+5),0
+		ret
+
+sub_973D	ld	ix,RUNZONE+0E4h
+		call	sub_9746
+		jr	loc_976D
+
+sub_9746	push	ix
+		ld	b,0Ah
+		ld	de,0Ah
+
+loc_974D	ld	a,(ix+1)
+		cp	0FFh
+		jr	z,loc_975B
+		ld	a,(ix+2)
+		cp	14h
+		jr	c,loc_975F
+
+loc_975B	ld	(ix+3),0
+
+loc_975F	add	ix,de
+		djnz	loc_974D
+		pop	ix
+		ret
+
+sub_9766	ld	ix,RUNZONE+7Ch
+		call	sub_9746
+
+loc_976D	ld	hl,(RUNZONE+14Fh)
+		ld	bc,20h	; ' '
+		add	hl,bc
+		ld	(loc_957A+1),hl
+		ld	a,0E0h
+		ld	(loc_957F+1),a
+		ld	a,0D3h
+		ld	(loc_958C+1),a
+		ld	a,3
+		ld	(loc_9584+2),a
+		ld	a,0Ah
+		ld	(byte_9566),a
+		ld	c,a
+		xor	a
+		jp	loc_956B
+
+sub_9790	ld	(loc_9877+1),sp
+		ld	sp,0A6FEh
+		ld	hl,loc_9877
+		push	hl
+		scf
+		push	af
+		ld	hl,9F7Fh
+		ld	de,50FFh
+		exx
+		ld	de,0AB41h
+		ld	hl,5AFFh
+		ld	xh,12h
+
+loc_97AD	push	de
+		push	hl
+		ld	bc,0FFE0h
+		add	hl,bc
+		exx
+		ld	c,0
+
+loc_97B6	ld	a,(hl)
+		and	3
+		ld	b,a
+		ld	xl,b
+		dec	l
+		ld	a,(hl)
+		dec	hl
+		exx
+		ld	c,a
+		ld	b,d
+		ld	d,0A7h
+		ld	a,(de)
+		out	(0FEh),a
+		ld	d,b
+		ld	a,0FCh
+		add	a,xl
+		ld	b,a
+		ld	a,(bc)
+		ld	(de),a
+		dec	de
+		ld	a,c
+		exx
+		cp	10h
+		jp	c,loc_97E4
+		push	hl
+		ld	l,a
+		ld	h,b
+		add	hl,hl
+		add	hl,hl
+		add	hl,hl
+		ld	a,h
+		add	a,0DCh
+		ld	h,a
+		ex	(sp),hl
+		push	de
+		inc	c
+
+loc_97E4	dec	e
+		ld	a,e
+		inc	a
+		jp	nz,loc_97EF
+		ld	a,d
+		sub	8
+		ld	d,a
+		xor	a
+
+loc_97EF	and	1Fh
+		jp	nz,loc_97B6
+		ld	a,c
+		or	a
+		push	af
+		ld	a,xh
+		cp	6
+		call	z,sub_9907
+		dec	xh
+		exx
+		jp	nz,loc_97AD
+		ld	a,(RUNZONE+67h)
+		or	a
+		call	z,sub_9881
+		di
+
+loc_980C	pop	af
+		ret	c
+		jr	z,loc_9832
+
+loc_9810	pop	de
+		pop	hl
+		ld	(loc_982B+1),sp
+		ld	sp,hl
+		ex	de,hl
+		pop	de
+		ld	(hl),e
+		inc	h
+		ld	(hl),d
+		inc	h
+		pop	de
+		ld	(hl),e
+		inc	h
+		ld	(hl),d
+		inc	h
+		pop	de
+		ld	(hl),e
+		inc	h
+		ld	(hl),d
+		inc	h
+		pop	de
+		ld	(hl),e
+		inc	h
+		ld	(hl),d
+
+loc_982B	ld	sp,0
+		dec	a
+		jp	nz,loc_9810
+
+loc_9832	pop	de
+		pop	hl
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		ldd
+		jp	loc_980C
+
+; ---------------------------------------------------------------------------
+
+loc_9877	ld	sp,0
+		ei
+		ret
+; ---------------------------------------------------------------------------
+		ld	a,(RUNZONE+67h)
+		or	a
+		ret	nz
+
+sub_9881	ld	a,0
+		dec	a
+		ld	(sub_9881+1),a
+		jp	z,loc_8FF7
+		cp	1Ah
+		jr	nc,loc_98DA
+		ld	hl,09A80h
+loc_9891	ld	a,(hl)
+		cp	9
+		jr	z,loc_98C4
+		cp	8
+		jr	z,loc_98C4
+		cp	1
+		jr	z,loc_98C4
+		bit	6,a
+		res	6,a
+		jr	nz,loc_98C3
+		ld	de,0
+		ld	c,e
+		and	7
+		jr	z,loc_98B2
+		dec	a
+		jr	z,loc_98F9
+
+loc_98AF	inc	e
+		ld	c,40h ; '@'
+
+loc_98B2	ld	a,(hl)
+		and	38h ; '8'
+		jr	z,loc_98BF
+		cp	8
+		jr	z,loc_9900
+
+loc_98BB	ld	d,8
+		ld	c,40h ; '@'
+
+loc_98BF	ld	a,(hl)
+		sub	e
+		sub	d
+		or	c
+
+loc_98C3	ld	(hl),a
+
+loc_98C4	inc	l
+		jr	nz,loc_9891
+		ld	hl,0A902h
+		ld	bc,240h
+		ld	d,9Ah
+
+loc_98CF	ld	e,(hl)
+		set	7,e
+		ld	a,(de)
+		ld	(hl),a
+		inc	hl
+		dec	bc
+		ld	a,b
+		or	c
+		jr	nz,loc_98CF
+
+loc_98DA	ld	hl,RUNZONE+153h
+		ld	a,(hl)
+		sub	3
+		jr	nc,loc_98E3
+		xor	a
+
+loc_98E3	ld	(hl),a
+		ld	hl,RUNZONE+77h
+		ld	a,(hl)
+		sub	0Ah
+		jr	nc,loc_98ED
+		xor	a
+
+loc_98ED	ld	(hl),a
+		ld	hl,RUNZONE+154h
+		ld	a,(hl)
+		sub	1
+		jr	nc,loc_98F7
+		xor	a
+
+loc_98F7	ld	(hl),a
+		ret
+; ---------------------------------------------------------------------------
+
+loc_98F9	ld	a,(hl)
+		and	38h ; '8'
+		jr	z,loc_98B2
+		jr	loc_98AF
+; ---------------------------------------------------------------------------
+
+loc_9900	ld	a,(hl)
+		and	38h ; '8'
+		jr	z,loc_98BF
+		jr	loc_98BB
+
+sub_9907	push	de
+		push	hl
+		exx
+		push	de
+		push	hl
+		push	ix
+		ld	(loc_9998+1),sp
+		ld	a,4
+		ld	(loc_998D+1),a
+		ld	a,(RUNZONE+14Ch)
+		or	a
+		jr	z,loc_9941
+		inc	a
+		ld	(RUNZONE+14Ch),a
+		ld	a,r
+		ld	e,a
+		xor	a
+		ld	d,a
+		ld	(RUNZONE+14Eh),a
+		ld	hl,0A700h
+		ld	c,a
+
+loc_992D	ld	a,(de)
+		inc	de
+		and	10h
+		inc	a
+		ld	b,a
+		ld	a,c
+
+loc_9934	ld	(hl),a
+		inc	l
+		jr	z,loc_9989
+		djnz	loc_9934
+		xor	18h
+		out	(0FEh),a
+		ld	c,a
+		jr	loc_992D
+; ---------------------------------------------------------------------------
+
+loc_9941	ld	a,(RUNZONE+14Dh)
+		or	a
+		jr	z,loc_994E
+		xor	a
+		ld	(RUNZONE+14Dh),a
+		inc	a
+		jr	loc_9979
+; ---------------------------------------------------------------------------
+
+loc_994E	ld	a,(RUNZONE+14Eh)
+		cp	1
+		jr	c,loc_9979
+		jr	z,loc_996B
+		add	a,a
+		ld	l,a
+		ld	h,0
+		ld	bc,loc_9073
+		add	hl,bc
+		ld	e,(hl)
+		inc	hl
+		ld	d,(hl)
+		ex	de,hl
+		ld	(loc_996B+1),hl
+		ld	a,1
+		ld	(RUNZONE+14Eh),a
+
+loc_996B	ld	hl,0
+		ld	a,(hl)
+		or	a
+		inc	hl
+		ld	(loc_996B+1),hl
+		jr	nz,loc_9979
+		ld	(RUNZONE+14Eh),a
+
+loc_9979	ld	c,a
+		ld	hl,0A700h
+		xor	a
+
+loc_997E	ld	b,c
+
+loc_997F	ld	(hl),a
+		inc	l
+		jr	z,loc_9989
+		djnz	loc_997F
+		xor	18h
+		jr	loc_997E
+; ---------------------------------------------------------------------------
+
+loc_9989	jr	$
+
+; ---------------------------------------------------------------------------
+
+loc_998B	push	af
+		ei
+
+loc_998D	ld	a,0
+		or	a
+		jr	nz,loc_9994
+		pop	af
+		ret
+; ---------------------------------------------------------------------------
+
+loc_9994	xor	a
+		ld	(loc_998D+1),a
+
+loc_9998	ld	sp,0
+		pop	ix
+		pop	hl
+		pop	de
+		exx
+		pop	hl
+		pop	de
+		ret
+; ---------------------------------------------------------------------------
 
 @mainblock.end
 
