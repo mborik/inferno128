@@ -25,32 +25,32 @@
 
 		jp	mainblock.start
 
-font_small:	incbin "console.font.bin"
-wpg_0_COBRA:	incbin "gfx.equipment.bin"
+font_small	incbin "console.font.bin"
+gfx_equipment	incbin "gfx.equipment.bin"
 
-wpt_0_COBRA	db	80h,"4xKOBRA, dopàedu odpalované raketa\r"
-wpt_1_VIPER	db	80h,"4xZMIJE, vzhöru odpalované raketa\r"
-wpt_2_MOLE	db	80h,"4xKRTEK, dolö odpalované raketa\r"
-wpt_3_SKUNK	db	80h,"4xSKUNK, dozadu odpalované raketa\r"
-txt_slot1	db	80h,"Pumovnice Ü. 1\r"
-wpt_4_GLIDER	db	80h,"8xPADAVKA, klouzajêcê tàêÑtivé bomba\r"
-wpt_5_SUPERBOMB	db	80h,"1xSUPERBOMBA, ploÑnå disruptor\r"
-wpt_6_CLUSTER	db	80h,"8xDIKOBRAZ, levitujêcê nérazovÄ miny\r"
-wpt_7_GLADIATOR	db	80h,"1xGLADIATOR, pàêdavné bitevnê stanice\r"
-txt_slot2	db	80h,"Pumovnice Ü. 2\r"
-wpt_8_AUREOLE	db	80h,"2xAUREOLA, pàêdavnå kontaktnê Ñtêt\r"
-wpt_9_SPARKLER	db	80h,"6xPRSKAVKA, bodovå disruptor\r"
-wpt_A_ENERGY	db	80h,"1xENERGO, pàêdavnå energetickå zdroj\r"
-wpt_B_CHAMELEON	db	80h,"4xCHAMELEON, ruÑiÜka navédÇnê raket\r"
-txt_slot3	db	80h,"Pumovnice Ü. 3\r"
-wpt_C_RESONANCE	db	80h,"2xREZONANCE, zesilovaÜ energie våbojö\r"
-wpt_D_TRIDENT	db	80h,"2xTROJZUBEC, kvantovå nésobiÜ våbojö\r"
-wpt_E_WALLABY	db	80h,"1xKLOKAN, hyperprostorovå systÄm\r"
-wpt_F_FUEL	db	80h,"1xPALIVO, pàêdavné palivové nédrä\r"
-txt_slot4	db	80h,"Pumovnice Ü. 4\r"
-txt_weapon_off	db	80h,"Volba zbranê ukonÜena\r"
-drt_linear	db	80h,"Lineérnê pohon lodi\r"
-drt_quantum	db	80h,"Kvantovå pohon lodi\r"
+txt_equipment	db	80h,"4xCOBRA, forward firing missile\r"
+		db	80h,"4xVIPER, upward firing missile\r"
+		db	80h,"4xMOLE, downward firing missile\r"
+		db	80h,"4xSKUNK, backward firing missile\r"
+		db	80h,"Weapon bay No. 1\r"
+		db	80h,"8xGLIDER, sliding cluster bomb\r"
+		db	80h,"1xSUPERBOMB, area disruptor\r"
+		db	80h,"8xCLUSTER, levitating impact mines\r"
+		db	80h,"1xGLADIATOR, battleship support unit\r"
+		db	80h,"Weapon bay No. 2\r"
+		db	80h,"2xAUREOLE, additional defensive shield\r"
+		db	80h,"6xSPARKLER, point disruptor\r"
+		db	80h,"1xENERGY, additional energy source\r"
+		db	80h,"4xCHAMELEON, homing missile jammer\r"
+		db	80h,"Weapon bay No. 3\r"
+		db	80h,"2xRESONANCE, pulse energy amplifier\r"
+		db	80h,"2xTRIDENT, quantum pulse multiplier\r"
+		db	80h,"1xWARP, hyperspace warp jump system\r"
+		db	80h,"1xFUEL, additional fuel tank\r"
+		db	80h,"Weapon bay No. 4\r"
+		db	80h,"Weapon selection complete\r"
+		db	80h,"Linear drive\r"
+		db	80h,"Quantum drive\r"
 		db	80h,"\r"
 
 @mainblock.start:
@@ -73,7 +73,14 @@ drt_quantum	db	80h,"Kvantovå pohon lodi\r"
 		ld	i,a
 		call	intro
 
-		call	sub_6E27
+; test custom ROM to disable bold font
+		ld	a,(3D09h)
+		cp	10h
+		jr	z,.standardROM
+		xor	a
+		ld	(loc_8231),a
+
+.standardROM	call	sub_6E27
 		ld	iy,5C3Ah
 		ld	(iy+30h),0
 		ld	(iy+1),0CCh
@@ -81,38 +88,37 @@ drt_quantum	db	80h,"Kvantovå pohon lodi\r"
 		ld	(iy-30h),3
 		ld	(iy-31h),14h
 		ld	hl,txt_kempston
-		call	sub_7F71
-		call	sub_742B
+		call	console_print
+		call	console_input
 		ld	a,(5B15h+1)
-		cp	41h ; 'A'
-		jr	z,loc_6DBB
 		cp	59h ; 'Y'
 		jr	nz,loc_6DC0
-
-loc_6DBB	ld	a,20h ; ' '
+		ld	a,20h ; ' '
 		ld	(loc_7533+1),a
 
 loc_6DC0	ei
+		ld	hl, c_sets_default
 		ld	de,5B00h
 		ld	bc,15h
 		ldir
-		call	sub_82C1
-		ld	a,(3D09h)	; is Didaktik ROM?
-		cp	10h
-		jr	z,loc_6DE6
-		xor	a		; disable bold font
-		ld	(loc_8231),a
+		call	init_pilot
+
 
 loc_6DE6	ld	sp,BASESP
 		call	sub_6E27
 
+		ld	hl,txt_help
+first_hello:	call	console_print
+		ld	a,31h
+		ld	(first_hello),a
+
 loc_6DEC	ld	a,0
 		ld	sp,(loc_6DE6+1)
 		or	a
-		call	nz,sub_82C1
+		call	nz,init_pilot
 		xor	a
 		ld	(loc_6DEC+1),a
-		call	sub_742B
+		call	console_input
 		jp	nz,loc_6E46
 		ld	a,(loc_7108+1)
 		inc	a
@@ -144,7 +150,7 @@ sub_6E27	ld	hl,4000h
 		call	sub_7E94
 		call	sub_8131
 		ld	hl,unk_751B
-		jp	sub_7F71
+		jp	console_print
 
 ; ---------------------------------------------------------------------------
 
@@ -190,17 +196,17 @@ loc_6E72	pop	hl
 ; ---------------------------------------------------------------------------
 
 loc_6E79	ld	hl,txt_unknown_cmd
-		call	sub_7F71
+		call	console_print
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
 txt_kempston	dw	6814h
-		db	"Kempston? (vloäte A/N)\r",-1
+		db	"Kempston? (enter Y/N)\r",-1
 txt_unknown_cmd	dw	5014h
-		db	"Neznémå povel\r",-1
+		db	"Unknown command\r",-1
 commands	dw	cmd_password
-		db	"HES"
+		db	"PAS"
 		dw	cmd_report
-		db	"RAP"
+		db	"REP"
 		dw	cmd_redefine
 		db	"RED"
 		dw	cmd_info
@@ -208,13 +214,13 @@ commands	dw	cmd_password
 		dw	cmd_start
 		db	"STA"
 		dw	cmd_weapons
-		db	"ZBR"
+		db	"WEA"
 		dw	cmd_exit
-		db	"KON"
+		db	"EXI"
 		dw	cmd_help
-		db	"POM"
+		db	"HEL"
 		dw	cmd_demo
-		db	"IDE"
+		db	"DEM"
 		dw	cmd_save
 		db	"SAV"
 		dw	cmd_load
@@ -234,28 +240,28 @@ cmd_sat		ld	hl,loc_7790+1
 ; ---------------------------------------------------------------------------
 
 cmd_report	ld	hl,txt_pilot
-		call	sub_7F71
+		call	console_print
 		ld	a,(byte_8302)
 		ld	hl,txt_pilot_ranks
 		call	sub_77DE
-		call	sub_7F71
+		call	console_print
 		ld	a,20h ; ' '
 		call	sub_7F91
 		ld	hl,c_pilotname
-		call	sub_7F71
+		call	console_print
 		ld	hl,txt_pilot_stat1
-		call	sub_7F71
+		call	console_print
 		ld	hl,(word_82FE)
 		call	sub_7A9C
 		call	sub_7F8F
 		ld	hl,txt_pilot_stat2
-		call	sub_7F71
+		call	console_print
 		ld	a,(byte_82FD)
 		dec	a
 		call	sub_7A99
 		call	sub_7F8F
 		ld	hl,txt_pilot_stat3
-		call	sub_7F71
+		call	console_print
 		ld	hl,(word_8300)
 		call	sub_7A9C
 		call	sub_7F8F
@@ -265,10 +271,10 @@ cmd_report	ld	hl,txt_pilot
 txt_pilot	dw	7014h
 		db	"Pilot:  ",-1
 txt_pilot_stat1	dw	6014h
-		db	"PoÜet nalÄtanåch misê: ",-1
-txt_pilot_stat2	db	"PoÜet splnÇnåch misê: ",-1
-txt_pilot_stat3	db	"PoÜet zniÜenåch objektö: ",-1
-		db	"Vyznamenénê:\r"
+		db	"Number of missions flown: ",-1
+txt_pilot_stat2	db	"Number of missions accomplished: ",-1
+txt_pilot_stat3	db	"Number of objects destroyed: ",-1
+		db	"Decorations:\r"
 		db	-1
 ; ---------------------------------------------------------------------------
 
@@ -310,7 +316,7 @@ loc_6FE4	pop	af
 ; ---------------------------------------------------------------------------
 
 cmd_help	ld	hl,txt_help
-		call	sub_7F71
+		call	console_print
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
 txt_memslot	dw	4E49h
@@ -365,7 +371,7 @@ loc_7032	ld	(de),a
 
 ; ---------------------------------------------------------------------------
 
-cmd_pilot	call	sub_82C1
+cmd_pilot	call	init_pilot
 		call	sub_70B8
 		or	a
 		jp	z,cmd_report
@@ -411,7 +417,7 @@ cmd_load	call	sub_70B8
 		call	sub_700B
 		call	sub_7118
 		ld	hl,txt_block_load
-		call	sub_7F71
+		call	console_print
 		ld	hl,txt_memslot_n+6
 		ld	de,31h	; '1'
 		ld	ix,5B15h
@@ -479,7 +485,7 @@ loc_70EA	pop	hl
 		cp	1Ah
 		jr	c,loc_70D4
 		ld	hl,txt_strange
-		call	sub_7F71
+		call	console_print
 		ld	a,1
 		jr	loc_70FD
 ; ---------------------------------------------------------------------------
@@ -532,7 +538,7 @@ loadblock_exe	add	a,30h ; '0'
 		ld	(loc_7108+1),a
 		call	sub_7118
 		ld	hl,txt_block_load
-		call	sub_7F71
+		call	console_print
 		ld	hl,c_blockname
 		ld	ix,RUNZONE+1770h
 		ld	de,1B00h
@@ -645,7 +651,7 @@ loc_7227	ld	hl,txt_err_tape
 loc_722A	push	hl
 		call	sub_6E27
 		pop	hl
-		call	sub_7F71
+		call	console_print
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
 
@@ -683,7 +689,7 @@ loc_7265	ld	(de),a
 		inc	de
 		djnz	loc_724E
 		ld	hl,txt_block_found
-		call	sub_7F71
+		call	console_print
 
 loc_7270	call	sub_72BF
 		jr	nz,loc_7235
@@ -740,8 +746,8 @@ loc_72C8	ld	a,(de)
 
 ; ---------------------------------------------------------------------------
 txt_block_load	db	16h,12h,10h
-		db	"Nahrévém... \r",-1
-txt_block_found	db	"Nalezeno: ",0,0,0,0,0,0,0,0,0,0,"\r",-1
+		db	"Loading... \r",-1
+txt_block_found	db	"Found: ",0,0,0,0,0,0,0,0,0,0,"\r",-1
 
 block_header	db	0
 block_filename	block	10,0
@@ -880,7 +886,7 @@ sub_73D3	ld	a,30h ; '0'
 		dec	a
 		and	3
 		ld	hl,(RUNZONE)
-		call	z,sub_7F71
+		call	z,console_print
 		call	sub_73F8
 		ld	a,68h ; 'h'
 		ld	(loc_7F0E+1),a
@@ -888,7 +894,7 @@ sub_73D3	ld	a,30h ; '0'
 		inc	hl
 		ld	h,(hl)
 		ld	l,a
-		jp	sub_7F71
+		jp	console_print
 
 ; ---------------------------------------------------------------------------
 
@@ -917,7 +923,7 @@ loc_7404	add	a,c
 c_somedata	db	8Fh,0,87h,93h,81h,83h,0,0,91h,0,0,0,0,95h,97h,0; 0
 		db	0,89h,85h,99h,9Dh,9Bh,0,0,8Dh,8Bh,0; 10h
 
-sub_742B	call	sub_80BB
+console_input	call	sub_80BB
 		res	5,(iy+1)
 		ld	a,38h ; '8'
 		ld	(loc_7F0E+1),a
@@ -1097,7 +1103,7 @@ loc_7533	cp	0
 		adc	a,0
 		ld	(loc_75BD+2),a
 		ld	hl,txt_redf_intro
-		call	sub_7F71
+		call	console_print
 		ld	hl, txt_redf_right
 		ld	de,5B00h
 		ld	b,7
@@ -1106,9 +1112,9 @@ loc_754A	push	bc
 		push	de
 		push	hl
 		ld	hl,txt_redf_for
-		call	sub_7F71
+		call	console_print
 		pop	hl
-		call	sub_7F71
+		call	console_print
 		pop	de
 		push	hl
 		push	de
@@ -1226,11 +1232,11 @@ c_symbols	db	"12345"
 		db	"Space"
 		db	"Symbol shift"
 		db	"MNB"
-		db	"Kempston vpravo"
-		db	"Kempston vlevo"
-		db	"Kempston dolö"
-		db	"Kempston nahoru"
-		db	"Kempston pal"
+		db	"Kempston right"
+		db	"Kempston left"
+		db	"Kempston down"
+		db	"Kempston up"
+		db	"Kempston fire"
 		db	41h ; A
 
 sub_768E	cp	30h ; '0'
@@ -1247,19 +1253,19 @@ loc_769D	cp	a
 		ret
 
 ; ---------------------------------------------------------------------------
-txt_redf_intro	db	"Stiskni klévesu nebo pohni joystickem:"
+txt_redf_intro	db	"Press a key or move the joystick:"
 		dw	7014h
 		db	0Dh
-txt_redf_right	db	"pohyb vpravo:"
+txt_redf_right	db	"move right:"
 		dw	3814h
 		db	0Dh
-txt_redf_left	db	"pohyb vlevo:\r"
-txt_redf_down	db	"pohyb dolö:\r"
-txt_redf_up	db	"pohyb nahoru:\r"
-txt_redf_fire	db	"stàelbu:\r"
-txt_redf_weps	db	"volbu zbranÇ:\r"
-txt_redf_wepa	db	"aktivaci zbranÇ:\r"
-txt_redf_for	db	"     Pro ",-1
+txt_redf_left	db	"move left:\r"
+txt_redf_down	db	"move down:\r"
+txt_redf_up	db	"move up:\r"
+txt_redf_fire	db	"fire:\r"
+txt_redf_weps	db	"weapon selection:\r"
+txt_redf_wepa	db	"weapon activation:\r"
+txt_redf_for	db	"    - ",-1
 
 ; ---------------------------------------------------------------------------
 sub_7731	ld	hl,5B00h
@@ -1305,7 +1311,7 @@ loc_775A	push	bc
 		ld	bc,620h
 		call	sub_7E94
 		ld	hl,txt_statusbar
-		call	sub_7F71
+		call	console_print
 		ld	hl,4027h
 		ld	c,20h ; ' '
 
@@ -1357,7 +1363,7 @@ loc_77B4	ld	a,(de)
 		dec	c
 		jr	nz,loc_77B2
 		ld	hl,c_txtptr
-		call	sub_7F71
+		call	console_print
 		ld	hl,5C26h
 		ld	b,4
 
@@ -1393,7 +1399,7 @@ loc_77EB	dec	c
 
 loc_77EF	ld	a,14h
 		sub	b
-		ld	hl,wpt_0_COBRA
+		ld	hl,txt_equipment
 		call	sub_77DE
 		inc	hl
 		inc	hl
@@ -1454,7 +1460,7 @@ loc_785F	pop	af
 		or	a
 		jp	z,loc_79E5
 		ld	hl,txt_mission_end
-		call	sub_7F71
+		call	console_print
 		ld	a,70h ; 'p'
 		ld	(loc_7F0E+1),a
 		call	sub_73F8
@@ -1474,19 +1480,19 @@ loc_785F	pop	af
 
 loc_7882	ex	de,hl
 		push	af
-		call	sub_7F71
+		call	console_print
 		ld	hl,txt_enem_total
-		call	sub_7F71
+		call	console_print
 		ld	a,(5CB0h)
 		call	sub_7A99
 		call	sub_7F8F
 		ld	hl,txt_enem_kill
-		call	sub_7F71
+		call	console_print
 		ld	a,(5CB1h)
 		call	sub_7A99
 		call	sub_7F8F
 		ld	hl,txt_danger
-		call	sub_7F71
+		call	console_print
 		ld	a,(5CB1h)
 		ld	e,a
 		ld	d,0
@@ -1504,7 +1510,7 @@ loc_78BF	or	a
 		call	sub_7A99
 		ld	hl,txt_percent
 
-sub_78CC	call	sub_7F71
+sub_78CC	call	console_print
 		pop	af
 		ld	hl,txt_result_1
 		cp	14h
@@ -1525,7 +1531,7 @@ sub_78CC	call	sub_7F71
 
 loc_78F5	ld	hl,txt_result_5
 
-loc_78F8	call	sub_7F71
+loc_78F8	call	console_print
 		pop	af
 		ld	a,(byte_82FD)
 		jp	nz,loc_7978
@@ -1570,13 +1576,13 @@ loc_7940	sub	3
 		jr	c,loc_795D
 		jr	nz,loc_7940
 		ld	hl,txt_ranked
-		call	sub_7F71
+		call	console_print
 		ld	hl,byte_8302
 		inc	(hl)
 		ld	a,(hl)
 		ld	hl,txt_pilot_ranks
 		call	sub_77DE
-		call	sub_7F71
+		call	console_print
 		call	sub_7F8F
 
 loc_795D	call	sub_7A04
@@ -1674,7 +1680,7 @@ loc_79E2	ld	(de),a
 ; ---------------------------------------------------------------------------
 
 loc_79E5	ld	hl,txt_killed
-		call	sub_7F71
+		call	console_print
 		ld	a,1
 		ld	(loc_6DEC+1),a
 		ld	a,80h
@@ -1684,7 +1690,7 @@ loc_79E5	ld	hl,txt_killed
 ; ---------------------------------------------------------------------------
 
 loc_79FB	ld	hl,txt_aborted
-		call	sub_7F71
+		call	console_print
 		jp	loc_6DEC
 
 sub_7A04	ld	hl,byte_8304
@@ -1704,7 +1710,7 @@ loc_7A14	ld	a,0
 		inc	a
 		ld	(loc_7A14+1),a
 		ld	hl,txt_recv_award
-		call	sub_7F71
+		call	console_print
 
 loc_7A23	ld	a,60h ; '`'
 		ld	(loc_7F0E+1),a
@@ -1717,7 +1723,7 @@ loc_7A2A	ld	a,20h ; ' '
 		push	af
 		ld	hl,txt_awards
 		call	sub_77DE
-		call	sub_7F71
+		call	console_print
 		call	sub_7F8F
 		pop	af
 
@@ -1745,7 +1751,7 @@ loc_7A56	ld	a,0
 		inc	a
 		ld	(loc_7A56+1),a
 		ld	hl,txt_prt_award
-		call	sub_7F71
+		call	console_print
 
 loc_7A65	ld	a,60h ; '`'
 		ld	(loc_7F0E+1),a
@@ -1767,7 +1773,7 @@ loc_7A6C	ld	a,20h ; ' '
 		push	af
 		ld	hl,txt_awards
 		call	sub_77DE
-		call	sub_7F71
+		call	console_print
 		call	sub_7F8F
 		pop	af
 
@@ -1839,7 +1845,7 @@ loc_7AEE	ld	a,b
 		dec	hl
 		djnz	loc_7AEE
 		ld	hl,byte_8584
-		call	sub_7F71
+		call	console_print
 
 loc_7B05	ld	hl,0
 		ld	a,60h ; '`'
@@ -1935,7 +1941,7 @@ loc_7B99	dec	e
 		ld	d,0
 		ld	hl,6Ch	; 'l'
 		call	30A9h
-		ld	de,wpg_0_COBRA
+		ld	de,gfx_equipment
 		add	hl,de
 		push	hl
 		ld	a,(loc_7B05+1)
@@ -2220,13 +2226,13 @@ loc_7D4E	ld	(hl),-1
 		dec	c
 		jr	nz,loc_7D4B
 		ld	hl,byte_8584
-		call	sub_7F71
+		call	console_print
 		pop	bc
-		ld	hl,wpt_0_COBRA
+		ld	hl,txt_equipment
 		ld	a,b
 		call	sub_77DE
 		inc	hl
-		call	sub_7F71
+		call	console_print
 
 loc_7D6C	exx
 		pop	hl
@@ -2258,7 +2264,7 @@ sub_7DBD	ld	hl,4000h
 		out	(254),a
 		ld	a,70h ; 'p'
 		ld	(loc_7F0E+1),a
-		ld	de,wpg_0_COBRA
+		ld	de,gfx_equipment
 		ld	b,4
 
 loc_7DCD	ld	c,4
@@ -2527,7 +2533,7 @@ loc_7F69	cp	40h ; '@'
 loc_7F6F	or	a
 		ret
 
-sub_7F71	ld	a,(hl)
+console_print	ld	a,(hl)
 		inc	hl
 		cp	-1
 		ret	z
@@ -2538,7 +2544,7 @@ sub_7F71	ld	a,(hl)
 		inc	a
 
 loc_7F7F	call	sub_7F91
-		jr	sub_7F71
+		jr	console_print
 
 sub_7F84	ld	a,(hl)
 		call	sub_7F91
@@ -3106,9 +3112,7 @@ sub_82A6	ld	a,l
 		ret
 
 ; ---------------------------------------------------------------------------
-c_pilot_def	db	"NoNamePilot\r"
-
-sub_82C1	ld	hl,c_pilot_def
+init_pilot	ld	hl,c_pilot_def
 		ld	de,c_pilotname
 		ld	bc,0Ch
 		ldir
@@ -3127,6 +3131,8 @@ loc_82D8	ld	(hl),c
 		djnz	loc_82D8
 		ret
 
+c_pilot_def	db	"NoNamePilot\r"
+
 ; ---------------------------------------------------------------------------
 c_pilotname	db	"NoNamePilot\r"
 		block	20,0
@@ -3142,53 +3148,53 @@ byte_8304	db	0,0,0,0,0,0,0
 
 byte_830B	db	0
 		db	0
-txt_awards	db	"Stàêbrné hvÇzda",-1
-		db	"Zlaté hvÇzda",-1
-		db	"âéd Slunce",-1
-		db	"âéd za osvobozenê ZemÇ",-1
-		db	"âéd VêtÇzstvê",-1
-		db	"âéd Osvobozenê",-1
-		db	"ãeleznå kàêä",-1
-		db	"âéd VÇÜnÄ pamÇti",-1
+txt_awards	db	"Silver Star",-1
+		db	"Gold Star",-1
+		db	"Order of the Sun",-1
+		db	"Order of the Liberation of Earth",-1
+		db	"Order of Victory",-1
+		db	"Order of Liberation",-1
+		db	"Iron Cross",-1
+		db	"Order of Eternal Memory",-1
 txt_recv_award	dw	7814h
-		db	"Obdräel jste vyznamenénê:\r"
+		db	"You have received a decoration:\r"
 txt_prt_award	dw	7814h
-		db	"Vyznamenénê:\r"
+		db	"Decorations:\r"
 txt_ranked	dw	7814h
-		db	"Byl jste povåÑen do hodnosti: ",-1
-txt_pilot_ranks	db	"Kadet",-1
-		db	"Pilot 2. tàêdy",-1
-		db	"Pilot 1. tàêdy",-1
-		db	"Pilot extra tàêdy",-1
-		db	"Kapitén",-1
+		db	"You have been promoted to the rank of: ",-1
+txt_pilot_ranks	db	"Cadet",-1
+		db	"Pilot of 2nd class",-1
+		db	"Pilot of 1st class",-1
+		db	"Extra class pilot",-1
+		db	"Captain",-1
 		db	"Major",-1
-		db	"PoruÜêk",-1
-		db	"Plukovnêk",-1
+		db	"Lieutenant",-1
+		db	"Colonel",-1
 txt_strange	dw	5014h
 		db	"#?!!...#",7Fh,0Dh
 		dw	7814h
-txt_passkey	db	"Vstupnê kñd: "
+txt_passkey	db	"Entry code: "
 		block	10,0
 		db	-1
 
-txt_result_1	db	"bêdné\r"
-txt_result_2	db	"slabé\r"
-txt_result_3	db	"prömÇrné\r"
-txt_result_4	db	"våborné\r"
-txt_result_5	db	"expertnê\r"
+txt_result_1	db	"miserable\r"
+txt_result_2	db	"weak\r"
+txt_result_3	db	"average\r"
+txt_result_4	db	"excellent\r"
+txt_result_5	db	"expert\r"
 txt_percent	db	" % - ",-1
 txt_danger	dw	6814h
-		db	"Dosaäena nebezpeÜnost ",-1
+		db	"Hazardousness achieved ",-1
 txt_enem_kill	dw	5814h
-		db	"Nepàételskåch objektö zniÜeno: ",-1
+		db	"Enemy objects destroyed: ",-1
 txt_enem_total	dw	5814h
-		db	"Nepàételskåch objektö v oblasti celkem: ",-1
+		db	"Total enemy objects in the area: ",-1
 txt_mission_end	dw	6014h
-		db	"Mise ukonÜena.\r"
+		db	"Mission accomplished.\r"
 txt_aborted	dw	5014h
-		db	"Mise pàeruÑena!\r"
+		db	"Mission aborted!\r"
 txt_killed	dw	5014h
-		db	"Bitevnêk zniÜen - jste mrtev!!\r"
+		db	"Battleship destroyed - you're dead!\r"
 
 c_colorbar	db	2,42h,6,6,46h,46h,44h,44h,44h,44h,4,4,4,41h,3,3
 		db	43h,43h,5,5,45h,45h,7,7,47h,47h,42h,6,6,46h,46h,44h
@@ -3196,28 +3202,28 @@ c_colorbar	db	2,42h,6,6,46h,46h,44h,44h,44h,44h,4,4,4,41h,3,3
 		db	5,6,6,7
 c_txtptr	db	16h,6,0B0h,-1
 txt_statusbar	db	16h,6,11h,15h,8
-		db	"Clona:"
+		db	"Shield:"
 		db	0Ch
-		db	"Plazma:"
+		db	"Pulse:"
 		db	0Ch
-		db	"Palivo:"
+		db	"Fuel:"
 		db	0Ch
-		db	"Rychlost:"
+		db	"Speed:"
 		db	0Ch
 		db	-1
 byte_8584	db	16h,0AAh,0Ah,14h,71h,17h,0B7h,0,-1
 
 txt_help	dw	7014h
-		db	"PouäitelnÄ povely jsou: START, PILOT, SAVE, LOAD, RAPORT, RED"
-		db	"EFINICE, INFORMACE, ZBRANÉ, POMOC a KONEC. StaÜê zadat pouze "
-		db	"prvnê pêsmeno.\r",-1
+		db	"Use the following commands to control the console: "
+		db	"PILOT [name], WEAPONS, REDEFINE, REPORT, INFO, HELP, START and EXIT. "
+		db	"You just need to enter the first few letters of these commands.\r",-1
 
 txt_err_disk	db	16h,12h,10h,15h,10h,17h,0F0h,0
 		dw	5014h
-		db	"Chyba pài Ütenê z disku!\r"
+		db	"Error reading from disk!\r"
 txt_err_tape	db	16h,12h,10h,15h,10h,17h,0F0h,0
 		dw	5014h
-		db	"Chyba pài Ütenê z kazety!\r"
+		db	"Error reading from tape!\r"
 
 c_sets_default	db	0FEh,0DFh,1
 		db	0FEh,0DFh,2
@@ -5098,6 +5104,7 @@ intro
 	endmodule
 
 		savebin "final.bin",COREZONE,$-COREZONE
+		savesna "final.sna",COREZONE
 
 	ifdef isFX
 		export COREZONE
