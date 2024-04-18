@@ -28,30 +28,30 @@
 font_small:	incbin "console.font.bin"
 wpg_0_COBRA:	incbin "gfx.equipment.bin"
 
-wpt_0_COBRA	db	'Ä4xKOBRA, dopàedu odpalované raketa\r'
-wpt_1_VIPER	db	'Ä4xZMIJE, vzhöru odpalované raketa\r'
-wpt_2_MOLE	db	'Ä4xKRTEK, dolö odpalované raketa\r'
-wpt_3_SKUNK	db	'Ä4xSKUNK, dozadu odpalované raketa\r'
-txt_slot1	db	'ÄPumovnice Ü. 1\r'
-wpt_4_GLIDER	db	'Ä8xPADAVKA, klouzajêcê tàêÑtivé bomba\r'
-wpt_5_SUPERBOMB	db	'Ä1xSUPERBOMBA, ploÑnå disruptor\r'
-wpt_6_CLUSTER	db	'Ä8xDIKOBRAZ, levitujêcê nérazovÄ miny\r'
-wpt_7_GLADIATOR	db	'Ä1xGLADIATOR, pàêdavné bitevnê stanice\r'
-txt_slot2	db	'ÄPumovnice Ü. 2\r'
-wpt_8_AUREOLE	db	'Ä2xAUREOLA, pàêdavnå kontaktnê Ñtêt\r'
-wpt_9_SPARKLER	db	'Ä6xPRSKAVKA, bodovå disruptor\r'
-wpt_A_ENERGY	db	'Ä1xENERGO, pàêdavnå energetickå zdroj\r'
-wpt_B_CHAMELEON	db	'Ä4xCHAMELEON, ruÑiÜka navédÇnê raket\r'
-txt_slot3	db	'ÄPumovnice Ü. 3\r'
-wpt_C_RESONANCE	db	'Ä2xREZONANCE, zesilovaÜ energie våbojö\r'
-wpt_D_TRIDENT	db	'Ä2xTROJZUBEC, kvantovå nésobiÜ våbojö\r'
-wpt_E_WALLABY	db	'Ä1xKLOKAN, hyperprostorovå systÄm\r'
-wpt_F_FUEL	db	'Ä1xPALIVO, pàêdavné palivové nédrä\r'
-txt_slot4	db	'ÄPumovnice Ü. 4\r'
-txt_weapon_off	db	'ÄVolba zbranê ukonÜena\r'
-drt_linear	db	'ÄLineérnê pohon lodi\r'
-drt_quantum	db	'ÄKvantovå pohon lodi\r'
-		db	'Ä\r'
+wpt_0_COBRA	db	80h,"4xKOBRA, dopàedu odpalované raketa\r"
+wpt_1_VIPER	db	80h,"4xZMIJE, vzhöru odpalované raketa\r"
+wpt_2_MOLE	db	80h,"4xKRTEK, dolö odpalované raketa\r"
+wpt_3_SKUNK	db	80h,"4xSKUNK, dozadu odpalované raketa\r"
+txt_slot1	db	80h,"Pumovnice Ü. 1\r"
+wpt_4_GLIDER	db	80h,"8xPADAVKA, klouzajêcê tàêÑtivé bomba\r"
+wpt_5_SUPERBOMB	db	80h,"1xSUPERBOMBA, ploÑnå disruptor\r"
+wpt_6_CLUSTER	db	80h,"8xDIKOBRAZ, levitujêcê nérazovÄ miny\r"
+wpt_7_GLADIATOR	db	80h,"1xGLADIATOR, pàêdavné bitevnê stanice\r"
+txt_slot2	db	80h,"Pumovnice Ü. 2\r"
+wpt_8_AUREOLE	db	80h,"2xAUREOLA, pàêdavnå kontaktnê Ñtêt\r"
+wpt_9_SPARKLER	db	80h,"6xPRSKAVKA, bodovå disruptor\r"
+wpt_A_ENERGY	db	80h,"1xENERGO, pàêdavnå energetickå zdroj\r"
+wpt_B_CHAMELEON	db	80h,"4xCHAMELEON, ruÑiÜka navédÇnê raket\r"
+txt_slot3	db	80h,"Pumovnice Ü. 3\r"
+wpt_C_RESONANCE	db	80h,"2xREZONANCE, zesilovaÜ energie våbojö\r"
+wpt_D_TRIDENT	db	80h,"2xTROJZUBEC, kvantovå nésobiÜ våbojö\r"
+wpt_E_WALLABY	db	80h,"1xKLOKAN, hyperprostorovå systÄm\r"
+wpt_F_FUEL	db	80h,"1xPALIVO, pàêdavné palivové nédrä\r"
+txt_slot4	db	80h,"Pumovnice Ü. 4\r"
+txt_weapon_off	db	80h,"Volba zbranê ukonÜena\r"
+drt_linear	db	80h,"Lineérnê pohon lodi\r"
+drt_quantum	db	80h,"Kvantovå pohon lodi\r"
+		db	80h,"\r"
 
 @mainblock.start:
 		di
@@ -136,7 +136,7 @@ sub_6E19	ld	bc,0Eh
 sub_6E27	ld	hl,4000h
 		ld	bc,1820h
 		xor	a
-		out	(0FEh),a
+		out	(254),a
 		ld	a,78h ; 'x'
 		ld	(loc_7F0E+1),a
 		ld	a,9
@@ -193,12 +193,10 @@ loc_6E79	ld	hl,txt_unknown_cmd
 		call	sub_7F71
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
-txt_kempston	db	14h
-		db	'hKempston? (vloäte A/N)\r'
-		db	0FFh
+txt_kempston	dw	6814h
+		db	"Kempston? (vloäte A/N)\r",-1
 txt_unknown_cmd	dw	5014h
-		db	'Neznémå povel\r'
-		db	0FFh
+		db	"Neznémå povel\r",-1
 commands	dw	cmd_password
 		db	"HES"
 		dw	cmd_report
@@ -265,17 +263,13 @@ cmd_report	ld	hl,txt_pilot
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
 txt_pilot	dw	7014h
-		db	'Pilot:  '
-		db	0FFh
+		db	"Pilot:  ",-1
 txt_pilot_stat1	dw	6014h
-		db	'PoÜet nalÄtanåch misê: '
-		db	0FFh
-txt_pilot_stat2	db	'PoÜet splnÇnåch misê: '
-		db	0FFh
-txt_pilot_stat3	db	'PoÜet zniÜenåch objektö: '
-		db	0FFh
-		db	'Vyznamenénê:\r'
-		db	0FFh
+		db	"PoÜet nalÄtanåch misê: ",-1
+txt_pilot_stat2	db	"PoÜet splnÇnåch misê: ",-1
+txt_pilot_stat3	db	"PoÜet zniÜenåch objektö: ",-1
+		db	"Vyznamenénê:\r"
+		db	-1
 ; ---------------------------------------------------------------------------
 
 cmd_demo	xor	a
@@ -320,7 +314,7 @@ cmd_help	ld	hl,txt_help
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
 txt_memslot	dw	4E49h
-txt_memslot_n	db	'pozice',0
+txt_memslot_n	db	"pozice",0
 		db	0
 		db	0
 		db	0
@@ -502,7 +496,7 @@ loc_7104	rrca
 		rrca
 		and	3Fh
 
-loc_7108	cp	0FFh
+loc_7108	cp	-1
 		jr	nz,loadblock
 		call	sub_739C
 		jp	loc_6DEC
@@ -515,7 +509,7 @@ sub_7118	ld	(iy+0Eh),47h ;	'G'
 		ld	hl,4000h
 		ld	de,4001h
 		ld	bc,1800h
-		ld	(hl),0FFh
+		ld	(hl),-1
 		ldir
 		ld	(hl),78h ; 'x'
 		ld	bc,2FFh
@@ -530,11 +524,11 @@ loadblock_exe	add	a,30h ; '0'
 		ld	a,61h ; 'a'
 		ld	(c_blockname+7),a
 		xor	a
-		out	(0FEh),a
+		out	(254),a
 		ld	(loc_739F+1),a
 		inc	a
 		ld	(loc_7241+1),a
-		ld	a,0FFh
+		ld	a,-1
 		ld	(loc_7108+1),a
 		call	sub_7118
 		ld	hl,txt_block_load
@@ -579,7 +573,7 @@ loc_71A7	ld	a,1
 		ret
 
 sub_71AB	xor	a
-		in	a,(0FEh)
+		in	a,(254)
 		cpl
 		and	1Fh
 		jr	nz,loc_71BA
@@ -722,12 +716,12 @@ loc_7286	ld	hl,(loc_7389+1)
 		call	block_save
 		ld	ix,(basic_ptr_load)
 		ld	de,(block_length)
-		ld	a,0FFh
+		ld	a,-1
 
 block_save	call	4C6h
 		ld	b,14h
 
-waitfor	ei
+waitfor		ei
 		halt
 		djnz	waitfor
 		ret
@@ -745,21 +739,14 @@ loc_72C8	ld	a,(de)
 		ret
 
 ; ---------------------------------------------------------------------------
-txt_block_load	db	16h
-		db	12h
-		db	10h
-		db	'Nahrévém... \r'
-		db	0FFh
-txt_block_found	db	'Nalezeno: ',0,0,0,0,0,0,0,0,0,0,'\r'
+txt_block_load	db	16h,12h,10h
+		db	"Nahrévém... \r",-1
+txt_block_found	db	"Nalezeno: ",0,0,0,0,0,0,0,0,0,0,"\r",-1
 
-		db	0FFh
 block_header	db	0
-block_filename	db	0,0,0,0,0,0,0,0,0,0
+block_filename	block	10,0
 block_length	dw	0
-		db	0
-		db	0
-		db	0
-		db	0
+		block	4,0
 
 sub_7308	ld	ix,block_header
 		ld	de,11h
@@ -771,15 +758,15 @@ loc_7311	inc	d
 		dec	d
 		di
 		ld	a,9
-		out	(0FEh),a
+		out	(254),a
 		call	562h
 		ex	af,af'
 		ld	a,7Fh
-		in	a,(0FEh)
+		in	a,(254)
 		rra
 		jp	nc,loc_6DE6
 		xor	a
-		out	(0FEh),a
+		out	(254),a
 		ex	af,af'
 		ret
 
@@ -834,7 +821,7 @@ loc_7378	ld	sp,0
 		ld	(5C5Dh),hl
 		ld	hl,5C3Ah
 		ld	a,(hl)
-		ld	(hl),0FFh
+		ld	(hl),-1
 		ld	(5C81h),a
 		ret
 ; ---------------------------------------------------------------------------
@@ -1088,7 +1075,7 @@ unk_751B	db	16h
 		db	15h
 		db	10h
 		db	17h
-		db	0F0h	; 
+		db	0F0h
 		db	0
 		db	0FFh
 ; ---------------------------------------------------------------------------
@@ -1110,6 +1097,8 @@ loc_7533	cp	0
 		adc	a,0
 		ld	(loc_75BD+2),a
 		ld	hl,txt_redf_intro
+		call	sub_7F71
+		ld	hl, txt_redf_right
 		ld	de,5B00h
 		ld	b,7
 
@@ -1258,20 +1247,19 @@ loc_769D	cp	a
 		ret
 
 ; ---------------------------------------------------------------------------
-txt_redf_intro	db	'Stiskni klévesu nebo pohni joystickem:'
+txt_redf_intro	db	"Stiskni klévesu nebo pohni joystickem:"
 		dw	7014h
 		db	0Dh
-txt_redf_right	db	'pohyb vpravo:'
+txt_redf_right	db	"pohyb vpravo:"
 		dw	3814h
 		db	0Dh
-txt_redf_left	db	'pohyb vlevo:\r'
-txt_redf_down	db	'pohyb dolö:\r'
-txt_redf_up	db	'pohyb nahoru:\r'
-txt_redf_fire	db	'stàelbu:\r'
-txt_redf_weps	db	'volbu zbranÇ:\r'
-txt_redf_wepa	db	'aktivaci zbranÇ:\r'
-txt_redf_for	db	'     Pro '
-		db	0FFh
+txt_redf_left	db	"pohyb vlevo:\r"
+txt_redf_down	db	"pohyb dolö:\r"
+txt_redf_up	db	"pohyb nahoru:\r"
+txt_redf_fire	db	"stàelbu:\r"
+txt_redf_weps	db	"volbu zbranÇ:\r"
+txt_redf_wepa	db	"aktivaci zbranÇ:\r"
+txt_redf_for	db	"     Pro ",-1
 
 ; ---------------------------------------------------------------------------
 sub_7731	ld	hl,5B00h
@@ -1392,7 +1380,7 @@ sub_77DE	or	a
 
 loc_77E1	ld	a,(hl)
 		inc	hl
-		cp	0FFh
+		cp	-1
 		jr	z,loc_77EB
 		cp	0Dh
 		jr	nz,loc_77E1
@@ -1506,7 +1494,7 @@ loc_7882	ex	de,hl
 		call	30A9h
 		ld	bc,(5CB0h)
 		ld	b,0
-		ld	a,0FFh
+		ld	a,-1
 
 loc_78BF	or	a
 		inc	a
@@ -1831,7 +1819,7 @@ cmd_weapons	call	sub_7DBD
 		push	hl
 		ld	hl,8C3Ch
 		ld	(loc_7C47+1),hl
-		ld	a,0FFh
+		ld	a,-1
 		ld	(loc_7D2F+1),a
 		ld	(loc_7B1C+1),a
 		ld	(loc_7D3E+1),a
@@ -1863,7 +1851,7 @@ loc_7B0D	ld	d,0
 		call	loc_7C47
 		ld	a,(loc_7D2F+1)
 
-loc_7B1C	cp	0FFh
+loc_7B1C	cp	-1
 		ld	(loc_7B1C+1),a
 		jr	z,loc_7B0D
 		call	sub_7C13
@@ -2012,7 +2000,7 @@ sub_7C13	push	hl
 loc_7C1E	ld	b,e
 		xor	10h
 
-loc_7C21	out	(0FEh),a
+loc_7C21	out	(254),a
 		djnz	loc_7C21
 		dec	hl
 		inc	h
@@ -2033,7 +2021,7 @@ sub_7C2F	push	hl
 
 loc_7C37	ld	a,r
 		and	18h
-		out	(0FEh),a
+		out	(254),a
 		djnz	loc_7C37
 		dec	c
 		jr	nz,loc_7C37
@@ -2127,7 +2115,7 @@ loc_7CAD	ld	a,(de)
 		pop	hl
 		bit	4,d
 		ret	nz
-		ld	a,0FFh
+		ld	a,-1
 		ld	(loc_7B1C+1),a
 		ld	c,4
 		bit	3,d
@@ -2175,7 +2163,7 @@ loc_7CF7	ld	a,d
 		push	hl
 		exx
 		ld	a,b
-		ld	b,0FFh
+		ld	b,-1
 
 loc_7D05	inc	b
 		sub	28h ; '('
@@ -2205,7 +2193,7 @@ loc_7D1D	inc	b
 		jr	nc,loc_7D33
 		ld	a,14h
 
-loc_7D2F	cp	0FFh
+loc_7D2F	cp	-1
 		jr	z,loc_7D6C
 
 loc_7D33	ld	(loc_7D2F+1),a
@@ -2214,7 +2202,7 @@ loc_7D33	ld	(loc_7D2F+1),a
 		ld	hl,5C2Eh
 		add	a,(hl)
 
-loc_7D3E	cp	0FFh
+loc_7D3E	cp	-1
 		jr	z,loc_7D6C
 		ld	(loc_7D3E+1),a
 		push	af
@@ -2224,7 +2212,7 @@ loc_7D3E	cp	0FFh
 loc_7D4B	ld	b,16h
 		ld	e,l
 
-loc_7D4E	ld	(hl),0FFh
+loc_7D4E	ld	(hl),-1
 		inc	l
 		djnz	loc_7D4E
 		ld	l,e
@@ -2267,7 +2255,7 @@ byte_7D9D	block	20h,0
 
 sub_7DBD	ld	hl,4000h
 		xor	a
-		out	(0FEh),a
+		out	(254),a
 		ld	a,70h ; 'p'
 		ld	(loc_7F0E+1),a
 		ld	de,wpg_0_COBRA
@@ -2541,7 +2529,7 @@ loc_7F6F	or	a
 
 sub_7F71	ld	a,(hl)
 		inc	hl
-		cp	0FFh
+		cp	-1
 		ret	z
 		cp	0Dh
 		jr	z,sub_7F91
@@ -2665,7 +2653,7 @@ loc_8019	ld	hl,loc_800E+1
 loc_802B	ld	hl,5B15h
 		ld	(hl),a
 		inc	hl
-		ld	(hl),0FFh
+		ld	(hl),-1
 		ld	(loc_802B+1),hl
 		ld	c,a
 		ld	b,0
@@ -2755,7 +2743,7 @@ loc_80A0	cp	0
 loc_80AC	inc	hl
 		call	sub_8152
 		ld	a,(hl)
-		cp	0FFh
+		cp	-1
 		jr	z,loc_80FD
 		cp	20h ; ' '
 		jr	nz,loc_80AC
@@ -3047,7 +3035,7 @@ loc_8244	ld	b,0Ah
 		jr	loc_8230
 
 ; ---------------------------------------------------------------------------
-unk_8250	block	12,0FFh
+unk_8250	block	12,-1
 
 sub_825C	ld	a,1Eh
 		ld	b,14h
@@ -3070,7 +3058,7 @@ loc_8276	ld	a,(loc_8286+1)
 		ld	b,a
 		ld	e,l
 
-loc_827B	ld	(hl),0FFh
+loc_827B	ld	(hl),-1
 		inc	l
 		djnz	loc_827B
 		ld	l,e
@@ -3118,7 +3106,7 @@ sub_82A6	ld	a,l
 		ret
 
 ; ---------------------------------------------------------------------------
-c_pilot_def	db	'NoNamePilot\r'
+c_pilot_def	db	"NoNamePilot\r"
 
 sub_82C1	ld	hl,c_pilot_def
 		ld	de,c_pilotname
@@ -3140,7 +3128,7 @@ loc_82D8	ld	(hl),c
 		ret
 
 ; ---------------------------------------------------------------------------
-c_pilotname	db	'NoNamePilot\r'
+c_pilotname	db	"NoNamePilot\r"
 		block	20,0
 byte_82FD	db	1
 word_82FE	dw	0
@@ -3154,105 +3142,83 @@ byte_8304	db	0,0,0,0,0,0,0
 
 byte_830B	db	0
 		db	0
-txt_awards	db	'Stàêbrné hvÇzda'
-
-		db	0FFh
-		db	'Zlaté hvÇzda'
-		db	0FFh
-		db	'âéd Slunce'
-		db	0FFh
-		db	'âéd za osvobozenê ZemÇ'
-		db	0FFh
-		db	'âéd VêtÇzstvê'
-		db	0FFh
-		db	'âéd Osvobozenê'
-		db	0FFh
-		db	'ãeleznå kàêä'
-		db	0FFh
-		db	'âéd VÇÜnÄ pamÇti'
-		db	0FFh
+txt_awards	db	"Stàêbrné hvÇzda",-1
+		db	"Zlaté hvÇzda",-1
+		db	"âéd Slunce",-1
+		db	"âéd za osvobozenê ZemÇ",-1
+		db	"âéd VêtÇzstvê",-1
+		db	"âéd Osvobozenê",-1
+		db	"ãeleznå kàêä",-1
+		db	"âéd VÇÜnÄ pamÇti",-1
 txt_recv_award	dw	7814h
-		db	'Obdräel jste vyznamenénê:\r'
+		db	"Obdräel jste vyznamenénê:\r"
 txt_prt_award	dw	7814h
-		db	'Vyznamenénê:\r'
+		db	"Vyznamenénê:\r"
 txt_ranked	dw	7814h
-		db	'Byl jste povåÑen do hodnosti: '
-		db	0FFh
-txt_pilot_ranks	db	'Kadet'
-
-		db	0FFh
-		db	'Pilot 2. tàêdy'
-		db	0FFh
-		db	'Pilot 1. tàêdy'
-		db	0FFh
-		db	'Pilot extra tàêdy'
-		db	0FFh
-		db	'Kapitén'
-		db	0FFh
-		db	'Major'
-		db	0FFh
-		db	'PoruÜêk'
-		db	0FFh
-		db	'Plukovnêk'
-		db	0FFh
+		db	"Byl jste povåÑen do hodnosti: ",-1
+txt_pilot_ranks	db	"Kadet",-1
+		db	"Pilot 2. tàêdy",-1
+		db	"Pilot 1. tàêdy",-1
+		db	"Pilot extra tàêdy",-1
+		db	"Kapitén",-1
+		db	"Major",-1
+		db	"PoruÜêk",-1
+		db	"Plukovnêk",-1
 txt_strange	dw	5014h
-		db	'#?!!...#'
-		db	7Fh
-		db	0Dh
+		db	"#?!!...#",7Fh,0Dh
 		dw	7814h
-txt_passkey	db	'Vstupnê kñd: ',0,0,0,0,0,0,0,0,0,0
+txt_passkey	db	"Vstupnê kñd: "
+		block	10,0
+		db	-1
 
-		db	0FFh
-txt_result_1	db	'bêdné\r'
-txt_result_2	db	'slabé\r'
-txt_result_3	db	'prömÇrné\r'
-txt_result_4	db	'våborné\r'
-txt_result_5	db	'expertnê\r'
-txt_percent	db	' % - '
-		db	0FFh
+txt_result_1	db	"bêdné\r"
+txt_result_2	db	"slabé\r"
+txt_result_3	db	"prömÇrné\r"
+txt_result_4	db	"våborné\r"
+txt_result_5	db	"expertnê\r"
+txt_percent	db	" % - ",-1
 txt_danger	dw	6814h
-		db	'Dosaäena nebezpeÜnost '
-		db	0FFh
+		db	"Dosaäena nebezpeÜnost ",-1
 txt_enem_kill	dw	5814h
-		db	'Nepàételskåch objektö zniÜeno: '
-		db	0FFh
+		db	"Nepàételskåch objektö zniÜeno: ",-1
 txt_enem_total	dw	5814h
-		db	'Nepàételskåch objektö v oblasti celkem: '
-		db	0FFh
+		db	"Nepàételskåch objektö v oblasti celkem: ",-1
 txt_mission_end	dw	6014h
-		db	'Mise ukonÜena.\r'
+		db	"Mise ukonÜena.\r"
 txt_aborted	dw	5014h
-		db	'Mise pàeruÑena!\r'
+		db	"Mise pàeruÑena!\r"
 txt_killed	dw	5014h
-		db	'Bitevnêk zniÜen - jste mrtev!!\r'
+		db	"Bitevnêk zniÜen - jste mrtev!!\r"
+
 c_colorbar	db	2,42h,6,6,46h,46h,44h,44h,44h,44h,4,4,4,41h,3,3
 		db	43h,43h,5,5,45h,45h,7,7,47h,47h,42h,6,6,46h,46h,44h
 		db	44h,44h,44h,4,4,4,4,1,1,2,2,3,3,4,4,5
 		db	5,6,6,7
-c_txtptr	db	16h,6,0B0h,0FFh
+c_txtptr	db	16h,6,0B0h,-1
 txt_statusbar	db	16h,6,11h,15h,8
-		db	'Clona:'
+		db	"Clona:"
 		db	0Ch
-		db	'Plazma:'
+		db	"Plazma:"
 		db	0Ch
-		db	'Palivo:'
+		db	"Palivo:"
 		db	0Ch
-		db	'Rychlost:'
+		db	"Rychlost:"
 		db	0Ch
-		db	0FFh
-byte_8584	db	16h,0AAh,0Ah,14h,71h,17h,0B7h,0,0FFh
+		db	-1
+byte_8584	db	16h,0AAh,0Ah,14h,71h,17h,0B7h,0,-1
 
 txt_help	dw	7014h
-		db	'PouäitelnÄ povely jsou: START, PILOT, SAVE, LOAD, RAPORT, RED'
-		db	'EFINICE, INFORMACE, ZBRANÉ, POMOC a KONEC. StaÜê zadat pouze '
-		db	'prvnê pêsmeno.\r'
-		db	0FFh
+		db	"PouäitelnÄ povely jsou: START, PILOT, SAVE, LOAD, RAPORT, RED"
+		db	"EFINICE, INFORMACE, ZBRANÉ, POMOC a KONEC. StaÜê zadat pouze "
+		db	"prvnê pêsmeno.\r",-1
+
 txt_err_disk	db	16h,12h,10h,15h,10h,17h,0F0h,0
 		dw	5014h
-		db	'Chyba pài Ütenê z disku!\r'
+		db	"Chyba pài Ütenê z disku!\r"
 txt_err_tape	db	16h,12h,10h,15h,10h,17h,0F0h,0
 		dw	5014h
-		db	'Chyba pài Ütenê z kazety!\r'
+		db	"Chyba pài Ütenê z kazety!\r"
+
 c_sets_default	db	0FEh,0DFh,1
 		db	0FEh,0DFh,2
 		db	0FEh,0FDh,1
@@ -3261,8 +3227,6 @@ c_sets_default	db	0FEh,0DFh,1
 		db	0FEh,7Fh,2
 		db	0FEh,7Fh,8
 		block	64h,0
-
-demoheader	ret
 
 sub_8EF8	di
 		ld	(loc_9197+1),a
@@ -3294,7 +3258,7 @@ loc_8F45	call	sub_91DD
 		ld	(RUNZONE+64h),hl
 
 loc_8F59	xor	a
-		out	(0FEh),a
+		out	(254),a
 		ld	(loc_8F6D+1),sp
 		ld	sp,9F80h
 		ld	h,a
@@ -3414,7 +3378,7 @@ sub_902C	ld	c,0Dh
 		and	1Fh
 		jr	z,loc_904B
 		ld	b,a
-		ld	a,0FFh
+		ld	a,-1
 
 loc_9039	cp	(hl)
 		jp	z,loc_9046
@@ -4620,7 +4584,7 @@ loc_9721	ld	(iy+5),a
 loc_972C	ld	(ix+5),a
 
 loc_972F	pop	iy
-		ld	a,0FFh
+		ld	a,-1
 		ld	(RUNZONE+14Dh),a
 		exx
 		ret
@@ -4638,7 +4602,7 @@ sub_9746	push	ix
 		ld	de,0Ah
 
 loc_974D	ld	a,(ix+1)
-		cp	0FFh
+		cp	-1
 		jr	z,loc_975B
 		ld	a,(ix+2)
 		cp	14h
@@ -4702,7 +4666,7 @@ loc_97B6	ld	a,(hl)
 		ld	b,d
 		ld	d,0A7h
 		ld	a,(de)
-		out	(0FEh),a
+		out	(254),a
 		ld	d,b
 		ld	a,0FCh
 		add	a,xl
@@ -4959,7 +4923,7 @@ loc_9934	ld	(hl),a
 		jr	z,loc_9989
 		djnz	loc_9934
 		xor	18h
-		out	(0FEh),a
+		out	(254),a
 		ld	c,a
 		jr	loc_992D
 ; ---------------------------------------------------------------------------
@@ -5038,6 +5002,8 @@ loc_9998	ld	sp,0
 		pop	de
 		ret
 ; ---------------------------------------------------------------------------
+
+demoheader	ret ; TBD
 
 @mainblock.end
 
