@@ -33,6 +33,12 @@ cd ../main
 ASM main.a80 -DisFX --lst=main.lst --exp=constants.inc
 PAK final.bin final.pak
 
+cd ../level1
+ASM level1.a80 -DisFX --lst=level1.lst
+PAK final.bin final.pak
+PAK loading.scr loading.pak
+PAK music.stc music.pak
+
 # banks composition
 cd ..
 rm -f bank*

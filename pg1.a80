@@ -6,6 +6,7 @@
 @_fxpage = #11
 @_fxpage_start
 
+entire128k_offset = ((_fxpage & 7) * #4000)
 ;;-----------------------------------------------------------------------------
 ; Every part is defined with this descriptor:
 ;
@@ -13,6 +14,27 @@
 ; .pg = _fxpage     ; current fx 128k page
 ;                   ; (set bit.7 to just ldir given length, not decompress)
 ; .length           ; optional when data transfer (ldir) needed
+
+		align	2
+level1_dat_real	incbin "level1/final.pak"
+level1_dat_len	= $ - level1_dat_real
+level1_dat_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level1_dat_ptr	= (entire128k_offset + (level1_dat_real - #C000)) >> 1
+
+		align	2
+level1_msx_real	incbin "level1/music.pak"
+level1_msx_len	= $ - level1_msx_real
+level1_msx_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level1_msx_ptr	= (entire128k_offset + (level1_msx_real - #C000)) >> 1
+
+		align	2
+level1_scr_real	incbin "level1/loading.pak"
+level1_scr_len	= $ - level1_scr_real
+level1_scr_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level1_scr_ptr	= (entire128k_offset + (level1_scr_real - #C000)) >> 1
 
 ;;-----------------------------------------------------------------------------
 	if $ > #10000
@@ -22,7 +44,7 @@
 		display /D,(#10000-$)," bytes free in bank ",/D,isFX
 	endif
 
-;		align	16384,0
+		align	16384,0
 		savebin "bank1",(_fxpage_start),$-(_fxpage_start)
 
 ;;-----------------------------------------------------------------------------
@@ -30,3 +52,18 @@
 ;
 ;		export fx_part
 ;		export fx_part.pg
+
+		export level1_dat_real
+		export level1_dat_len
+		export level1_dat_pg
+		export level1_dat_ptr
+
+		export level1_msx_real
+		export level1_msx_len
+		export level1_msx_pg
+		export level1_msx_ptr
+
+		export level1_scr_real
+		export level1_scr_len
+		export level1_scr_pg
+		export level1_scr_ptr

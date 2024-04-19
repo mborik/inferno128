@@ -1,0 +1,104 @@
+		device	zxspectrum48
+
+		include	"../main/constants.inc"
+
+
+	ifdef isFX
+		display "Composing Level 1"
+	endif
+
+		org	RUNZONE
+
+		dw	txt_intro_brief
+		dw	txt_L1_intro
+		dw	txt_L1_success
+		dw	txt_L1_fail
+		dw	10Ch
+		dw	20Fh
+		dw	60Dh
+		dw	108h
+		dw	0D449h
+		dw	0D66Fh
+		dw	0C374h
+		dw	0C2B3h
+		dw	txt_L2_intro
+		dw	txt_L2_success
+		dw	txt_L2_fail
+		dw	10Ch
+		dw	20Fh
+		dw	60Dh
+		dw	60Dh
+		dw	0D6F6h
+		dw	0D8E0h
+		dw	0C374h
+		dw	0C2B3h
+		dw	txt_L3_intro
+		dw	txt_L3_success
+		dw	txt_L3_fail
+		dw	10Ch
+		dw	20Fh
+		dw	108h
+		dw	105h
+		dw	0F40Fh
+		dw	0D976h
+		dw	0C374h
+		dw	0C2B3h
+		dw	txt_L4_intro
+		dw	txt_L4_success
+		dw	txt_L4_fail
+		dw	401h
+		dw	401h
+		dw	20Fh
+		dw	404h
+		dw	0C444h
+		dw	0C21Ah
+		dw	0C374h
+		dw	0C2B3h
+
+		org	RUNZONE+100
+
+		incbin	"leveldata1.bin"
+
+txt_intro_brief	db	"The area of operation is the New York city (an ancient landmark of late 20th century). "
+		db	"Orgaids are disguising their weapons as ancient Earth machines, beware of any unusual objects. "
+		db	"The clouds over the city are physically modified and pose a significant danger to your battleship. \r"
+		db	0FFh
+txt_L1_intro	db	"The first mission is the usual patrol flight on the route RAINA - Statue of Liberty - RAINA. "
+		db	"Eliminate all hostile activity if possible. \r"
+		db	0FFh
+txt_L1_success	db	"Excellent. Your first mission has been successful. \r"
+		db	0FFh
+txt_L1_fail	db	"The patrol flight must be repeated. We need information about the entire area. \r"
+		db	0FFh
+
+		org	0DC80h ; offset #30A0
+
+		incbin	"leveldata2.bin"
+
+txt_L2_intro	db	"Objective: Locate and destroy an enemy cruiser disguised as a shuttle. "
+		db	"The cruiser is equipped with homing missiles that are aimed on you at the moment of launch. \r"
+		db	0FFh
+txt_L2_success	db	"Congratulations, your first enemy cruiser was destroyed. \r"
+		db	0FFh
+txt_L2_fail	db	"The cruiser hasn't been destroyed - the mission must be repeated. \r"
+		db	0FFh
+txt_L3_intro	db	"A large battle cruiser threatens the offensive preparations, it must be destroyed as soon as possible. \r"
+		db	0FFh
+txt_L3_success	db	"The cruiser has been destroyed - the offensive is ready to launch! \r"
+		db	0FFh
+txt_L3_fail	db	"Without destroying this enemy, the offensive cannot be launched. \r"
+		db	0FFh
+txt_L4_intro	db	"As part of Operation Twist, you have been assigned to a very important mission - "
+		db	"to destroy the Orgaid headquarters, which is hidden in the Statue of Liberty. "
+		db	"But first, you must hold off an enemy attack on RAINA. \r"
+		db	0FFh
+txt_L4_success	db	"An outstanding achievement - Earth is completely liberated. \r"
+		db	0FFh
+txt_L4_fail	db	"The Orgaids are successfully resisting the offensive. \r"
+		db	0FFh
+
+		org	0FC00h ; offset #5020
+
+		incbin	"leveldata3.bin"
+
+		savebin	"final.bin",RUNZONE,$-RUNZONE
