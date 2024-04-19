@@ -55,7 +55,8 @@
 		dw	0C374h
 		dw	0C2B3h
 
-		org	RUNZONE+100
+		org	RUNZONE+99 ; #0063
+		db	0 ; level 1 ID
 
 		incbin	"leveldata1.bin"
 

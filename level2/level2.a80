@@ -1,0 +1,106 @@
+		device	zxspectrum48
+
+		include	"../main/constants.inc"
+
+
+	ifdef	isFX
+		display	"Composing Level 2"
+	endif
+
+		org	RUNZONE
+
+		dw	txt_intro_brief
+		dw	txt_L1_intro
+		dw	txt_L1_success
+		dw	txt_L1_fail
+		dw	10Ch
+		dw	60Dh
+		dw	60Dh
+		dw	20Fh
+		dw	0D28Eh
+		dw	0D4C3h
+		dw	0C2EDh
+		dw	0C286h
+		dw	txt_L2_intro
+		dw	txt_L2_success
+		dw	txt_L2_fail
+		dw	10Ch
+		dw	60Dh
+		dw	108h
+		dw	20Fh
+		dw	0D53Bh
+		dw	0D7E8h
+		dw	0C2EDh
+		dw	0C286h
+		dw	txt_L3_intro
+		dw	txt_L3_success
+		dw	txt_L3_fail
+		dw	10Ch
+		dw	60Dh
+		dw	60Dh
+		dw	20Ah
+		dw	0D856h
+		dw	0DAB8h
+		dw	0C2EDh
+		dw	0C286h
+		dw	txt_L4_intro
+		dw	txt_L4_success
+		dw	txt_L4_fail
+		dw	10Ch
+		dw	108h
+		dw	60Dh
+		dw	108h
+		dw	0C386h
+		dw	0C21Ah
+		dw	0C2EDh
+		dw	0C286h
+
+		org	RUNZONE+99 ; #0063
+		db	1 ; level 2 ID
+
+		incbin	"leveldata1.bin"
+
+txt_intro_brief	db	"After retreating from Earth, the Orgaids are trying to stop our offensive on the Moon. "
+		db	"They have brought a large number of new weapons (the most dangerous are probably "
+		db	"surface-to-air missiles), so try to utilize the rugged terrain. \r"
+		db	0FFh
+
+		org	0DC80h ; offset #30A0
+
+		incbin	"leveldata2.bin"
+
+txt_L1_intro	db	"A large unknown machine has been discovered not far from the base - "
+		db	"attack & destroy it if possible \r"
+		db	0FFh
+txt_L1_success	db	"Excellent - the cruiser was approaching our forward positions. \r"
+		db	0FFh
+txt_L1_fail	db	"The machine must be destroyed. \r"
+		db	0FFh
+txt_L2_intro	db	"Today's target is a very well protected enemy base. "
+		db	"According to our information, there should be a VIP "
+		db	"of the Orgaid High Command here - try to get him! \r"
+		db	0FFh
+txt_L2_success	db	"Outstanding results! Killing this Orgaid strategist will save the lives of many of our soldiers. \r"
+		db	0FFh
+txt_L2_fail	db	"According to intelligence, the enemy strategist is still on the base, the attack must be repeated. \r"
+		db	0FFh
+txt_L3_intro	db	"Regrouping the forces before the upcoming operation requires a transfer to another base. "
+		db	"According to intelligence reports, enemy activity is unusually high, so watch out! \r"
+		db	0FFh
+txt_L3_success	db	"Congratulations on reaching the objective, judging by the mission log it wasn't easy at all! \r"
+		db	0FFh
+txt_L3_fail	db	"The transfer must be accomplished. \r"
+		db	0FFh
+txt_L4_intro	db	"The task force has captured several enemy battle cruisers, one of which is on its way here. "
+		db	"We need to clear the access route and protect it during the flyby - be careful, the captured ship is not marked in any way. \r"
+		db	0FFh
+txt_L4_success	db	"We've managed to discover a way to remotely detonate the self-destruct systems in the Orgaid ships - the Moon is liberated! \r"
+		db	0FFh
+txt_L4_fail	db	"We're preparing another battleship for a flyby. \r"
+		db	0FFh
+
+		org	0FC00h ; offset #5020
+
+		incbin	"leveldata3.bin"
+
+		savebin	"final.bin",RUNZONE,$-RUNZONE
