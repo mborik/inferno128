@@ -78,7 +78,7 @@ txt_equipment	db	80h,"4xCOBRA, forward firing missile\r"
 		cp	10h
 		jr	z,.standardROM
 		xor	a
-		ld	(loc_8231),a
+		ld	(print_zx_char.bold),a
 
 .standardROM	call	sub_6E27
 		ld	iy,5C3Ah
@@ -94,7 +94,7 @@ txt_equipment	db	80h,"4xCOBRA, forward firing missile\r"
 		cp	59h ; 'Y'
 		jr	nz,loc_6DC0
 		ld	a,20h ; ' '
-		ld	(loc_7533+1),a
+		ld	(cmd_redefine.testkempston+1),a
 
 loc_6DC0	ei
 		ld	hl, c_sets_default
@@ -632,15 +632,15 @@ basic_exe	ld	(basic_load_seq+1),a
 		call	loc_7389
 		call	basic_exe_2
 ; ---------------------------------------------------------------------------
-basic_load_seq	db	26h,0EFh,2Ah,22h,20h,20h,20h,20h,20h,20h,20h,20h,22h,0AFh; 0
-		db	30h,0Eh,0,0	; 0Eh
+basic_load_seq	db	26h,0EFh,2Ah,22h,20h,20h,20h,20h,20h,20h,20h,20h,22h,0AFh
+		db	30h,0Eh,0,0
 basic_ptr_load	dw	0
-		db	0,2Ch,30h,0Eh,0,0; 0
+		db	0,2Ch,30h,0Eh,0,0
 basic_ptr_usr	dw	0
-		db	0,3Ah,0F9h,0C0h,30h,0Eh,0,0; 0
+		db	0,3Ah,0F9h,0C0h,30h,0Eh,0,0
 word_721E	dw	7368h
 		db	0
-		db	0D0h	; Ð
+		db	0D0h
 ; ---------------------------------------------------------------------------
 		ld	hl,txt_err_disk
 		jr	loc_722A
@@ -920,7 +920,7 @@ loc_7404	add	a,c
 		ret
 
 ; ---------------------------------------------------------------------------
-c_somedata	db	8Fh,0,87h,93h,81h,83h,0,0,91h,0,0,0,0,95h,97h,0; 0
+c_somedata	db	8Fh,0,87h,93h,81h,83h,0,0,91h,0,0,0,0,95h,97h,0
 		db	0,89h,85h,99h,9Dh,9Bh,0,0,8Dh,8Bh,0; 10h
 
 console_input	call	sub_80BB
@@ -946,15 +946,15 @@ console_input	call	sub_80BB
 		call	22B0h
 		ld	b,1
 
-loc_7456	call	sub_7ED1
+loc_7456	call	downhl
 		djnz	loc_7456
 		xor	a
 
 loc_745C	push	hl
 		push	af
-		ld	(loc_8212+1),hl
+		ld	(print_zx_char.scraddr+1),hl
 		ld	a,3Eh ; '>'
-		call	sub_81EE
+		call	print_zx_char
 		ld	hl,5B15h
 		ld	c,(hl)
 		ld	b,1Bh
@@ -966,7 +966,7 @@ loc_746C	ld	a,c
 		dec	b
 		dec	c
 		ld	a,(hl)
-		call	sub_81EE
+		call	print_zx_char
 		jr	loc_746C
 ; ---------------------------------------------------------------------------
 
@@ -976,12 +976,12 @@ loc_7479	pop	hl
 ; ---------------------------------------------------------------------------
 
 loc_747C	ld	a,0
-		ld	hl,(loc_8212+1)
+		ld	hl,(print_zx_char.scraddr+1)
 		ld	(loc_750A+1),hl
-		call	sub_81EE
+		call	print_zx_char
 
 loc_7487	ld	a,20h ; ' '
-		call	sub_81EE
+		call	print_zx_char
 		djnz	loc_7487
 		pop	af
 		ei
@@ -1066,9 +1066,9 @@ loc_7502	ld	c,(hl)
 		pop	hl
 
 loc_750A	ld	hl,0
-		ld	(loc_8212+1),hl
+		ld	(print_zx_char.scraddr+1),hl
 		ld	a,20h ; ' '
-		call	sub_81EE
+		call	print_zx_char
 		call	sub_7F8F
 		xor	a
 		inc	a
@@ -1088,17 +1088,16 @@ unk_751B	db	16h
 
 cmd_redefine	ld	hl,3E8h
 		ld	c,0
-
-loc_7529	in	a,(1Fh)
+.waitkey	in	a,(1Fh)
 		or	c
 		ld	c,a
 		dec	hl
 		ld	a,h
 		or	l
-		jr	nz,loc_7529
+		jr	nz,.waitkey
 		ld	a,c
 
-loc_7533	cp	0
+.testkempston	cp	0
 		ld	a,8
 		adc	a,0
 		ld	(loc_75BD+2),a
@@ -1107,8 +1106,7 @@ loc_7533	cp	0
 		ld	hl, txt_redf_right
 		ld	de,5B00h
 		ld	b,7
-
-loc_754A	push	bc
+.keyloop	push	bc
 		push	de
 		push	hl
 		ld	hl,txt_redf_for
@@ -1118,10 +1116,9 @@ loc_754A	push	bc
 		pop	de
 		push	hl
 		push	de
-		ld	b,14h
-
-loc_755C	halt
-		djnz	loc_755C
+		ld	b,20
+.waitsecond	halt
+		djnz	.waitsecond
 		call	loc_75BA
 		call	sub_7C13
 		pop	hl
@@ -1135,17 +1132,15 @@ loc_755C	halt
 		push	hl
 		ld	hl,c_symbols
 		inc	e
-
-loc_7572	dec	e
-		jr	z,loc_758B
-
-loc_7575	inc	hl
+.loopsymbols	dec	e
+		jr	z,.printkey
+.findsymbol	inc	hl
 		ld	a,(hl)
-		call	sub_768E
-		jr	nz,loc_7575
-		jr	loc_7572
+		call	testsymbound
+		jr	nz,.findsymbol
+		jr	.loopsymbols
 
-sub_757E	ld	(5B79h),a
+.storerange	ld	(5B79h),a
 		ld	(loc_803C+1),a
 		ld	(loc_813B+1),a
 		ld	(loc_8160+1),a
@@ -1153,26 +1148,25 @@ sub_757E	ld	(5B79h),a
 
 ; ---------------------------------------------------------------------------
 
-loc_758B	ld	bc,0
+.printkey	ld	bc,0
 		ld	(loc_8160+1),bc
 		ld	a,7Bh ; '{'
-		call	sub_757E
+		call	.storerange
 		ld	a,60h ; '`'
 		ld	(loc_7F0E+1),a
 		call	sub_7F84
 		ld	a,10h
-		call	sub_757E
+		call	.storerange
 		ld	a,30h ; '0'
 		ld	(loc_7F0E+1),a
 		pop	de
 		pop	hl
 		pop	bc
-		djnz	loc_754A
-		ld	b,0Ah
-
-loc_75B0	ei
+		djnz	.printkey
+		ld	b,10
+.waithalfsec	ei
 		halt
-		djnz	loc_75B0
+		djnz	.waithalfsec
 		call	sub_7F8F
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
@@ -1239,7 +1233,7 @@ c_symbols	db	"12345"
 		db	"Kempston fire"
 		db	41h ; A
 
-sub_768E	cp	30h ; '0'
+testsymbound	cp	30h ; '0'
 		ret	c
 		cp	3Ah ; ':'
 		jr	c,loc_769D
@@ -1322,7 +1316,7 @@ loc_7784	ld	(hl),0
 		inc	l
 		djnz	loc_7784
 		ld	l,a
-		call	sub_7ED1
+		call	downhl
 		dec	c
 		jr	nz,loc_7781
 
@@ -1632,7 +1626,7 @@ loc_7995	ld	b,8
 loc_799F	ld	a,(de)
 		ld	(hl),a
 		inc	de
-		call	sub_7ED1
+		call	downhl
 		djnz	loc_799F
 		dec	c
 		jr	nz,loc_7995
@@ -2097,7 +2091,7 @@ loc_7C7E	add	hl,hl
 		or	c
 		ld	(hl),a
 		pop	hl
-		call	sub_7ED1
+		call	downhl
 		pop	bc
 		djnz	loc_7C6B
 		halt
@@ -2115,7 +2109,7 @@ loc_7CAD	ld	a,(de)
 		ld	(hl),a
 		inc	de
 		pop	hl
-		call	sub_7ED1
+		call	downhl
 		djnz	loc_7CAD
 		call	sub_7731
 		pop	hl
@@ -2222,7 +2216,7 @@ loc_7D4E	ld	(hl),-1
 		inc	l
 		djnz	loc_7D4E
 		ld	l,e
-		call	sub_7ED1
+		call	downhl
 		dec	c
 		jr	nz,loc_7D4B
 		ld	hl,byte_8584
@@ -2352,7 +2346,7 @@ loc_7E4D	ld	a,(de)
 		inc	de
 		djnz	loc_7E4D
 		pop	hl
-		call	sub_7ED1
+		call	downhl
 		pop	bc
 		djnz	loc_7E4A
 		pop	hl
@@ -2394,7 +2388,7 @@ loc_7E7B	ld	(hl),0AAh
 		inc	h
 		djnz	loc_7E7B
 		dec	h
-		call	sub_7ED1
+		call	downhl
 		dec	c
 		jr	nz,loc_7E72
 		pop	hl
@@ -2441,27 +2435,25 @@ loc_7EBF	ld	bc,8
 		pop	hl
 		ld	b,7
 
-loc_7ECB	call	sub_7ED1
+loc_7ECB	call	downhl
 		djnz	loc_7ECB
 		pop	bc
 
-sub_7ED1	inc	h
+downhl		inc	h
 		ld	a,h
 		and	7
 		ret	nz
 		ld	a,l
-		add	a,20h ; ' '
+		add	a,32
 		ld	l,a
 		ld	a,h
-		jr	c,loc_7EE0
+		jr	c,.next3rd
 		sub	8
 		ld	h,a
-
-loc_7EE0	cp	58h ; 'X'
-		jr	c,loc_7EE6
-		ld	h,40h ; '@'
-
-loc_7EE6	or	a
+.next3rd	cp	58h
+		jr	c,.nooverlap
+		ld	h,40h
+.nooverlap	or	a
 		ret
 
 sub_7EE8	add	a,l
@@ -2550,7 +2542,7 @@ sub_7F84	ld	a,(hl)
 		call	sub_7F91
 		inc	hl
 		ld	a,(hl)
-		call	sub_768E
+		call	testsymbound
 		jr	nz,sub_7F84
 
 sub_7F8F	ld	a,0Dh
@@ -2801,7 +2793,7 @@ loc_80FC	inc	hl
 
 loc_80FD	ex	de,hl
 		ld	hl,(loc_8160+1)
-		ld	(loc_758B+1),hl
+		ld	(cmd_redefine.printkey+1),hl
 		call	loc_80EB
 		ld	hl,5B14h
 
@@ -2898,7 +2890,7 @@ loc_817B	ld	(hl),a
 		ex	de,hl
 		push	bc
 		ld	b,9
-		call	sub_7ED1
+		call	downhl
 
 loc_8192	ld	a,(de)
 		inc	de
@@ -2930,7 +2922,7 @@ loc_81AA	ld	a,(hl)
 		ld	(hl),a
 		dec	hl
 
-loc_81B6	call	sub_7ED1
+loc_81B6	call	downhl
 		pop	de
 		pop	bc
 		djnz	loc_8192
@@ -2941,107 +2933,101 @@ loc_81B6	call	sub_7ED1
 		ld	(hl),a
 		pop	hl
 		pop	de
-
-locret_81C6	ret
+		ret
 
 ; ---------------------------------------------------------------------------
-		db	45h,0
-		db	45h,1
-		db	53h,1
-		db	43h,1
-		db	52h,1
-		db	5Ah,1
-		db	59h,0
-		db	41h,0
-		db	49h,0
-		db	44h,1
-		db	4Eh,1
-		db	4Fh,0
-		db	54h,1
-		db	55h,2
-		db	55h,0
-unk_81E5	db	0F9h
+diacs_map	db	'E',0
+		db	'E',1
+		db	'S',1
+		db	'C',1
+		db	'R',1
+		db	'Z',1
+		db	'Y',0
+		db	'A',0
+		db	'I',0
+		db	'D',1
+		db	'N',1
+		db	'O',0
+		db	'T',1
+		db	'U',2
+		db	'U',0
+
+diacs_accents	db	0F9h ; acute accent
 		db	0F3h
 		db	0FFh
-		db	0C9h
+		db	0C9h ; caron accent
 		db	0E3h
 		db	0FFh
-		db	0E3h
+		db	0E3h ; ring accent
 		db	0C9h
 		db	0E3h
 
-sub_81EE	exx
+print_zx_char	exx
 		or	a
-		jr	z,loc_8244
+		jr	z,.repeatlast
 		cp	80h
-		ld	(loc_8222+1),a
-		ld	hl,unk_8250
-		jr	c,loc_8212
-		ld	hl,locret_81C6
+		ld	(.drawromchar+1),a
+		ld	hl,.buffer
+		jr	c,.scraddr
+		ld	hl,diacs_map - 1
 		and	7Fh
 		ld	c,a
 		ld	b,0
 		add	hl,bc
 		ld	a,(hl)
-		ld	(loc_8222+1),a
+		ld	(.drawromchar+1),a
 		inc	hl
 		ld	a,(hl)
 		add	a,(hl)
 		add	a,(hl)
 		ld	c,a
-		ld	hl,unk_81E5
+		ld	hl,diacs_accents
 		add	hl,bc
-
-loc_8212	ld	de,0
+.scraddr	ld	de,0
 		push	de
 		ld	b,3
-
-loc_8218	ld	a,(hl)
+.drawaccent	ld	a,(hl)
 		ld	(de),a
 		inc	hl
 		ex	de,hl
-		call	sub_7ED1
+		call	downhl
 		ex	de,hl
-		djnz	loc_8218
-
-loc_8222	ld	a,0
+		djnz	.drawaccent
+.drawromchar	ld	a,0
 		add	a,a
 		ld	l,a
 		sbc	a,a
 		cpl
 		ld	c,a
-		ld	h,0Fh
+		ld	h,15
 		add	hl,hl
 		add	hl,hl
 		inc	hl
 		ld	b,7
-
-loc_8230	ld	a,(hl)
-
-loc_8231	rrca
+.drawloop	ld	a,(hl)
+.bold		rrca
 		or	(hl)
 		xor	c
 		ld	(de),a
 		ex	de,hl
 		inc	de
-		call	sub_7ED1
+		call	downhl
 		ex	de,hl
-		djnz	loc_8230
+		djnz	.drawloop
 		pop	hl
 		inc	l
-		ld	(loc_8212+1),hl
+		ld	(print_zx_char.scraddr+1),hl
 		exx
 		ret
-; ---------------------------------------------------------------------------
 
-loc_8244	ld	b,0Ah
-		ld	hl,unk_8250
-		ld	de,(loc_8212+1)
+.repeatlast	ld	b,10
+		ld	hl,.buffer
+		ld	de,(print_zx_char.scraddr+1)
 		push	de
-		jr	loc_8230
+		jr	.drawloop
 
+.buffer		block	12,-1
 ; ---------------------------------------------------------------------------
-unk_8250	block	12,-1
 
 sub_825C	ld	a,1Eh
 		ld	b,14h
@@ -3715,7 +3701,6 @@ sub_91DD	ld	a,34h ; '4'
 		ld	(loc_919C+1),a
 		ld	b,8
 		ld	hl,5BF8h
-
 loc_91F3	ld	(hl),a
 		inc	l
 		djnz	loc_91F3
