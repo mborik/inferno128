@@ -5000,10 +5000,13 @@ demoheader	ret ; TBD
 
 ;;-----------------------------------------------------------------------------
 
-		org	im2vector - (im2vector_space - music_init)
+		org	im2vector - (im2vector_space - music_space)
+
+@music_space	ds	1510
+
 		include "stc.a80"
 
-@xchg.keeper:	and	#17
+@xchg.keeper	and	#17
 		ld	c,a
 		ld	a,(act128page)
 		jr	nz,1F
@@ -5011,16 +5014,16 @@ demoheader	ret ; TBD
 1		and	#F8
 		or	c
 		jr	1F
-@xchg.bnk:	ld	(act128page),a
+@xchg.bnk	ld	(act128page),a
 1		ld	bc,page128
 		out	(c),a
 		ret
 
-	if mainblock.end > music_init
-		display "Too long! ",/D,(mainblock.end-music_init)," bytes out!"
+	if mainblock.end > music_space
+		display "Too long! ",/D,(mainblock.end-music_space)," bytes out!"
 		end
 	else
-		display /D,(music_init-mainblock.end)," bytes free for game engine"
+		display /D,(music_space-mainblock.end)," bytes free for game engine"
 	endif
 
 	if $ > interrupt
@@ -5050,15 +5053,12 @@ interrupt	di
 
 @IMCALL		ld	bc,#0101
 
-@music_page	ld	a,0
+@music_enabled	ld	a,0
 		or	a
 		jr	z,.disabled
-		call	xchg.keeper
 		call	music_play
-		xor	a
-		call	xchg.keeper
 
-.disabled:	pop	hl
+.disabled	pop	hl
 		pop	de
 		pop	bc
 		pop	af
@@ -5082,7 +5082,6 @@ interrupt	di
 	    endif
 	endif
 
-		org	RUNZONE
 intro
 	module _INTRO_WRAPPER
 		include "../intro/intro.a80"
@@ -5096,8 +5095,10 @@ intro
 		export RUNZONE
 		export BASESP
 		export IMCALL
+		export music_space
 		export music_init
 		export music_play
-		export music_page
+		export music_enabled
 		export music_setup
+		export enablefade
 	endif

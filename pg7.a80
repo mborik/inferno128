@@ -6,29 +6,8 @@
 @_fxpage = #17
 @_fxpage_start
 
+entire128k_offset = ((_fxpage & 7) * #4000)
 ;;-----------------------------------------------------------------------------
-; Every part is defined with this descriptor:
-;
-; fx_part: incbin "demo-part-folder/final.pak"
-; .pg = _fxpage     ; current fx 128k page
-;                   ; (set bit.7 to just ldir given length, not decompress)
-; .length           ; optional when data transfer (ldir) needed
-
-	module soundtrack
-
-intro:		incbin "intro/music.stc"
-level1:		incbin "level1/music.stc"
-level2:		incbin "level2/music.stc"
-level3:		incbin "level3/music.stc"
-level4:		incbin "level4/music.stc"
-level5:		incbin "level5/music.stc"
-level6:		incbin "level6/music.stc"
-outro1:		incbin "outro/song1.stc"
-outro2:		incbin "outro/song2.stc"
-
-	endmodule
-
-music_pg = _fxpage
 
 ;;-----------------------------------------------------------------------------
 	if $ > #10000
@@ -42,18 +21,3 @@ music_pg = _fxpage
 		savebin "bank7",(_fxpage_start),$-(_fxpage_start)
 
 ;;-----------------------------------------------------------------------------
-; Every part descriptor values should be exported:
-;
-;		export fx_part
-;		export fx_part.pg
-
-		export music_pg
-		export soundtrack.intro
-		export soundtrack.level1
-		export soundtrack.level2
-		export soundtrack.level3
-		export soundtrack.level4
-		export soundtrack.level5
-		export soundtrack.level6
-		export soundtrack.outro1
-		export soundtrack.outro2

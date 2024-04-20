@@ -1,1 +1,1 @@
-fx_main_mover: EQU 0x0000B554
+fx_main_mover: EQU 0x0000B3E6

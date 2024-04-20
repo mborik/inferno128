@@ -1,11 +1,12 @@
-intro		ld	a,music_pg
-		ld	(music_page+1),a
-		call	xchg.bnk
-		ld	hl,soundtrack.intro
-		call	music_init
-		ld	a,#10
-		call	xchg.bnk
+		org	music_space
+
+		incbin "music.stc"
+
+		org	RUNZONE
+
+intro		call	music_init
 		ld	a,#CD
+		ld	(music_enabled+1),a
 		ld	(IMCALL),a
 		ld	hl,introint
 		ld	(IMCALL+1),hl
@@ -189,7 +190,7 @@ introend	di
 		im	1
 backsp		ld	sp,0
 		xor	a
-		ld	(music_page+1),a
+		ld	(music_enabled+1),a
 		inc	a
 		ld	(IMCALL),a
 		jp	music_mute

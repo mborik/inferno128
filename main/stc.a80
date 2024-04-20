@@ -8,7 +8,8 @@ PATTLEN = 7	; single pattern record length
 NULL = 0
 
 ;------------------------------------------------------------------------------
-music_init:	ld	a,(hl)
+music_init:	ld	hl,music_space
+		ld	a,(hl)
 		ld	(speed),a
 		ld	(module_addr+1),hl
 		inc	hl
