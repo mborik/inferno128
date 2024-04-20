@@ -4,7 +4,7 @@
 
 
 	ifdef	isFX
-		display	"Composing Level 2"
+		display	"Composing Level 2" ; Others on the Moon
 	endif
 
 		org	RUNZONE
@@ -56,7 +56,7 @@
 		dw	0C286h
 
 		org	RUNZONE+99 ; #0063
-		db	1 ; level 2 ID
+		db	1 ; level ID
 
 		incbin	"leveldata1.bin"
 

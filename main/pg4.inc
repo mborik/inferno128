@@ -1,0 +1,10 @@
+level3_dat_len: EQU 0x00002983
+level3_dat_pg2: EQU 0x00000014
+level3_msx_real: EQU 0x0000D706
+level3_msx_len: EQU 0x000001ED
+level3_msx_pg: EQU 0x00000014
+level3_msx_ptr: EQU 0x00008B83
+level3_scr_real: EQU 0x0000D8F4
+level3_scr_len: EQU 0x000005A1
+level3_scr_pg: EQU 0x00000014
+level3_scr_ptr: EQU 0x00008C7A

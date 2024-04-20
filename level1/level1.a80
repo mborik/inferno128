@@ -4,7 +4,7 @@
 
 
 	ifdef isFX
-		display "Composing Level 1"
+		display "Composing Level 1" ; Found in New York
 	endif
 
 		org	RUNZONE
@@ -56,7 +56,7 @@
 		dw	0C2B3h
 
 		org	RUNZONE+99 ; #0063
-		db	0 ; level 1 ID
+		db	0 ; level ID
 
 		incbin	"leveldata1.bin"
 

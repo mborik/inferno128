@@ -1,0 +1,115 @@
+		device	zxspectrum48
+
+		include	"../main/constants.inc"
+
+
+	ifdef	isFX
+		display	"Composing Level 3" ; The Empire Strikes Back
+	endif
+
+		org	RUNZONE
+
+		dw	txt_intro_brief
+		dw	txt_L1_intro
+		dw	txt_L1_success
+		dw	txt_L1_fail
+		dw	20Fh
+		dw	108h
+		dw	800h
+		dw	10Bh
+		dw	0D1A5h
+		dw	0D542h
+		dw	0C423h
+		dw	0D66Eh
+		dw	txt_L2_intro
+		dw	txt_L2_success
+		dw	txt_L2_fail
+		dw	20Fh
+		dw	60Dh
+		dw	108h
+		dw	800h
+		dw	0D6B9h
+		dw	0EC08h
+		dw	0C423h
+		dw	0DACEh
+		dw	txt_L3_intro
+		dw	txt_L3_success
+		dw	txt_L3_fail
+		dw	20Fh
+		dw	60Dh
+		dw	807h
+		dw	10Ch
+		dw	0ED7Fh
+		dw	0F0C2h
+		dw	0C423h
+		dw	0DB1Eh
+		dw	txt_L4_intro
+		dw	txt_L4_success
+		dw	txt_L4_fail
+		dw	20Fh
+		dw	60Dh
+		dw	807h
+		dw	10Ch
+		dw	0C4E9h
+		dw	0C21Ah
+		dw	0C423h
+		dw	0C3C6h
+
+		org	RUNZONE+99 ; #0063
+		db	2 ; level ID
+
+		incbin	"leveldata1.bin"
+
+		org	0DC80h ; offset #30A0
+
+		incbin	"leveldata2.bin"
+
+txt_intro_brief	db	"Planet Violet is the third planet in the Alpha Centauri system, named after the characteristically coloured deserts. "
+		db	"It is also known for its strange belts of mountains, sort of geometrically perfect cones. "
+		db	"The planet was discovered in 2313, and a small scientific colony was later established here. "
+		db	"After a sudden Orgaid invasion, the entire population had to be evacuated. "
+		db	"Currently, Violet is the fulcrum of Orgaid defences in the Alpha Centauri system. \r"
+		db	0FFh
+txt_L1_intro	db	"A recon satellite has detected the location of the enemy base, the objective of the first mission is to find and destroy it. "
+		db	"A strong enemy presence has been detected in the area. \r"
+		db	0FFh
+txt_L1_success	db	"Well done. Destroying this base will significantly weaken enemy defences across the planet. "
+		db	"The first strategic success on Violet is mostly just your success. \r"
+		db	0FFh
+txt_L1_fail	db	"The presence of an enemy base near our position heavily limits our plans, "
+		db	"the destruction of the base remains a strategic task of the highest priority. \r"
+		db	0FFh
+txt_L2_intro	db	"Several of our supply convoys have been recently attacked by enemy forces. "
+		db	"The recon satellite has not yet detected any enemy bases. However, now we know the direction of the attacks. "
+		db	"Find and destroy the enemy base. \r"
+		db	0FFh
+txt_L2_success	db	"Unexpected success. You have found and destroyed a well-hidden enemy base. "
+		db	"Ground forces now control more than half of the Violet's surface. \r"
+		db	0FFh
+txt_L2_fail	db	"A strategic offensive cannot be initiated without finding and destroying the source of dangerous attacks. "
+		db	"The search must continue. \r"
+		db	0FFh
+txt_L3_intro	db	"The upcoming offensive requires the transport of supplies to one of the outposts. "
+		db	"Your mission is to clear a path for SOUMAR and ensure its safe passage. "
+		db	"SOUMAR will take off immediately. You must move quickly. "
+		db	"Do not land until you are sure that SOUMAR has arrived safely at the target base. \r"
+		db	0FFh
+txt_L3_success	db	"Excellent! SOUMAR has arrived at its destination without a single scratch. The strategic offensive is about to begin. \r"
+		db	0FFh
+txt_L3_fail	db	"The SOUMAR has been destroyed, the offensive must be postponed and a new supply transport dispatched. \r"
+		db	0FFh
+txt_L4_intro	db	"The enemies are preparing a final counter-attack to prevent the imminent liberation of Violet. "
+		db	"Several ships are heading towards the planet, fully loaded with weapons. "
+		db	"Today's mission is to find and destroy one of the enemy cargo spaceships. "
+		db	"Beware, it is heavily armed with annihilators and missiles. \r"
+		db	0FFh
+txt_L4_success	db	"The Violet is free of the enemy. The remnants of their colonial army are now leaving the Alpha Centauri system. \r"
+		db	0FFh
+txt_L4_fail	db	"The enemy spaceship has not been destroyed. The mission must be repeated. \r"
+		db	0FFh
+
+		org	0FC00h ; offset #5020
+
+		incbin	"leveldata3.bin"
+
+		savebin	"final.bin",RUNZONE,$-RUNZONE

@@ -3,16 +3,32 @@
 		define isFX 4
 		display "Composing bank ",/D,isFX
 
+		include "main/pg3.inc"
+
 @_fxpage = #14
 @_fxpage_start
 
+entire128k_offset = ((_fxpage & 7) * #4000)
 ;;-----------------------------------------------------------------------------
-; Every part is defined with this descriptor:
-;
-; fx_part: incbin "demo-part-folder/final.pak"
-; .pg = _fxpage     ; current fx 128k page
-;                   ; (set bit.7 to just ldir given length, not decompress)
-; .length           ; optional when data transfer (ldir) needed
+
+		align	2
+level3_dat_rest	incbin "level3/final.pak",level3_dat_snip
+level3_dat_len	= ($ - level3_dat_rest) + level3_dat_snip
+level3_dat_pg2	= _fxpage
+
+		align	2
+level3_msx_real	incbin "level3/music.pak"
+level3_msx_len	= $ - level3_msx_real
+level3_msx_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level3_msx_ptr	= (entire128k_offset + (level3_msx_real - #C000)) >> 1
+
+		align	2
+level3_scr_real	incbin "level3/loading.pak"
+level3_scr_len	= $ - level3_scr_real
+level3_scr_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level3_scr_ptr	= (entire128k_offset + (level3_scr_real - #C000)) >> 1
 
 ;;-----------------------------------------------------------------------------
 	if $ > #10000
@@ -26,7 +42,16 @@
 		savebin "bank4",(_fxpage_start),$-(_fxpage_start)
 
 ;;-----------------------------------------------------------------------------
-; Every part descriptor values should be exported:
-;
-;		export fx_part
-;		export fx_part.pg
+
+		export level3_dat_len
+		export level3_dat_pg2
+
+		export level3_msx_real
+		export level3_msx_len
+		export level3_msx_pg
+		export level3_msx_ptr
+
+		export level3_scr_real
+		export level3_scr_len
+		export level3_scr_pg
+		export level3_scr_ptr

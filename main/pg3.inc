@@ -8,3 +8,7 @@ level2_scr_real: EQU 0x0000E7B8
 level2_scr_len: EQU 0x000005C9
 level2_scr_pg: EQU 0x00000013
 level2_scr_ptr: EQU 0x000073DC
+level3_dat_real: EQU 0x0000ED82
+level3_dat_snip: EQU 0x0000127E
+level3_dat_pg: EQU 0x00000013
+level3_dat_ptr: EQU 0x000076C1
