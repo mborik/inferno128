@@ -30,6 +30,13 @@ level3_scr_pg	= _fxpage
 ; special entire 128k area pointer, shifted >> 1 to fit a word
 level3_scr_ptr	= (entire128k_offset + (level3_scr_real - #C000)) >> 1
 
+		align	2
+level4_dat_real	incbin "level4/final.pak",0,#10000 - level4_dat_real
+level4_dat_snip	= $ - level4_dat_real
+level4_dat_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level4_dat_ptr	= (entire128k_offset + (level4_dat_real - #C000)) >> 1
+
 ;;-----------------------------------------------------------------------------
 	if $ > #10000
 		display "Too long! ",/D,($-#10000)," bytes out!"
@@ -55,3 +62,8 @@ level3_scr_ptr	= (entire128k_offset + (level3_scr_real - #C000)) >> 1
 		export level3_scr_len
 		export level3_scr_pg
 		export level3_scr_ptr
+
+		export level4_dat_real
+		export level4_dat_snip
+		export level4_dat_pg
+		export level4_dat_ptr

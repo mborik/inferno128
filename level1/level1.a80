@@ -63,14 +63,14 @@
 txt_intro_brief	db	"The area of operation is the New York city (an ancient landmark of late 20th century). "
 		db	"Orgaids are disguising their weapons as ancient Earth machines, beware of any unusual objects. "
 		db	"The clouds over the city are physically modified and pose a significant danger to your battleship. \r"
-		db	0FFh
+		db	-1
 txt_L1_intro	db	"The first mission is the usual patrol flight on the route RAINA - Statue of Liberty - RAINA. "
 		db	"Eliminate all hostile activity if possible. \r"
-		db	0FFh
+		db	-1
 txt_L1_success	db	"Excellent. Your first mission has been successful. \r"
-		db	0FFh
+		db	-1
 txt_L1_fail	db	"The patrol flight must be repeated. We need information about the entire area. \r"
-		db	0FFh
+		db	-1
 
 		org	0DC80h ; offset #30A0
 
@@ -78,25 +78,25 @@ txt_L1_fail	db	"The patrol flight must be repeated. We need information about th
 
 txt_L2_intro	db	"Objective: Locate and destroy an enemy cruiser disguised as a shuttle. "
 		db	"The cruiser is equipped with homing missiles that are aimed on you at the moment of launch. \r"
-		db	0FFh
+		db	-1
 txt_L2_success	db	"Congratulations, your first enemy cruiser was destroyed. \r"
-		db	0FFh
+		db	-1
 txt_L2_fail	db	"The cruiser hasn't been destroyed - the mission must be repeated. \r"
-		db	0FFh
+		db	-1
 txt_L3_intro	db	"A large battle cruiser threatens the offensive preparations, it must be destroyed as soon as possible. \r"
-		db	0FFh
+		db	-1
 txt_L3_success	db	"The cruiser has been destroyed - the offensive is ready to launch! \r"
-		db	0FFh
+		db	-1
 txt_L3_fail	db	"Without destroying this enemy, the offensive cannot be launched. \r"
-		db	0FFh
+		db	-1
 txt_L4_intro	db	"As part of Operation Twist, you have been assigned to a very important mission - "
 		db	"to destroy the Orgaid headquarters, which is hidden in the Statue of Liberty. "
 		db	"But first, you must hold off an enemy attack on RAINA. \r"
-		db	0FFh
+		db	-1
 txt_L4_success	db	"An outstanding achievement - Earth is completely liberated. \r"
-		db	0FFh
+		db	-1
 txt_L4_fail	db	"The Orgaids are successfully resisting the offensive. \r"
-		db	0FFh
+		db	-1
 
 		org	0FC00h ; offset #5020
 

@@ -1,0 +1,105 @@
+		device	zxspectrum48
+
+		include	"../main/constants.inc"
+
+
+	ifdef isFX
+		display	"Composing Level 4" ; Fourth Planet of Death
+	endif
+
+		org	RUNZONE
+
+		dw	txt_intro_brief
+		dw	txt_L1_intro
+		dw	txt_L1_success
+		dw	txt_L1_fail
+		dw	10Ch
+		dw	20Fh
+		dw	60Dh
+		dw	10Bh
+		dw	0D215h
+		dw	0D567h
+		dw	0C2E3h
+		dw	0C28Bh
+		dw	txt_L2_intro
+		dw	txt_L2_success
+		dw	txt_L2_fail
+		dw	809h
+		dw	20Fh
+		dw	20Fh
+		dw	807h
+		dw	0D5D5h
+		dw	0D918h
+		dw	0C2E3h
+		dw	0C28Bh
+		dw	txt_L3_intro
+		dw	txt_L3_success
+		dw	txt_L3_fail
+		dw	60Dh
+		dw	800h
+		dw	800h
+		dw	10Bh
+		dw	0F40Ch
+		dw	0C21Ah
+		dw	0C2E3h
+		dw	0C28Bh
+		dw	txt_L4_intro
+		dw	txt_L4_success
+		dw	txt_L4_fail
+		dw	60Dh
+		dw	10Bh
+		dw	10Bh
+		dw	10Bh
+		dw	0C3A4h
+		dw	0C21Ah
+		dw	0C2E3h
+		dw	0C28Bh
+
+		org	RUNZONE+99 ; #0063
+		db	3 ; level ID
+
+		incbin	"leveldata1.bin"
+
+txt_L1_intro	db	"The first mission on NGC32/4 is to locate and destroy the enemy Area Headquarters - "
+		db	"it's hidden in one of the hangars. \r"
+		db	-1
+txt_L1_success	db	"Headquarters destroyed, excellent result, congratulations! \r"
+		db	-1
+txt_L1_fail	db	"A new attack on the Area Headquarters is necessary. \r"
+		db	-1
+txt_L2_intro	db	"One to three enemy MANTAs are quickly heading towards the CIMRMAN. Eliminate them before they reach their target - "
+		db	"put a mine barrier in their path. After repelling the attack, destroy the enemy fuel supply. \r"
+		db	-1
+txt_L2_success	db	"Well done, both missions accomplished. \r"
+		db	-1
+txt_L2_fail	db	"Until the fuel supply is destroyed, the attack must be repeated. \r"
+		db	-1
+txt_L3_success	db	"Excellent, NGC32/4 will be under our control soon. \r"
+		db	-1
+txt_L3_fail	db	"Supplies are still our primary target! \r"
+		db	-1
+txt_L4_fail	db	"There is no other choice than to try to repeat the mission, the route has not been cleared. \r"
+		db	-1
+
+		org	0DC80h ; offset #30A0
+
+		incbin	"leveldata2.bin"
+
+txt_intro_brief	db	"The planet NGC32/4 (yet unnamed) is very similar to Earth. "
+		db	"It is located within the former neutral zone and therefore has never been inhabited by Earthlings. "
+		db	"Due to the lack of ground bases, you will launch missions off the deck of CIMRMAN. \r"
+		db	-1
+txt_L3_intro	db	"Orbital recon has discovered strategic supplies, destroying them may turn the situation completely on our side. "
+		db	"The tanks are very durable and can be destroyed only by a direct bomb strike. \r"
+		db	-1
+txt_L4_intro	db	"The last mission is to destroy the remnants of the enemy defenses and allow CIMRMAN to move to a new location "
+		db	"(CIMRMAN will move out as soon as you are in sight, you must hurry). \r"
+		db	-1
+txt_L4_success	db	"NGC32/4 is fully under our control, the next battles will take place in Orgaid space. \r"
+		db	-1
+
+		org	0FC00h ; offset #5020
+
+		incbin	"leveldata3.bin"
+
+		savebin	"final.bin",RUNZONE,$-RUNZONE
