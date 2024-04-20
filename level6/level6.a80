@@ -1,0 +1,108 @@
+		device	zxspectrum48
+
+		include	"../main/constants.inc"
+
+
+	ifdef isFX
+		display	"Composing Level 6" ; Orga
+	endif
+
+		org	RUNZONE
+
+		dw	txt_intro_brief
+		dw	txt_L1_intro
+		dw	txt_L1_success
+		dw	txt_L1_fail
+		dw	10Ch
+		dw	60Dh
+		dw	105h
+		dw	809h
+		dw	0D5C5h
+		dw	0D863h
+		dw	0C342h
+		dw	0D8F4h
+		dw	txt_L2_intro
+		dw	txt_L2_success
+		dw	txt_L2_fail
+		dw	10Ch
+		dw	108h
+		dw	60Dh
+		dw	20Fh
+		dw	0F40Fh
+		dw	0D93Fh
+		dw	0C342h
+		dw	0D9DFh
+		dw	txt_L3_intro
+		dw	txt_L3_success
+		dw	txt_L3_fail
+		dw	60Dh
+		dw	108h
+		dw	20Ah
+		dw	20Fh
+		dw	0F707h
+		dw	0DA20h
+		dw	0C342h
+		dw	0DAE3h
+		dw	txt_L4_intro
+		dw	txt_L4_success
+		dw	txt_L4_fail
+		dw	10Ch
+		dw	108h
+		dw	20Fh
+		dw	20Fh
+		dw	0C40Dh
+		dw	0C21Ah
+		dw	0C342h
+		dw	0C2F4h
+
+		org	RUNZONE+99 ; #0063
+		db	5 ; level ID
+
+		incbin	"leveldata1.bin"
+
+txt_intro_brief	db	"Orga is the home planet of the Orgaids. "
+		db	"It is located approximately in the middle of the third spiral arm of the Galaxy. "
+		db	"Orga is the last planet controlled by the Orgaids - if we conquer it, we will win. \r"
+		db	0FFh
+txt_L1_intro	db	"We've located an important enemy ship, destroy it! \r"
+		db	0FFh
+txt_L1_success	db	"Excellent. The latest intel indicates the ship was carrying two special forces. \r"
+		db	0FFh
+txt_L1_fail	db	"Destruction of the ship is still the only objective. \r"
+		db	0FFh
+txt_L4_fail	db	"Prepare to launch again. \r"
+		db	0FFh
+
+		org	0C000h ; offset #1420
+
+		incbin	"leveldata2.bin"
+
+txt_L2_intro	db	"Special battle robots are moving towards our position. Destroy them. "
+		db	"Beware, they're backed up by several fighters. \r"
+		db	0FFh
+txt_L2_success	db	"Congratulations, you've eliminated the danger. \r"
+		db	0FFh
+txt_L2_fail	db	"The attack against the robots must be repeated. \r"
+		db	0FFh
+txt_L3_intro	db	"We've located strategic fuel supplies. Destroy them! \r"
+		db	0FFh
+txt_L3_fail	db	"The destruction of this supplies is necessary! \r"
+		db	0FFh
+
+		org	0DC80h ; offset #30A0
+
+		incbin	"leveldata3.bin"
+
+txt_L3_success	db	"An unexpected success, congratulations. \r"
+		db	0FFh
+txt_L4_intro	db	"The last point of resistance on Orga is the heavily protected Imperial Palace - "
+		db	"try to destroy it. This mission is very dangerous, good luck! \r"
+		db	0FFh
+txt_L4_success	db	"Congratulations, the Orgaids have been defeated! The war is over with our victory. \r"
+		db	0FFh
+
+		org	0FC00h ; offset #5020
+
+		incbin	"leveldata4.bin"
+
+		savebin	"final.bin",RUNZONE,$-RUNZONE

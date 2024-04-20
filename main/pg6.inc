@@ -12,3 +12,7 @@ level5_dat_real: EQU 0x0000D1B8
 level5_dat_len: EQU 0x00002D22
 level5_dat_pg: EQU 0x00000016
 level5_dat_ptr: EQU 0x0000C8DC
+level5_scr_real: EQU 0x0000FEDA
+level5_scr_snip: EQU 0x00000126
+level5_scr_pg: EQU 0x00000016
+level5_scr_ptr: EQU 0x0000DF6D

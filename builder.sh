@@ -63,6 +63,12 @@ PAK final.bin final.pak
 PAK loading.scr loading.pak
 PAK music.stc music.pak
 
+cd ../level6
+ASM level6.a80 -DisFX --lst=level6.lst
+PAK final.bin final.pak
+PAK loading.scr loading.pak
+PAK music.stc music.pak
+
 # banks composition
 cd ..
 rm -f bank*

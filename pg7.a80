@@ -3,11 +3,46 @@
 		define isFX 7
 		display "Composing bank ",/D,isFX
 
+		include "main/pg6.inc"
+
 @_fxpage = #17
 @_fxpage_start
 
 entire128k_offset = ((_fxpage & 7) * #4000)
 ;;-----------------------------------------------------------------------------
+
+		align	2
+level5_scr_rest	incbin "level5/loading.pak",level5_scr_snip
+level5_scr_len	= ($ - level5_scr_rest) + level5_scr_snip
+level5_scr_pg2	= _fxpage
+
+		align	2
+level5_msx_real	incbin "level5/music.pak"
+level5_msx_len	= $ - level5_msx_real
+level5_msx_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level5_msx_ptr	= (entire128k_offset + (level5_msx_real - #C000)) >> 1
+
+		align	2
+level6_dat_real	incbin "level6/final.pak"
+level6_dat_len	= $ - level6_dat_real
+level6_dat_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level6_dat_ptr	= (entire128k_offset + (level6_dat_real - #C000)) >> 1
+
+		align	2
+level6_msx_real	incbin "level6/music.pak"
+level6_msx_len	= $ - level6_msx_real
+level6_msx_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level6_msx_ptr	= (entire128k_offset + (level6_msx_real - #C000)) >> 1
+
+		align	2
+level6_scr_real	incbin "level6/loading.pak"
+level6_scr_len	= $ - level6_scr_real
+level6_scr_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+level6_scr_ptr	= (entire128k_offset + (level6_scr_real - #C000)) >> 1
 
 ;;-----------------------------------------------------------------------------
 	if $ > #10000
@@ -21,3 +56,26 @@ entire128k_offset = ((_fxpage & 7) * #4000)
 		savebin "bank7",(_fxpage_start),$-(_fxpage_start)
 
 ;;-----------------------------------------------------------------------------
+
+		export level5_scr_len
+		export level5_scr_pg2
+
+		export level5_msx_real
+		export level5_msx_len
+		export level5_msx_pg
+		export level5_msx_ptr
+
+		export level6_dat_real
+		export level6_dat_len
+		export level6_dat_pg
+		export level6_dat_ptr
+
+		export level6_msx_real
+		export level6_msx_len
+		export level6_msx_pg
+		export level6_msx_ptr
+
+		export level6_scr_real
+		export level6_scr_len
+		export level6_scr_pg
+		export level6_scr_ptr
