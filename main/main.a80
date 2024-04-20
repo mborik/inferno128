@@ -1100,7 +1100,7 @@ cmd_redefine	ld	hl,3E8h
 .testkempston	cp	0
 		ld	a,8
 		adc	a,0
-		ld	(loc_75BD+2),a
+		ld	(scan_ports.counter+2),a
 		ld	hl,txt_redf_intro
 		call	console_print
 		ld	hl, txt_redf_right
@@ -1119,7 +1119,7 @@ cmd_redefine	ld	hl,3E8h
 		ld	b,20
 .waitsecond	halt
 		djnz	.waitsecond
-		call	loc_75BA
+		call	scan_ports
 		call	sub_7C13
 		pop	hl
 		ld	(hl),c
@@ -1162,7 +1162,7 @@ cmd_redefine	ld	hl,3E8h
 		pop	de
 		pop	hl
 		pop	bc
-		djnz	.printkey
+		djnz	.keyloop
 		ld	b,10
 .waithalfsec	ei
 		halt
@@ -1171,45 +1171,39 @@ cmd_redefine	ld	hl,3E8h
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
 
-loc_75BA	ld	hl,c_key_ports
-
-loc_75BD	ld	de,900h
-
-loc_75C0	ld	c,(hl)
+scan_ports	ld	hl,c_key_ports
+.counter	ld	de,900h
+.loop		ld	c,(hl)
 		inc	hl
 		ld	b,(hl)
 		inc	hl
 		in	a,(c)
 		bit	7,c
-		jr	z,loc_75CB
+		jr	z,.skip
 		cpl
-
-loc_75CB	and	1Fh
-		jr	nz,loc_75D8
+.skip		and	1Fh
+		jr	nz,decode_key
 		ld	a,e
 		add	a,5
 		ld	e,a
 		dec	d
-		jr	nz,loc_75C0
-		jr	loc_75BA
-; ---------------------------------------------------------------------------
+		jr	nz,.loop
+		jr	scan_ports
 
-loc_75D8	push	hl
+decode_key	push	hl
 		push	bc
 		ld	hl,c_key_bits
 		ld	b,5
-
-loc_75DF	cp	(hl)
-		jr	z,loc_75EA
+.loop		cp	(hl)
+		jr	z,.exit
 		inc	hl
 		inc	e
-		djnz	loc_75DF
+		djnz	.loop
 		pop	bc
 		pop	hl
-		jr	loc_75BA
-; ---------------------------------------------------------------------------
+		jr	scan_ports
 
-loc_75EA	pop	bc
+.exit		pop	bc
 		pop	hl
 		ret
 ; ---------------------------------------------------------------------------
