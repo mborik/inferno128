@@ -7,10 +7,10 @@ level1_msx_len: EQU 0x000001CD
 level1_msx_pg: EQU 0x00000011
 level1_msx_ptr: EQU 0x0000377C
 level1_scr_real: EQU 0x0000F0C6
-level1_scr_len: EQU 0x00000666
+level1_scr_len: EQU 0x000005F7
 level1_scr_pg: EQU 0x00000011
 level1_scr_ptr: EQU 0x00003863
-level2_dat_real: EQU 0x0000F72C
-level2_dat_snip: EQU 0x000008D4
+level2_dat_real: EQU 0x0000F6BE
+level2_dat_snip: EQU 0x00000942
 level2_dat_pg: EQU 0x00000011
-level2_dat_ptr: EQU 0x00003B96
+level2_dat_ptr: EQU 0x00003B5F
