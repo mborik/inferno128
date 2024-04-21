@@ -1,0 +1,139 @@
+; ZX0 decoder by Einar Saukas & Urusergi
+; see https://github.com/einar-saukas/ZX0 for more information
+;
+; Special modification for work with continual 128k RAM by mborik (04-2024).
+; HL = SOURCE as absolute 128k memory pointer 1 bit shifted right
+;      (#891A = #1234 at page 4)
+; DE = TARGET address within basic 64k addressing space
+; A  = page to be paged while storing a byte
+
+dzx0_128k	ld	(dzx0s_literals.dstpage+1),a
+		ld	(dzx0s_copy.page+1),a
+		ld	a,h
+		rlca
+		rlca
+		rlca
+		and	7
+		or	$10
+		ld	(dzx0s_literals.srcpage+1),a
+		ld	(dzx0s_new_offset.page+1),a
+		ld	(dzx0s_elias_loop.page+1),a
+		ld	a,l
+		rla
+		ld	l,a
+		ld	a,h
+		rla
+		or	$C0
+		ld	h,a
+
+		ld	bc,$ffff               ; preserve default offset 1
+		push	bc
+		inc	bc
+		ld	a,$80
+dzx0s_literals
+		call	dzx0s_elias             ; obtain length
+		push	af
+.ldir		push	bc                      ; copy literals
+.srcpage	ld	a,$10
+		ld	bc,page128
+		out	(c),a
+		ld	a,(hl)
+		inc	hl
+		push	af
+.dstpage	ld	a,$10
+		out	(c),a
+		pop	af
+		ld	(de),a
+		inc	de
+		pop	bc
+		bit	7,h
+		call	z,dzx0s_skip2next128kpg
+		dec	bc
+		ld	a,b
+		or	c
+		jr	nz,.ldir
+		pop	af
+
+		add	a,a                    ; copy from last offset or new offset?
+		jr	c,dzx0s_new_offset
+		call	dzx0s_elias             ; obtain length
+dzx0s_copy
+		ex	(sp),hl                ; preserve source, restore offset
+		push	hl                      ; preserve offset
+		add	hl,de                  ; calculate destination - offset
+		push	af
+		push	bc
+.page		ld	a,$10
+		ld	bc,page128
+		out	(c),a
+		pop	bc
+		pop	af
+		ldir                            ; copy from offset
+		pop	hl                      ; restore offset
+		ex	(sp),hl                ; preserve offset, restore source
+		add	a,a                    ; copy from literals or new offset?
+		jr	nc,dzx0s_literals
+dzx0s_new_offset
+		pop	bc                      ; discard last offset
+		ld	c,$fe                  ; prepare negative offset
+		call	dzx0s_elias_loop        ; obtain offset MSB
+		inc	c
+		ret	z                       ; check end marker
+		ld	b,c
+		push	bc
+		push	af
+.page		ld	a,$10
+		ld	bc,page128
+		out	(c),a
+		pop	af
+		pop	bc
+		ld	c,(hl)                 ; obtain offset LSB
+		inc	hl
+		bit	7,h
+		call	z,dzx0s_skip2next128kpg
+		rr	b                       ; last offset bit becomes first length bit
+		rr	c
+		push	bc                      ; preserve new offset
+		ld	bc,1                   ; obtain length
+		call	nc,dzx0s_elias_backtrack
+		inc	bc
+		jr	dzx0s_copy
+dzx0s_elias
+		inc	c                       ; interlaced Elias gamma coding
+dzx0s_elias_loop
+		add	a,a
+		jr	nz,dzx0s_elias_skip
+		push	bc
+.page		ld	a,$10
+		ld	bc,page128
+		out	(c),a
+		pop	bc
+		ld	a,(hl)                 ; load another group of 8 bits
+		inc	hl
+		bit	7,h
+		call	z,dzx0s_skip2next128kpg
+		rla
+dzx0s_elias_skip
+		ret	c
+dzx0s_elias_backtrack
+		add	a,a
+		rl	c
+		rl	b
+		jr	dzx0s_elias_loop
+
+dzx0s_skip2next128kpg
+		push	af
+		push	bc
+		ld	bc,$C000
+		add	hl,bc
+		ld	a,(dzx0s_literals.srcpage+1)
+		add	a,low continualpagingtable - $10
+		ld	b,high continualpagingtable
+		ld	c,a
+		ld	a,(bc)
+		ld	(dzx0s_literals.srcpage+1),a
+		ld	(dzx0s_new_offset.page+1),a
+		ld	(dzx0s_elias_loop.page+1),a
+		pop	bc
+		pop	af
+		ret

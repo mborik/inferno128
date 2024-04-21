@@ -221,10 +221,6 @@ commands	dw	cmd_password
 		db	"HEL"
 		dw	cmd_demo
 		db	"DEM"
-		dw	cmd_save
-		db	"SAV"
-		dw	cmd_load
-		db	"LOA"
 		dw	cmd_pilot
 		db	"PIL"
 		dw	cmd_sat
@@ -319,57 +315,6 @@ cmd_help	ld	hl,txt_help
 		call	console_print
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
-txt_memslot	dw	4E49h
-txt_memslot_n	db	"pozice",0
-		db	0
-		db	0
-		db	0
-		db	0
-		db	0
-		db	0
-		db	0
-		db	0
-		db	0
-
-sub_700B	or	a
-		jr	nz,loc_7011
-		ld	hl,txt_memslot
-
-loc_7011	ld	de,txt_memslot_n+6
-
-loc_7014	ld	b,8
-
-loc_7016	ld	a,(hl)
-		inc	hl
-		or	a
-		jr	z,loc_702F
-		cp	80h
-		jr	c,loc_7023
-		res	7,a
-		jr	loc_7032
-; ---------------------------------------------------------------------------
-
-loc_7023	cp	41h ; 'A'
-		jr	c,loc_7032
-		cp	5Bh ; '['
-		jr	nc,loc_7032
-		add	a,20h ; ' '
-		jr	loc_7032
-; ---------------------------------------------------------------------------
-
-loc_702F	ld	a,20h ; ' '
-		dec	hl
-
-loc_7032	ld	(de),a
-		inc	de
-		djnz	loc_7016
-		ld	a,20h ; ' '
-		ld	(de),a
-		inc	de
-		ld	(de),a
-		ret
-
-; ---------------------------------------------------------------------------
 
 cmd_pilot	call	init_pilot
 		call	sub_70B8
@@ -389,57 +334,7 @@ loc_7049	ld	a,(hl)
 		jp	cmd_report
 ; ---------------------------------------------------------------------------
 
-cmd_save	call	sub_70B8
-		call	sub_700B
-		call	sub_7118
-		ld	a,r
-		ld	hl,c_pilotname
-		ld	de,5B15h
-		ld	b,30h ; '0'
-		ld	(de),a
-		inc	de
-		ld	c,a
-
-loc_706D	ld	a,(hl)
-		xor	c
-		ld	(de),a
-		inc	hl
-		inc	de
-		djnz	loc_706D
-		ld	hl,txt_memslot_n+6
-		ld	de,31h	; '1'
-		ld	ix,5B15h
-		call	basic_c_save
-		jp	loc_6DE6
-; ---------------------------------------------------------------------------
-
-cmd_load	call	sub_70B8
-		call	sub_700B
-		call	sub_7118
-		ld	hl,txt_block_load
-		call	console_print
-		ld	hl,txt_memslot_n+6
-		ld	de,31h	; '1'
-		ld	ix,5B15h
-		call	basic_c_load
-		xor	a
-		ld	(loc_739F+1),a
-		ld	hl,5B15h
-		ld	de,c_pilotname
-		ld	b,30h ; '0'
-		ld	c,(hl)
-		inc	hl
-
-loc_70AE	ld	a,(hl)
-		xor	c
-		ld	(de),a
-		inc	hl
-		inc	de
-		djnz	loc_70AE
-		jp	loc_6DE6
-
 sub_70B8	ld	hl,5B15h
-
 loc_70BB	ld	a,(hl)
 		inc	hl
 		cp	20h ; ' '
@@ -447,7 +342,6 @@ loc_70BB	ld	a,(hl)
 		or	a
 		jr	nz,loc_70BB
 		ret
-; ---------------------------------------------------------------------------
 
 loc_70C5	ld	a,(hl)
 		cp	20h ; ' '
@@ -461,15 +355,13 @@ cmd_password	xor	a
 		ld	(loc_739F+1),a
 		call	sub_70B8
 		xor	a
-
 loc_70D4	push	af
 		push	hl
 		call	sub_79B3
 		pop	hl
 		push	hl
-		ld	b,0Ah
+		ld	b,10
 		ld	de,txt_passkey+0Dh
-
 loc_70E0	ld	a,(de)
 		cp	(hl)
 		inc	hl
@@ -477,7 +369,6 @@ loc_70E0	ld	a,(de)
 		jr	nz,loc_70EA
 		djnz	loc_70E0
 		jr	loc_70FB
-; ---------------------------------------------------------------------------
 
 loc_70EA	pop	hl
 		pop	af
@@ -488,7 +379,6 @@ loc_70EA	pop	hl
 		call	console_print
 		ld	a,1
 		jr	loc_70FD
-; ---------------------------------------------------------------------------
 
 loc_70FB	pop	hl
 		pop	af
@@ -497,7 +387,6 @@ loc_70FD	ld	(byte_82FD),a
 		or	a
 		jr	z,loc_7104
 		dec	a
-
 loc_7104	rrca
 		rrca
 		and	3Fh
@@ -511,7 +400,7 @@ loc_7108	cp	-1
 loc_7112	call	sub_739C
 		jp	loc_6DE6
 
-sub_7118	ld	(iy+0Eh),47h ;	'G'
+clearscr	ld	(iy+0Eh),47h ;	'G'
 		ld	hl,4000h
 		ld	de,4001h
 		ld	bc,1800h
@@ -525,7 +414,9 @@ sub_7118	ld	(iy+0Eh),47h ;	'G'
 loadblock	ld	hl,loc_7112
 		push	hl
 
-loadblock_exe	add	a,30h ; '0'
+loadblock_exe	ld	a,0	; currently loaded part
+/*
+		add	a,30h ; '0'
 		ld	(c_blockname+6),a
 		ld	a,61h ; 'a'
 		ld	(c_blockname+7),a
@@ -536,7 +427,7 @@ loadblock_exe	add	a,30h ; '0'
 		ld	(loc_7241+1),a
 		ld	a,-1
 		ld	(loc_7108+1),a
-		call	sub_7118
+		call	clearscr
 		ld	hl,txt_block_load
 		call	console_print
 		ld	hl,c_blockname
@@ -552,6 +443,7 @@ loadblock_exe	add	a,30h ; '0'
 		ld	de,5420h
 		xor	a
 		call	basic_c_load
+*/
 		ld	hl,RUNZONE
 		ld	a,(hl)
 		cp	0CDh
@@ -563,8 +455,7 @@ loadblock_exe	add	a,30h ; '0'
 
 loc_718C	call	RUNZONE
 
-loc_718F	ld	a,(c_blockname+6)
-		sub	30h ; '0'
+loc_718F	ld	a,(loadblock_exe+1)
 		ld	hl,RUNZONE+63h
 		cp	(hl)
 		ret	nz
@@ -591,258 +482,7 @@ sub_71AB	xor	a
 loc_71BA	xor	a
 		ret
 
-sub_71BC	ld	hl,5CCFh
-
-loc_71BF	ld	a,(hl)
-		cp	0Dh
-		ret	z
-		push	hl
-		ld	de,unk_732A
-		ld	b,5
-
-loc_71C9	ld	a,(de)
-		cp	(hl)
-		inc	de
-		inc	hl
-		jr	nz,loc_71D1
-		djnz	loc_71C9
-
-loc_71D1	pop	hl
-		inc	hl
-		jr	nz,loc_71BF
-		inc	h
-		dec	h
-		ret
-
 ; ---------------------------------------------------------------------------
-
-basic_c_save	ld	a,0F8h
-		jr	basic_exe
-; ---------------------------------------------------------------------------
-
-basic_c_load	ld	(loc_7241+1),a
-		ld	a,0EFh
-
-basic_exe	ld	(basic_load_seq+1),a
-		ld	(basic_ptr_load),ix
-		ld	(basic_ptr_usr),de
-		ld	(loc_7389+1),hl
-		call	sub_71BC
-		jr	nz,loc_7235
-		call	loc_7389
-		call	basic_exe_2
-; ---------------------------------------------------------------------------
-basic_load_seq	db	26h,0EFh,2Ah,22h,20h,20h,20h,20h,20h,20h,20h,20h,22h,0AFh
-		db	30h,0Eh,0,0
-basic_ptr_load	dw	0
-		db	0,2Ch,30h,0Eh,0,0
-basic_ptr_usr	dw	0
-		db	0,3Ah,0F9h,0C0h,30h,0Eh,0,0
-word_721E	dw	7368h
-		db	0
-		db	0D0h
-; ---------------------------------------------------------------------------
-		ld	hl,txt_err_disk
-		jr	loc_722A
-; ---------------------------------------------------------------------------
-
-loc_7227	ld	hl,txt_err_tape
-
-loc_722A	push	hl
-		call	sub_6E27
-		pop	hl
-		call	console_print
-		jp	loc_6DEC
-; ---------------------------------------------------------------------------
-
-loc_7235	ld	a,(basic_load_seq+1)
-		cp	0F8h
-		jr	z,loc_7286
-
-loc_723C	call	sub_7308
-		jr	nc,loc_723C
-
-loc_7241	ld	a,0
-		or	a
-		jr	z,loc_7270
-		ld	hl,block_filename ; ""
-		ld	de,txt_block_found+0Ah
-		ld	b,0Ah
-
-loc_724E	ld	a,(hl)
-		cp	20h ; ' '
-		jr	c,loc_7263
-		cp	80h
-		jr	nc,loc_7263
-		cp	61h ; 'a'
-		jr	c,loc_7265
-		cp	7Bh ; '{'
-		jr	nc,loc_7263
-		sub	20h ; ' '
-		jr	loc_7265
-; ---------------------------------------------------------------------------
-
-loc_7263	ld	a,3Fh ; '?'
-
-loc_7265	ld	(de),a
-		inc	hl
-		inc	de
-		djnz	loc_724E
-		ld	hl,txt_block_found
-		call	console_print
-
-loc_7270	call	sub_72BF
-		jr	nz,loc_7235
-		ld	ix,(basic_ptr_load)
-		ld	de,(block_length)
-		scf
-		sbc	a,a
-		call	loc_7311
-		jp	nc,loc_7227
-		ret
-; ---------------------------------------------------------------------------
-
-loc_7286	ld	hl,(loc_7389+1)
-		ld	de,block_header
-		ld	a,3
-		ld	(de),a
-		push	de
-		inc	de
-		ld	bc,8
-		ldir
-		ex	de,hl
-		ld	(hl),20h ; ' '
-		inc	hl
-		ld	(hl),20h ; ' '
-		ld	hl,(basic_ptr_usr)
-		ld	(block_length),hl
-		pop	ix
-		ld	de,11h
-		xor	a
-		call	block_save
-		ld	ix,(basic_ptr_load)
-		ld	de,(block_length)
-		ld	a,-1
-
-block_save	call	4C6h
-		ld	b,14h
-
-waitfor		ei
-		halt
-		djnz	waitfor
-		ret
-
-sub_72BF	ld	b,8
-		ld	hl,block_filename ; ""
-		ld	de,(loc_7389+1)
-
-loc_72C8	ld	a,(de)
-		cp	(hl)
-		ret	nz
-		inc	hl
-		inc	de
-		djnz	loc_72C8
-		ret
-
-; ---------------------------------------------------------------------------
-txt_block_load	db	16h,12h,10h
-		db	"Loading... \r",-1
-txt_block_found	db	"Found: ",0,0,0,0,0,0,0,0,0,0,"\r",-1
-
-block_header	db	0
-block_filename	block	10,0
-block_length	dw	0
-		block	4,0
-
-sub_7308	ld	ix,block_header
-		ld	de,11h
-		xor	a
-		scf
-
-loc_7311	inc	d
-		ex	af,af'
-		dec	d
-		di
-		ld	a,9
-		out	(254),a
-		call	562h
-		ex	af,af'
-		ld	a,7Fh
-		in	a,(254)
-		rra
-		jp	nc,loc_6DE6
-		xor	a
-		out	(254),a
-		ex	af,af'
-		ret
-
-; ---------------------------------------------------------------------------
-unk_732A	db	"65082"
-c_blockname	db	"level 1b"
-; ---------------------------------------------------------------------------
-
-basic_exe_2	pop	hl
-		ld	de,5B51h
-		push	de
-		ld	c,(hl)
-		ld	b,0
-		inc	hl
-		ldir
-		ld	a,3Ah ; ':'
-		ld	(de),a
-		inc	de
-		ld	a,3Fh ; '?'
-		ld	(de),a
-		pop	de
-		push	hl
-		ld	hl,(5C5Dh)
-		push	hl
-		ld	(loc_7378+1),sp
-		ld	sp,(5C3Dh)
-		ld	hl,loc_736B
-		ex	(sp),hl
-		ld	(loc_7370+1),hl
-		im	1
-		ei
-		ld	a,1
-		ex	de,hl
-		dec	hl
-		jp	1BD5h
-; ---------------------------------------------------------------------------
-		xor	a
-		jr	loc_736C
-; ---------------------------------------------------------------------------
-
-loc_736B	scf
-
-loc_736C	ld	sp,(5C3Dh)
-
-loc_7370	ld	hl,0
-		ex	(sp),hl
-		ld	hl,1B76h
-		push	hl
-
-loc_7378	ld	sp,0
-		pop	hl
-		ld	(5C5Dh),hl
-		ld	hl,5C3Ah
-		ld	a,(hl)
-		ld	(hl),-1
-		ld	(5C81h),a
-		ret
-; ---------------------------------------------------------------------------
-
-loc_7389	ld	hl,c_blockname
-		ld	de,basic_load_seq+4
-		ld	bc,8
-		ldir
-
-loc_7394	dec	de
-		ld	a,(de)
-		sub	20h ; ' '
-		ret	nz
-		ld	(de),a
-		jr	loc_7394
 
 sub_739C	call	sub_73F8
 
@@ -920,9 +560,6 @@ loc_7404	add	a,c
 		ret
 
 ; ---------------------------------------------------------------------------
-c_somedata	db	8Fh,0,87h,93h,81h,83h,0,0,91h,0,0,0,0,95h,97h,0
-		db	0,89h,85h,99h,9Dh,9Bh,0,0,8Dh,8Bh,0; 10h
-
 console_input	call	sub_80BB
 		res	5,(iy+1)
 		ld	a,38h ; '8'
@@ -1010,16 +647,7 @@ loc_7493	halt
 		cp	41h ; 'A'
 		jr	c,loc_74D1
 		cp	5Bh ; '['
-		jr	nc,loc_74D1
-		sub	41h ; 'A'
-		ld	c,a
-		ld	b,0
-		ld	hl,c_somedata
-		add	hl,bc
-		ld	a,(hl)
-		or	a
-		jr	z,loc_7490
-		jr	loc_74DB
+		jr	c,loc_74DB
 ; ---------------------------------------------------------------------------
 
 loc_74D1	cp	61h ; 'a'
@@ -2930,53 +2558,13 @@ loc_81B6	call	downhl
 		ret
 
 ; ---------------------------------------------------------------------------
-diacs_map	db	'E',0
-		db	'E',1
-		db	'S',1
-		db	'C',1
-		db	'R',1
-		db	'Z',1
-		db	'Y',0
-		db	'A',0
-		db	'I',0
-		db	'D',1
-		db	'N',1
-		db	'O',0
-		db	'T',1
-		db	'U',2
-		db	'U',0
-
-diacs_accents	db	0F9h ; acute accent
-		db	0F3h
-		db	0FFh
-		db	0C9h ; caron accent
-		db	0E3h
-		db	0FFh
-		db	0E3h ; ring accent
-		db	0C9h
-		db	0E3h
-
 print_zx_char	exx
 		or	a
 		jr	z,.repeatlast
 		cp	80h
+		ret	nc
 		ld	(.drawromchar+1),a
 		ld	hl,.buffer
-		jr	c,.scraddr
-		ld	hl,diacs_map - 1
-		and	7Fh
-		ld	c,a
-		ld	b,0
-		add	hl,bc
-		ld	a,(hl)
-		ld	(.drawromchar+1),a
-		inc	hl
-		ld	a,(hl)
-		add	a,(hl)
-		add	a,(hl)
-		ld	c,a
-		ld	hl,diacs_accents
-		add	hl,bc
 .scraddr	ld	de,0
 		push	de
 		ld	b,3
@@ -4990,6 +4578,8 @@ loc_9998	ld	sp,0
 
 demoheader	ret ; TBD
 
+		include "dzx0_128k.a80"
+
 @mainblock.end
 
 ;;-----------------------------------------------------------------------------
@@ -5000,18 +4590,15 @@ demoheader	ret ; TBD
 
 		include "stc.a80"
 
-@xchg.keeper	and	#17
-		ld	c,a
-		ld	a,(act128page)
-		jr	nz,1F
-		ld	c,a
-1		and	#F8
-		or	c
-		jr	1F
-@xchg.bnk	ld	(act128page),a
-1		ld	bc,page128
-		out	(c),a
-		ret
+continualpagingtable
+		db	$11 ; from $10
+		db	$13 ; from $11
+		db	$10 ; should not happen ($12)
+		db	$14 ; from $13
+		db	$16 ; from $14
+		db	$10 ; should not happen ($15)
+		db	$17 ; from $16
+		db	$10 ; should not happen ($17)
 
 	if mainblock.end > music_space
 		display "Too long! ",/D,(mainblock.end-music_space)," bytes out!"
@@ -5082,7 +4669,6 @@ intro
 	endmodule
 
 		savebin "final.bin",COREZONE,$-COREZONE
-		savesna "final.sna",COREZONE
 
 	ifdef isFX
 		export COREZONE
@@ -5095,4 +4681,17 @@ intro
 		export music_enabled
 		export music_setup
 		export enablefade
+	else
+		org	$C000,1
+		incbin	"../bank1"
+		org	$C000,3
+		incbin	"../bank3"
+		org	$C000,4
+		incbin	"../bank4"
+		org	$C000,6
+		incbin	"../bank6"
+		org	$C000,7
+		incbin	"../bank7"
+		page	0
+		savesna	"final.sna",COREZONE
 	endif
