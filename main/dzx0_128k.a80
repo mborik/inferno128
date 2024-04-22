@@ -7,9 +7,10 @@
 ; DE = TARGET address within basic 64k addressing space
 ; A  = page to be paged while storing a byte
 
-dzx0_128k	ld	(dzx0s_literals.dstpage+1),a
+dzx0_128k_topg	ld	(dzx0s_literals.dstpage+1),a
 		ld	(dzx0s_copy.page+1),a
-		ld	a,h
+
+dzx0_128k	ld	a,h
 		rlca
 		rlca
 		rlca

@@ -415,56 +415,68 @@ loadblock	ld	hl,loc_7112
 		push	hl
 
 loadblock_exe	ld	a,0	; currently loaded part
-/*
-		add	a,30h ; '0'
-		ld	(c_blockname+6),a
-		ld	a,61h ; 'a'
-		ld	(c_blockname+7),a
+		ld	hl,5800h
+		ld	de,5801h
+		ld	bc,02ffh
+		ld	(hl),l
+		ldir
+		rlca
+		rlca
+		rlca
+		ld	d,b
+		ld	e,a
 		xor	a
 		out	(254),a
 		ld	(loc_739F+1),a
-		inc	a
-		ld	(loc_7241+1),a
-		ld	a,-1
+		dec	a
 		ld	(loc_7108+1),a
-		call	clearscr
-		ld	hl,txt_block_load
-		call	console_print
-		ld	hl,c_blockname
-		ld	ix,RUNZONE+1770h
-		ld	de,1B00h
-		ld	a,1
-		call	basic_c_load
-		call	RUNZONE+1770h
-		ld	a,62h ; 'b'
-		ld	(c_blockname+7),a
-		ld	hl,c_blockname
-		ld	ix,RUNZONE
-		ld	de,5420h
-		xor	a
-		call	basic_c_load
-*/
-		ld	hl,RUNZONE
+		ld	(music_enabled+1),a
+		ld	hl,levelblocktable
+		add	hl,de
+		ld	e,(hl)
+		inc	hl
+		ld	d,(hl)
+		inc	hl
+		push	hl
+		ex	hl,de
+		ld	de,$4000
+		call	dzx0_128k
+		pop	hl
+		ld	e,(hl)
+		inc	hl
+		ld	d,(hl)
+		inc	hl
+		push	hl
+		ex	hl,de
+		ld	de,music_space
+		call	dzx0_128k
+		call	music_init
+		im	2
+		ld	b,100
+.justsec	ei
+		halt
+		djnz	.justsec
+		pop	hl
+	; console_print
+		inc	hl
+		inc	hl
+	; TODO
 		ld	a,(hl)
-		cp	0CDh
-		jr	nz,loc_718F
-		ld	a,(loc_71A7+1)
-		or	a
-		jr	nz,loc_718C
-		ld	(hl),21h ; '!'
-
-loc_718C	call	RUNZONE
+		inc	hl
+		ld	h,(hl)
+		ld	l,a
+		ld	de,RUNZONE
+		call	dzx0_128k
+		ld	b,100
+.justnop	ei
+		halt
+		djnz	.justnop
 
 loc_718F	ld	a,(loadblock_exe+1)
 		ld	hl,RUNZONE+63h
 		cp	(hl)
 		ret	nz
 		ld	(loc_7108+1),a
-		ld	a,(RUNZONE+60h)
-		cp	0C3h
-		ld	hl,c_pilotname
-		call	z,RUNZONE+60h
-
 loc_71A7	ld	a,1
 		xor	a
 		ret
@@ -1439,7 +1451,7 @@ loc_7ACD	ld	c,30h ; '0'
 cmd_weapons	call	sub_7DBD
 		ld	hl,cmd_weapons
 		push	hl
-		ld	hl,8C3Ch
+		ld	hl,8C80h
 		ld	(loc_7C47+1),hl
 		ld	a,-1
 		ld	(loc_7D2F+1),a
@@ -1555,7 +1567,7 @@ loc_7B99	dec	e
 		sub	5
 		jr	nc,loc_7B99
 		ld	d,0
-		ld	hl,6Ch	; 'l'
+		ld	hl,6Ch
 		call	30A9h
 		ld	de,gfx_equipment
 		add	hl,de
@@ -2965,7 +2977,6 @@ loc_9039	cp	(hl)
 		inc	h
 		ld	(hl),a
 		ld	h,d
-
 loc_9046	inc	l
 		dec	c
 		ret	z
@@ -2994,7 +3005,6 @@ loc_904B	ld	a,e
 		ret	z
 		ld	b,c
 		xor	a
-
 loc_9066	cp	(hl)
 		jp	z,loc_9073
 		ld	(hl),a
@@ -3006,7 +3016,6 @@ loc_9066	cp	(hl)
 		inc	h
 		ld	(hl),a
 		ld	h,d
-
 loc_9073	inc	l
 		djnz	loc_9066
 		ret
@@ -3451,7 +3460,7 @@ loc_9306	ld	a,yh
 		ld	b,a
 		ld	a,(RUNZONE+156h)
 		ld	(loc_932E+1),a
-		ld	hl,0 ; loc_9A04 ! TBD ! Nobody knows what is that!
+		ld	hl,loc_9A04
 		ld	(RUNZONE+151h),hl
 
 loc_931F	ld	e,(hl)
@@ -3565,7 +3574,7 @@ loc_93D1	ld	bc,20h	; ' '
 		add	hl,bc
 		ld	(loc_93EE+1),hl
 		ld	(loc_9418+1),a
-		ld	(byte_94F9),a
+		ld	(loc_94F8+1),a
 		jr	loc_93E5
 ; ---------------------------------------------------------------------------
 
@@ -3774,19 +3783,60 @@ loc_94E5	inc	hl
 loc_94EA	ld	yl,a
 		ld	h,0C0h
 		ld	l,(ix+4)
-; ---------------------------------------------------------------------------
 word_94F1	dw	0
-		db	7Eh,2Ch,66h,6Fh,7Eh,0F6h
-byte_94F9	db	0,4Fh,23h,7Eh,0B7h,0CAh
-		db	0E0h,93h,47h,23h,7Eh,23h
-		db	0FDh,85h,5Fh,7Eh,23h,0EBh
-		db	0DDh,86h,2,0FEh,12h,0D2h
-		db	2Eh,95h,67h,0AFh,0CBh,3Ch
-		db	1Fh,0CBh,3Ch,1Fh,85h,85h
-		db	6Fh,7Ch,0CEh,9Bh,67h,1Ah
-		db	77h,13h,2Ch,71h,2Ch,10h
-		db	0F8h,0EBh,0C3h,0FCh,94h,68h
-		db	26h,0,19h,0C3h,0FCh,94h
+		ld	a, (hl)
+		inc	l
+		ld	h, (hl)
+		ld	l, a
+		ld	a, (hl)
+
+loc_94F8:	or	0
+		ld	c, a
+		inc	hl
+
+loc_94FC:	ld	a, (hl)
+		or	a
+		jp	z, loc_93E0
+		ld	b, a
+		inc	hl
+		ld	a, (hl)
+		inc	hl
+		add	a, yl
+		ld	e, a
+		ld	a, (hl)
+		inc	hl
+		ex	de, hl
+		add	a, (ix+2)
+		cp	12h
+		jp	nc, loc_952E
+		ld	h, a
+		xor	a
+		srl	h
+		rra
+		srl	h
+		rra
+		add	a, l
+		add	a, l
+		ld	l, a
+		ld	a, h
+		adc	a, 9Bh ; '›'
+		ld	h, a
+
+loc_9522:	ld	a, (de)
+		ld	(hl), a
+		inc	de
+		inc	l
+		ld	(hl), c
+		inc	l
+		djnz	loc_9522
+		ex	de, hl
+		jr	loc_94FC
+; ---------------------------------------------------------------------------
+
+loc_952E:	ld	l, b
+		ld	h, 0
+		add	hl, de
+		jr	loc_94FC
 
 sub_9535	ld	ix,RUNZONE+64h
 		jr	loc_953F
@@ -4483,14 +4533,12 @@ sub_9907	push	de
 		ld	(RUNZONE+14Eh),a
 		ld	hl,0A700h
 		ld	c,a
-
 loc_992D	ld	a,(de)
 		inc	de
 		and	10h
 		inc	a
 		ld	b,a
 		ld	a,c
-
 loc_9934	ld	(hl),a
 		inc	l
 		jr	z,loc_9989
@@ -4526,7 +4574,6 @@ loc_994E	ld	a,(RUNZONE+14Eh)
 		ld	(loc_996B+1),hl
 		ld	a,1
 		ld	(RUNZONE+14Eh),a
-
 loc_996B	ld	hl,0
 		ld	a,(hl)
 		or	a
@@ -4534,13 +4581,10 @@ loc_996B	ld	hl,0
 		ld	(loc_996B+1),hl
 		jr	nz,loc_9979
 		ld	(RUNZONE+14Eh),a
-
 loc_9979	ld	c,a
 		ld	hl,0A700h
 		xor	a
-
 loc_997E	ld	b,c
-
 loc_997F	ld	(hl),a
 		inc	l
 		jr	z,loc_9989
@@ -4555,7 +4599,6 @@ loc_9989	jr	$
 
 loc_998B	push	af
 		ei
-
 loc_998D	ld	a,0
 		or	a
 		jr	nz,loc_9994
@@ -4565,7 +4608,6 @@ loc_998D	ld	a,0
 
 loc_9994	xor	a
 		ld	(loc_998D+1),a
-
 loc_9998	ld	sp,0
 		pop	ix
 		pop	hl
@@ -4575,6 +4617,23 @@ loc_9998	ld	sp,0
 		pop	de
 		ret
 ; ---------------------------------------------------------------------------
+
+loc_9A04	dec	hl
+		ld	(ix+0),l
+		ld	(ix+1),h
+		ld	a,r
+		and	7
+		ret	nz
+		dec	hl
+		dec	hl
+		ld	(RUNZONE+0B9Ah),hl
+		ld	a,(ix+2)
+		dec	a
+		ld	(RUNZONE+0B9Ch),a
+		ld	hl,RUNZONE+0B9Ah
+		ld	ix,RUNZONE+7Ch
+		ld	a,4
+		jp	RUNZONE+4B5h
 
 demoheader	ret ; TBD
 
@@ -4590,15 +4649,35 @@ demoheader	ret ; TBD
 
 		include "stc.a80"
 
-continualpagingtable
-		db	$11 ; from $10
-		db	$13 ; from $11
-		db	$10 ; should not happen ($12)
-		db	$14 ; from $13
-		db	$16 ; from $14
-		db	$10 ; should not happen ($15)
-		db	$17 ; from $16
-		db	$10 ; should not happen ($17)
+;;-----------------------------------------------------------------------------
+
+levelblocktable
+		dw	level1_scr_ptr
+		dw	level1_msx_ptr
+		dw	0 ; reserved from level title
+		dw	level1_dat_ptr
+		dw	level2_scr_ptr
+		dw	level2_msx_ptr
+		dw	0 ; reserved from level title
+		dw	level2_dat_ptr
+		dw	level3_scr_ptr
+		dw	level3_msx_ptr
+		dw	0 ; reserved from level title
+		dw	level3_dat_ptr
+		dw	level4_scr_ptr
+		dw	level4_msx_ptr
+		dw	0 ; reserved from level title
+		dw	level4_dat_ptr
+		dw	level5_scr_ptr
+		dw	level5_msx_ptr
+		dw	0 ; reserved from level title
+		dw	level5_dat_ptr
+		dw	level6_scr_ptr
+		dw	level6_msx_ptr
+		dw	0 ; reserved from level title
+		dw	level6_dat_ptr
+
+;;-----------------------------------------------------------------------------
 
 	if mainblock.end > music_space
 		display "Too long! ",/D,(mainblock.end-music_space)," bytes out!"
@@ -4653,6 +4732,16 @@ interrupt	di
 		pop	af
 		ei
 		ret
+
+continualpagingtable
+		db	$11 ; from $10
+		db	$13 ; from $11
+		db	$10 ; should not happen ($12)
+		db	$14 ; from $13
+		db	$16 ; from $14
+		db	$10 ; should not happen ($15)
+		db	$17 ; from $16
+		db	$10 ; should not happen ($17)
 
 	if $ > RUNZONE
 		display "Too long! ",/D,($-RUNZONE)," bytes out!"
