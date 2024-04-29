@@ -104,7 +104,7 @@ loc_6DC0	ei
 		call	init_pilot
 
 
-loc_6DE6	ld	sp,BASESP
+hard_reset	ld	sp,BASESP
 		call	sub_6E27
 
 		ld	hl,txt_help
@@ -113,7 +113,7 @@ first_hello:	call	console_print
 		ld	(first_hello),a
 
 loc_6DEC	ld	a,0
-		ld	sp,(loc_6DE6+1)
+		ld	sp,(hard_reset+1)
 		or	a
 		call	nz,init_pilot
 		xor	a
@@ -125,9 +125,9 @@ loc_6DEC	ld	a,0
 		jr	z,loc_6DEC
 		call	demoheader
 		ld	a,r
-		call	sub_73FF
+		call	calc_levelptr.do
 		call	sub_6E19
-		jr	nc,loc_6DE6
+		jr	nc,hard_reset
 		call	sub_6E27
 		jp	loc_6DEC
 
@@ -149,7 +149,7 @@ sub_6E27	ld	hl,4000h
 		ld	(loc_80C3+1),a
 		call	sub_7E94
 		call	sub_8131
-		ld	hl,unk_751B
+		ld	hl,txtpos_reset
 		jp	console_print
 
 ; ---------------------------------------------------------------------------
@@ -275,7 +275,7 @@ txt_pilot_stat3	db	"Number of objects destroyed: ",-1
 ; ---------------------------------------------------------------------------
 
 cmd_demo	xor	a
-		ld	(loc_71A7+1),a
+		ld	(loadblock_ret+1),a
 		ld	a,(byte_82FD)
 		push	af
 loc_6FB7	ld	a,r
@@ -287,7 +287,7 @@ loc_6FB9	cp	18h
 
 loc_6FC1	inc	a
 		ld	(byte_82FD),a
-		call	sub_73D3
+		call	cmd_info.load
 		ld	b,0
 
 loc_6FCA	ei
@@ -297,7 +297,7 @@ loc_6FCA	ei
 		halt
 		djnz	loc_6FCA
 		call	demoheader
-		call	sub_73F8
+		call	calc_levelptr
 		call	sub_6E19
 		jr	nc,loc_6FE4
 		call	sub_6E27
@@ -307,8 +307,8 @@ loc_6FCA	ei
 loc_6FE4	pop	af
 		ld	(byte_82FD),a
 		ld	a,1
-		ld	(loc_71A7+1),a
-		jp	loc_6DE6
+		ld	(loadblock_ret+1),a
+		jp	hard_reset
 ; ---------------------------------------------------------------------------
 
 cmd_help	ld	hl,txt_help
@@ -352,7 +352,7 @@ loc_70C5	ld	a,(hl)
 ; ---------------------------------------------------------------------------
 
 cmd_password	xor	a
-		ld	(loc_739F+1),a
+		ld	(loadblock_run.level+1),a
 		call	sub_70B8
 		xor	a
 loc_70D4	push	af
@@ -392,13 +392,10 @@ loc_7104	rrca
 		and	3Fh
 
 loc_7108	cp	-1
-		jr	nz,loadblock
-		call	sub_739C
+		jr	nz,loadblock_ex2
+		call	loadblock_run
 		jp	loc_6DEC
 ; ---------------------------------------------------------------------------
-
-loc_7112	call	sub_739C
-		jp	loc_6DE6
 
 clearscr	ld	(iy+0Eh),47h ;	'G'
 		ld	hl,4000h
@@ -411,75 +408,92 @@ clearscr	ld	(iy+0Eh),47h ;	'G'
 		ldir
 		ret
 
-loadblock	ld	hl,loc_7112
+loadblock_ex2	ld	hl,loadblock_exit
 		push	hl
-
 loadblock_exe	ld	a,0	; currently loaded part
-		ld	hl,5800h
-		ld	de,5801h
-		ld	bc,02ffh
-		ld	(hl),l
-		ldir
+;		ld	hl,5800h
+;		ld	de,5801h
+;		ld	bc,02ffh
+;		ld	(hl),l
+;		ldir
 		rlca
 		rlca
 		rlca
-		ld	d,b
+;		ld	d,b
+		ld	d,0
 		ld	e,a
 		xor	a
 		out	(254),a
-		ld	(loc_739F+1),a
+		ld	(loadblock_run.level+1),a
 		dec	a
 		ld	(loc_7108+1),a
-		ld	(music_enabled+1),a
-		ld	hl,levelblocktable
-		add	hl,de
-		ld	e,(hl)
-		inc	hl
-		ld	d,(hl)
-		inc	hl
-		push	hl
-		ex	hl,de
-		ld	de,$4000
-		call	dzx0_128k
-		pop	hl
-		ld	e,(hl)
-		inc	hl
-		ld	d,(hl)
-		inc	hl
-		push	hl
-		ex	hl,de
-		ld	de,music_space
-		call	dzx0_128k
-		call	music_init
-		im	2
-		ld	b,100
-.justsec	ei
-		halt
-		djnz	.justsec
-		pop	hl
-	; console_print
-		inc	hl
-		inc	hl
-	; TODO
+;		ld	(music_enabled+1),a
+;		ld	hl,levelblocktable
+		ld	hl,levelblocktable+6
+; 		add	hl,de
+; 		ld	e,(hl)
+; 		inc	hl
+; 		ld	d,(hl)
+; 		inc	hl
+; 		push	hl
+; 		ex	hl,de
+; 		ld	de,$4000
+; 		call	dzx0_128k
+; 		ld	hl,5AA5h
+; 		ld	de,5AA6h
+; 		ld	bc,0014h
+; 		ld	(hl),2
+; 		ldir
+; 		pop	hl
+; 		ld	e,(hl)
+; 		inc	hl
+; 		ld	d,(hl)
+; 		inc	hl
+; 		push	hl
+; 		ex	hl,de
+; 		ld	de,music_space
+; 		call	dzx0_128k
+; 		ld	a,$10
+; 		ld	bc,page128
+; 		out	(c),a
+; 		call	music_init
+; 		im	2
+; 		ei
+; 		halt
+; 		pop	hl
+; 		ld	e,(hl)
+; 		inc	hl
+; 		ld	d,(hl)
+; 		inc	hl
+; 		push	hl
+; 		ex	hl,de
+; 		call	console_print
+; 		pop	hl
 		ld	a,(hl)
 		inc	hl
 		ld	h,(hl)
 		ld	l,a
 		ld	de,RUNZONE
 		call	dzx0_128k
-		ld	b,100
-.justnop	ei
-		halt
-		djnz	.justnop
+		ld	a,$10
+		ld	bc,page128
+		out	(c),a
+; 		ld	b,100
+; .justnop	ei
+; 		halt
+; 		djnz	.justnop
 
-loc_718F	ld	a,(loadblock_exe+1)
+		ld	a,(loadblock_exe+1)
 		ld	hl,RUNZONE+63h
 		cp	(hl)
 		ret	nz
 		ld	(loc_7108+1),a
-loc_71A7	ld	a,1
+loadblock_ret	ld	a,1
 		xor	a
 		ret
+
+loadblock_exit	call	loadblock_run
+		jp	hard_reset
 
 sub_71AB	xor	a
 		in	a,(254)
@@ -490,15 +504,27 @@ sub_71AB	xor	a
 		ld	a,d
 		or	a
 		jr	z,sub_71AB
-
 loc_71BA	xor	a
 		ret
 
 ; ---------------------------------------------------------------------------
 
-sub_739C	call	sub_73F8
+loadblock	ld	a,(byte_82FD)
+		or	a
+		jr	z,.zero
+		dec	a
+.zero		rrca
+		rrca
+		and	3Fh ; '?'
+		ld	hl,loc_7108+1
+		cp	(hl)
+		call	nz,loadblock_exe
+		jp	nz,hard_reset
+		call	loadblock_run
+		jp	sub_6E27
 
-loc_739F	ld	a,0
+loadblock_run	call	calc_levelptr
+.level		ld	a,0
 		or	a
 		ret	nz
 		ld	bc,6
@@ -508,38 +534,22 @@ loc_739F	ld	a,0
 		inc	bc
 		ldir
 		ld	a,1
-		ld	(loc_739F+1),a
+		ld	(.level+1),a
 		ret
-
-sub_73B4	ld	a,(byte_82FD)
-		or	a
-		jr	z,loc_73BB
-		dec	a
-
-loc_73BB	rrca
-		rrca
-		and	3Fh ; '?'
-		ld	hl,loc_7108+1
-		cp	(hl)
-		call	nz,loadblock_exe
-		jp	nz,loc_6DE6
-		call	sub_739C
-		jp	sub_6E27
 
 ; ---------------------------------------------------------------------------
 
 cmd_info	ld	hl,loc_6DEC
 		push	hl
-
-sub_73D3	ld	a,30h ; '0'
+.load		ld	a,30h ; '0'
 		ld	(loc_7F0E+1),a
-		call	sub_73B4
+		call	loadblock
 		ld	a,(byte_82FD)
 		dec	a
 		and	3
 		ld	hl,(RUNZONE)
 		call	z,console_print
-		call	sub_73F8
+		call	calc_levelptr
 		ld	a,68h ; 'h'
 		ld	(loc_7F0E+1),a
 		ld	a,(hl)
@@ -553,19 +563,16 @@ sub_73D3	ld	a,30h ; '0'
 cmd_exit	rst	0
 		rst	0
 
-sub_73F8	ld	a,(byte_82FD)
+calc_levelptr	ld	a,(byte_82FD)
 		or	a
-		jr	z,sub_73FF
+		jr	z,.do
 		dec	a
-
-sub_73FF	and	3
+.do		and	3
 		ld	c,a
-		ld	b,15h
-
-loc_7404	add	a,c
-		djnz	loc_7404
+		ld	b,21
+.mul22x		add	a,c
+		djnz	.mul22x
 		ld	c,a
-		ld	b,0
 		ld	hl,RUNZONE+2
 		add	hl,bc
 		or	h
@@ -714,16 +721,6 @@ loc_750A	ld	hl,0
 		inc	a
 		ret
 
-; ---------------------------------------------------------------------------
-unk_751B	db	16h
-		db	12h
-		db	10h
-		db	15h
-		db	10h
-		db	17h
-		db	0F0h
-		db	0
-		db	0FFh
 ; ---------------------------------------------------------------------------
 
 cmd_redefine	ld	hl,3E8h
@@ -920,10 +917,10 @@ loc_7748	srl	d
 
 ; ---------------------------------------------------------------------------
 
-cmd_start	call	sub_73B4
+cmd_start	call	loadblock
 		ld	a,(loc_7108+1)
 		inc	a
-		jp	z,loc_6DE6
+		jp	z,hard_reset
 		ld	b,12h
 
 loc_775A	push	bc
@@ -1006,7 +1003,7 @@ loc_77D4	cp	(hl)
 		inc	hl
 		inc	hl
 		djnz	loc_77D4
-		jp	loc_6DE6
+		jp	hard_reset
 
 sub_77DE	or	a
 		ret	z
@@ -1050,7 +1047,7 @@ loc_77FA	ld	a,(hl)
 		call	sub_7993
 		ld	hl,403Eh
 		call	sub_7993
-		call	sub_73F8
+		call	calc_levelptr
 		push	hl
 		ld	bc,0Eh
 		add	hl,bc
@@ -1091,7 +1088,7 @@ loc_785F	pop	af
 		call	console_print
 		ld	a,70h ; 'p'
 		ld	(loc_7F0E+1),a
-		call	sub_73F8
+		call	calc_levelptr
 		inc	hl
 		inc	hl
 		ld	a,(5C81h)
@@ -1215,8 +1212,8 @@ loc_7940	sub	3
 
 loc_795D	call	sub_7A04
 		xor	a
-		ld	(loc_739F+1),a
-		call	sub_739C
+		ld	(loadblock_run.level+1),a
+		call	loadblock_run
 
 loc_7967	call	sub_7F8F
 		ld	a,(byte_82FD)
@@ -1472,7 +1469,7 @@ loc_7AEE	ld	a,b
 		dec	hl
 		dec	hl
 		djnz	loc_7AEE
-		ld	hl,byte_8584
+		ld	hl,txtpos_weapon
 		call	console_print
 
 loc_7B05	ld	hl,0
@@ -1491,7 +1488,7 @@ loc_7B1C	cp	-1
 		call	sub_7C13
 		ld	a,(loc_7D2F+1)
 		cp	14h
-		jp	z,loc_6DE6
+		jp	z,hard_reset
 		cp	15h
 		jr	nz,loc_7B4E
 		ld	hl,5C2Eh
@@ -1853,7 +1850,7 @@ loc_7D4E	ld	(hl),-1
 		call	downhl
 		dec	c
 		jr	nz,loc_7D4B
-		ld	hl,byte_8584
+		ld	hl,txtpos_weapon
 		call	console_print
 		pop	bc
 		ld	hl,txt_equipment
@@ -2123,7 +2120,6 @@ sub_7F05	ld	a,h
 		and	1Fh
 		xor	50h ; 'P'
 		ld	h,a
-
 loc_7F0E	ld	a,0
 		ld	(hl),a
 		ret
@@ -2393,7 +2389,7 @@ loc_80C3	ld	a,0
 		jr	c,loc_80DA
 		ld	a,0B8h
 		ld	(5ADEh),a
-		ld	a,(loc_71A7+1)
+		ld	a,(loadblock_ret+1)
 		or	a
 		call	nz,sub_71AB
 		xor	a
@@ -2778,8 +2774,7 @@ txt_killed	dw	5014h
 
 c_colorbar	db	2,42h,6,6,46h,46h,44h,44h,44h,44h,4,4,4,41h,3,3
 		db	43h,43h,5,5,45h,45h,7,7,47h,47h,42h,6,6,46h,46h,44h
-		db	44h,44h,44h,4,4,4,4,1,1,2,2,3,3,4,4,5
-		db	5,6,6,7
+		db	44h,44h,44h,4,4,4,4,1,1,2,2,3,3,4,4,5,5,6,6,7
 c_txtptr	db	16h,6,0B0h,-1
 txt_statusbar	db	16h,6,11h,15h,8
 		db	"Shield:"
@@ -2791,19 +2786,20 @@ txt_statusbar	db	16h,6,11h,15h,8
 		db	"Speed:"
 		db	0Ch
 		db	-1
-byte_8584	db	16h,0AAh,0Ah,14h,71h,17h,0B7h,0,-1
+txtpos_weapon	db	16h,0AAh,0Ah,14h,71h,17h,0B7h,0,-1
+txtpos_reset	db	16h,12h,10h,15h,10h,17h,0F0h,0,-1
 
 txt_help	dw	7014h
 		db	"Use the following commands to control the console: "
 		db	"PILOT [name], WEAPONS, REDEFINE, REPORT, INFO, HELP, START and EXIT. "
 		db	"You just need to enter the first few letters of these commands.\r",-1
 
-txt_err_disk	db	16h,12h,10h,15h,10h,17h,0F0h,0
-		dw	5014h
-		db	"Error reading from disk!\r"
-txt_err_tape	db	16h,12h,10h,15h,10h,17h,0F0h,0
-		dw	5014h
-		db	"Error reading from tape!\r"
+txt_level1_name	db	"Found in New York\r",-1
+txt_level2_name	db	"The Others on the Moon\r",-1
+txt_level3_name	db	"The Empire Strikes Back\r",-1
+txt_level4_name	db	"Fourth Planet of Death\r",-1
+txt_level5_name	db	"Far Away from Paradise\r",-1
+txt_level6_name	db	"Termination on Orga\r",-1
 
 c_sets_default	db	0FEh,0DFh,1
 		db	0FEh,0DFh,2
@@ -3856,26 +3852,16 @@ loc_953F	ld	hl,(RUNZONE+14Fh)
 		ld	a,0Eh
 		ld	(loc_9584+2),a
 		inc	a
-		ld	(byte_9566),a
+		ld	(unk_9565+1),a
 		ld	c,a
 		xor	a
 		jr	loc_956B
 
 sub_9560	jp	(hl)
-
-; ---------------------------------------------------------------------------
-		db	0DDh
-		db	36h
-		db	3
-		db	0
-unk_9565	db	1
-byte_9566	db	0Fh
-		db	0
-		db	78h
-; ---------------------------------------------------------------------------
-
+		ld	(ix+3),0
+unk_9565	ld	bc,0Fh
+		ld	a,b
 loc_9569	add	ix,bc
-
 loc_956B	xor	(ix+3)
 		jp	z,loc_9569
 		ld	h,(ix+1)
@@ -4252,7 +4238,7 @@ loc_976D	ld	hl,(RUNZONE+14Fh)
 		ld	a,3
 		ld	(loc_9584+2),a
 		ld	a,0Ah
-		ld	(byte_9566),a
+		ld	(unk_9565+1),a
 		ld	c,a
 		xor	a
 		jp	loc_956B
@@ -4635,6 +4621,34 @@ loc_9A04	dec	hl
 		ld	a,4
 		jp	RUNZONE+4B5h
 
+levelblocktable
+		dw	level1_scr_ptr
+		dw	level1_msx_ptr
+		dw	txt_level1_name
+		dw	level1_dat_ptr
+		dw	level2_scr_ptr
+		dw	level2_msx_ptr
+		dw	txt_level2_name
+		dw	level2_dat_ptr
+		dw	level3_scr_ptr
+		dw	level3_msx_ptr
+		dw	txt_level3_name
+		dw	level3_dat_ptr
+		dw	level4_scr_ptr
+		dw	level4_msx_ptr
+		dw	txt_level4_name
+		dw	level4_dat_ptr
+		dw	level5_scr_ptr
+		dw	level5_msx_ptr
+		dw	txt_level5_name
+		dw	level5_dat_ptr
+		dw	level6_scr_ptr
+		dw	level6_msx_ptr
+		dw	txt_level6_name
+		dw	level6_dat_ptr
+
+;;-----------------------------------------------------------------------------
+
 demoheader	ret ; TBD
 
 		include "dzx0_128k.a80"
@@ -4648,34 +4662,6 @@ demoheader	ret ; TBD
 @music_space	ds	1510
 
 		include "stc.a80"
-
-;;-----------------------------------------------------------------------------
-
-levelblocktable
-		dw	level1_scr_ptr
-		dw	level1_msx_ptr
-		dw	0 ; reserved from level title
-		dw	level1_dat_ptr
-		dw	level2_scr_ptr
-		dw	level2_msx_ptr
-		dw	0 ; reserved from level title
-		dw	level2_dat_ptr
-		dw	level3_scr_ptr
-		dw	level3_msx_ptr
-		dw	0 ; reserved from level title
-		dw	level3_dat_ptr
-		dw	level4_scr_ptr
-		dw	level4_msx_ptr
-		dw	0 ; reserved from level title
-		dw	level4_dat_ptr
-		dw	level5_scr_ptr
-		dw	level5_msx_ptr
-		dw	0 ; reserved from level title
-		dw	level5_dat_ptr
-		dw	level6_scr_ptr
-		dw	level6_msx_ptr
-		dw	0 ; reserved from level title
-		dw	level6_dat_ptr
 
 ;;-----------------------------------------------------------------------------
 
