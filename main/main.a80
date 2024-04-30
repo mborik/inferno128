@@ -112,24 +112,24 @@ first_hello:	call	console_print
 		ld	a,31h
 		ld	(first_hello),a
 
-loc_6DEC	ld	a,0
+console_loop	ld	a,0
 		ld	sp,(hard_reset+1)
 		or	a
 		call	nz,init_pilot
 		xor	a
-		ld	(loc_6DEC+1),a
+		ld	(console_loop+1),a
 		call	console_input
 		jp	nz,loc_6E46
 		ld	a,(loc_7108+1)
 		inc	a
-		jr	z,loc_6DEC
+		jr	z,console_loop
 		call	demoheader
 		ld	a,r
 		call	calc_levelptr.do
 		call	sub_6E19
 		jr	nc,hard_reset
 		call	sub_6E27
-		jp	loc_6DEC
+		jp	console_loop
 
 sub_6E19	ld	bc,0Eh
 		add	hl,bc
@@ -144,10 +144,10 @@ sub_6E27	ld	hl,4000h
 		xor	a
 		out	(254),a
 		ld	a,78h ; 'x'
-		ld	(loc_7F0E+1),a
+		ld	(colorize.attr+1),a
 		ld	a,9
 		ld	(loc_80C3+1),a
-		call	sub_7E94
+		call	draw_border
 		call	sub_8131
 		ld	hl,txtpos_reset
 		jp	console_print
@@ -156,7 +156,7 @@ sub_6E27	ld	hl,4000h
 
 loc_6E46	ld	a,(5B15h)
 		or	a
-		jp	z,loc_6DEC
+		jp	z,console_loop
 		ld	hl,commands
 
 loc_6E50	ld	e,(hl)
@@ -197,7 +197,7 @@ loc_6E72	pop	hl
 
 loc_6E79	ld	hl,txt_unknown_cmd
 		call	console_print
-		jp	loc_6DEC
+		jp	console_loop
 ; ---------------------------------------------------------------------------
 txt_kempston	dw	6814h
 		db	"Kempston? (enter Y/N)\r",-1
@@ -227,11 +227,11 @@ commands	dw	cmd_password
 		db	"SAT"
 		dw	0
 
-cmd_sat		ld	hl,loc_7790+1
+cmd_sat		ld	hl,cmd_start_exe+1
 		ld	a,(hl)
 		xor	2
 		ld	(hl),a
-		jp	loc_6DEC
+		jp	console_loop
 
 ; ---------------------------------------------------------------------------
 
@@ -239,30 +239,30 @@ cmd_report	ld	hl,txt_pilot
 		call	console_print
 		ld	a,(byte_8302)
 		ld	hl,txt_pilot_ranks
-		call	sub_77DE
+		call	find_eqipend
 		call	console_print
 		ld	a,20h ; ' '
-		call	sub_7F91
+		call	print_char_safe
 		ld	hl,c_pilotname
 		call	console_print
 		ld	hl,txt_pilot_stat1
 		call	console_print
 		ld	hl,(word_82FE)
 		call	sub_7A9C
-		call	sub_7F8F
+		call	nextline
 		ld	hl,txt_pilot_stat2
 		call	console_print
 		ld	a,(byte_82FD)
 		dec	a
 		call	sub_7A99
-		call	sub_7F8F
+		call	nextline
 		ld	hl,txt_pilot_stat3
 		call	console_print
 		ld	hl,(word_8300)
 		call	sub_7A9C
-		call	sub_7F8F
+		call	nextline
 		call	sub_7A48
-		jp	loc_6DEC
+		jp	console_loop
 ; ---------------------------------------------------------------------------
 txt_pilot	dw	7014h
 		db	"Pilot:  ",-1
@@ -313,7 +313,7 @@ loc_6FE4	pop	af
 
 cmd_help	ld	hl,txt_help
 		call	console_print
-		jp	loc_6DEC
+		jp	console_loop
 ; ---------------------------------------------------------------------------
 
 cmd_pilot	call	init_pilot
@@ -394,7 +394,7 @@ loc_7104	rrca
 loc_7108	cp	-1
 		jr	nz,loadblock_ex2
 		call	loadblock_run
-		jp	loc_6DEC
+		jp	console_loop
 ; ---------------------------------------------------------------------------
 
 clearscr	ld	(iy+0Eh),47h ;	'G'
@@ -539,10 +539,10 @@ loadblock_run	call	calc_levelptr
 
 ; ---------------------------------------------------------------------------
 
-cmd_info	ld	hl,loc_6DEC
+cmd_info	ld	hl,console_loop
 		push	hl
 .load		ld	a,30h ; '0'
-		ld	(loc_7F0E+1),a
+		ld	(colorize.attr+1),a
 		call	loadblock
 		ld	a,(byte_82FD)
 		dec	a
@@ -551,7 +551,7 @@ cmd_info	ld	hl,loc_6DEC
 		call	z,console_print
 		call	calc_levelptr
 		ld	a,68h ; 'h'
-		ld	(loc_7F0E+1),a
+		ld	(colorize.attr+1),a
 		ld	a,(hl)
 		inc	hl
 		ld	h,(hl)
@@ -582,7 +582,7 @@ calc_levelptr	ld	a,(byte_82FD)
 console_input	call	sub_80BB
 		res	5,(iy+1)
 		ld	a,38h ; '8'
-		ld	(loc_7F0E+1),a
+		ld	(colorize.attr+1),a
 		xor	a
 		ld	(5B15h),a
 		ld	a,(loc_8160+2)
@@ -716,7 +716,7 @@ loc_750A	ld	hl,0
 		ld	(print_zx_char.scraddr+1),hl
 		ld	a,20h ; ' '
 		call	print_zx_char
-		call	sub_7F8F
+		call	nextline
 		xor	a
 		inc	a
 		ret
@@ -790,12 +790,12 @@ cmd_redefine	ld	hl,3E8h
 		ld	a,7Bh ; '{'
 		call	.storerange
 		ld	a,60h ; '`'
-		ld	(loc_7F0E+1),a
-		call	sub_7F84
+		ld	(colorize.attr+1),a
+		call	print_keysym
 		ld	a,10h
 		call	.storerange
 		ld	a,30h ; '0'
-		ld	(loc_7F0E+1),a
+		ld	(colorize.attr+1),a
 		pop	de
 		pop	hl
 		pop	bc
@@ -804,8 +804,8 @@ cmd_redefine	ld	hl,3E8h
 .waithalfsec	ei
 		halt
 		djnz	.waithalfsec
-		call	sub_7F8F
-		jp	loc_6DEC
+		call	nextline
+		jp	console_loop
 ; ---------------------------------------------------------------------------
 
 scan_ports	ld	hl,c_key_ports
@@ -921,128 +921,115 @@ cmd_start	call	loadblock
 		ld	a,(loc_7108+1)
 		inc	a
 		jp	z,hard_reset
-		ld	b,12h
-
-loc_775A	push	bc
+		ld	b,18
+.rollup		push	bc
 		ld	hl,40A0h
-		ld	a,20h ; ' '
+		ld	a,20h
 		ld	b,12h
 		call	sub_8263
 		pop	bc
-		djnz	loc_775A
+		djnz	.rollup
 		ld	a,38h ; '8'
-		ld	(loc_7F0E+1),a
+		ld	(colorize.attr+1),a
 		ld	hl,4000h
 		ld	bc,620h
-		call	sub_7E94
+		call	draw_border
 		ld	hl,txt_statusbar
 		call	console_print
+
 		ld	hl,4027h
-		ld	c,20h ; ' '
-
-loc_7781	ld	b,0Dh
+		ld	c,20h
+.clrbar_px1	ld	b,13
 		ld	a,l
-
-loc_7784	ld	(hl),0
+.clrbar_px2	ld	(hl),0
 		inc	l
-		djnz	loc_7784
+		djnz	.clrbar_px2
 		ld	l,a
 		call	downhl
 		dec	c
-		jr	nz,loc_7781
+		jr	nz,.clrbar_px1
 
-loc_7790	ld	c,3
+cmd_start_exe	ld	c,3
 		ld	a,c
 		xor	2
 		ld	e,a
 		ld	hl,RUNZONE+23Ah
-		ld	b,64h ; 'd'
-
-loc_779B	ld	a,(hl)
+		ld	b,64h
+.loop		ld	a,(hl)
 		inc	hl
 		cp	0FEh
-		jr	nz,loc_77A8
+		jr	nz,.next
 		ld	a,(hl)
 		cp	e
-		jr	nz,loc_77A8
+		jr	nz,.next
 		ld	(hl),c
-		jr	loc_77AA
-; ---------------------------------------------------------------------------
+		jr	.exit
+.next		djnz	.loop
 
-loc_77A8	djnz	loc_779B
-
-loc_77AA	ld	hl,5827h
+.exit		ld	hl,5827h
 		ld	de,c_colorbar
 		ld	c,4
-
-loc_77B2	ld	b,0Dh
-
-loc_77B4	ld	a,(de)
+.clrbar_atr1	ld	b,13
+.clrbar_atr2	ld	a,(de)
 		ld	(hl),a
 		inc	de
 		inc	hl
-		djnz	loc_77B4
+		djnz	.clrbar_atr2
 		ld	a,l
-		add	a,13h
+		add	a,32 - 13
 		ld	l,a
 		dec	c
-		jr	nz,loc_77B2
+		jr	nz,.clrbar_atr1
 		ld	hl,c_txtptr
 		call	console_print
 		ld	hl,5C26h
 		ld	b,4
 
-loc_77CC	ld	a,(hl)
+draw_equipment	ld	a,(hl)
 		push	hl
 		push	bc
 		ld	hl,byte_7BC3
-		ld	b,14h
-
-loc_77D4	cp	(hl)
-		jr	z,loc_77EF
+		ld	b,20
+.find		cp	(hl)
+		jr	z,equip_found
 		inc	hl
 		inc	hl
-		djnz	loc_77D4
+		djnz	.find
 		jp	hard_reset
 
-sub_77DE	or	a
+find_eqipend	or	a
 		ret	z
 		ld	c,a
-
-loc_77E1	ld	a,(hl)
+.loop		ld	a,(hl)
 		inc	hl
 		cp	-1
-		jr	z,loc_77EB
+		jr	z,.next
 		cp	0Dh
-		jr	nz,loc_77E1
-
-loc_77EB	dec	c
-		jr	nz,loc_77E1
+		jr	nz,.loop
+.next		dec	c
+		jr	nz,.loop
 		ret
 
-; ---------------------------------------------------------------------------
-
-loc_77EF	ld	a,14h
+equip_found	ld	a,20
 		sub	b
 		ld	hl,txt_equipment
-		call	sub_77DE
+		call	find_eqipend
 		inc	hl
 		inc	hl
-
 loc_77FA	ld	a,(hl)
-		call	sub_7F91
+		call	print_char_safe
 		inc	hl
 		ld	a,(hl)
 		cp	2Ch ; ','
 		jr	nz,loc_77FA
-		call	sub_7F8F
+		call	nextline
 		pop	bc
 		pop	hl
 		inc	hl
 		inc	hl
-		djnz	loc_77CC
-		ld	a,44h ; 'D'
-		ld	(loc_7F0E+1),a
+		djnz	draw_equipment
+		ld	a,44h
+		ld	(colorize.attr+1),a
 		ld	hl,4021h
 		call	sub_7993
 		ld	hl,403Eh
@@ -1087,7 +1074,7 @@ loc_785F	pop	af
 		ld	hl,txt_mission_end
 		call	console_print
 		ld	a,70h ; 'p'
-		ld	(loc_7F0E+1),a
+		ld	(colorize.attr+1),a
 		call	calc_levelptr
 		inc	hl
 		inc	hl
@@ -1110,12 +1097,12 @@ loc_7882	ex	de,hl
 		call	console_print
 		ld	a,(5CB0h)
 		call	sub_7A99
-		call	sub_7F8F
+		call	nextline
 		ld	hl,txt_enem_kill
 		call	console_print
 		ld	a,(5CB1h)
 		call	sub_7A99
-		call	sub_7F8F
+		call	nextline
 		ld	hl,txt_danger
 		call	console_print
 		ld	a,(5CB1h)
@@ -1206,19 +1193,19 @@ loc_7940	sub	3
 		inc	(hl)
 		ld	a,(hl)
 		ld	hl,txt_pilot_ranks
-		call	sub_77DE
+		call	find_eqipend
 		call	console_print
-		call	sub_7F8F
+		call	nextline
 
 loc_795D	call	sub_7A04
 		xor	a
 		ld	(loadblock_run.level+1),a
 		call	loadblock_run
 
-loc_7967	call	sub_7F8F
+loc_7967	call	nextline
 		ld	a,(byte_82FD)
 		cp	19h
-		jp	c,loc_6DEC
+		jp	c,console_loop
 		call	sub_71AB
 		jp	cmd_start
 ; ---------------------------------------------------------------------------
@@ -1251,7 +1238,7 @@ sub_7993	ld	c,4
 loc_7995	ld	b,8
 		ld	de,byte_79AB
 		push	hl
-		call	sub_7F05
+		call	colorize
 		pop	hl
 
 loc_799F	ld	a,(de)
@@ -1307,7 +1294,7 @@ loc_79E2	ld	(de),a
 loc_79E5	ld	hl,txt_killed
 		call	console_print
 		ld	a,1
-		ld	(loc_6DEC+1),a
+		ld	(console_loop+1),a
 		ld	a,80h
 		ld	(byte_830B),a
 		call	sub_7A04
@@ -1316,7 +1303,7 @@ loc_79E5	ld	hl,txt_killed
 
 loc_79FB	ld	hl,txt_aborted
 		call	console_print
-		jp	loc_6DEC
+		jp	console_loop
 
 sub_7A04	ld	hl,byte_8304
 		xor	a
@@ -1338,18 +1325,18 @@ loc_7A14	ld	a,0
 		call	console_print
 
 loc_7A23	ld	a,60h ; '`'
-		ld	(loc_7F0E+1),a
+		ld	(colorize.attr+1),a
 		ld	b,5
 
 loc_7A2A	ld	a,20h ; ' '
-		call	sub_7F91
+		call	print_char_safe
 		djnz	loc_7A2A
 		pop	af
 		push	af
 		ld	hl,txt_awards
-		call	sub_77DE
+		call	find_eqipend
 		call	console_print
-		call	sub_7F8F
+		call	nextline
 		pop	af
 
 loc_7A40	pop	hl
@@ -1379,11 +1366,11 @@ loc_7A56	ld	a,0
 		call	console_print
 
 loc_7A65	ld	a,60h ; '`'
-		ld	(loc_7F0E+1),a
+		ld	(colorize.attr+1),a
 		ld	b,5
 
 loc_7A6C	ld	a,20h ; ' '
-		call	sub_7F91
+		call	print_char_safe
 		djnz	loc_7A6C
 		pop	af
 		pop	hl
@@ -1393,13 +1380,13 @@ loc_7A6C	ld	a,20h ; ' '
 		push	af
 		call	sub_7A9C
 		ld	a,78h ; 'x'
-		call	sub_7F91
+		call	print_char_safe
 		pop	af
 		push	af
 		ld	hl,txt_awards
-		call	sub_77DE
+		call	find_eqipend
 		call	console_print
-		call	sub_7F8F
+		call	nextline
 		pop	af
 
 loc_7A91	pop	hl
@@ -1437,7 +1424,7 @@ loc_7ABB	inc	a
 
 loc_7AC7	cp	20h ; ' '
 		ret	z
-		jp	sub_7F91
+		jp	print_char_safe
 ; ---------------------------------------------------------------------------
 
 loc_7ACD	ld	c,30h ; '0'
@@ -1445,7 +1432,7 @@ loc_7ACD	ld	c,30h ; '0'
 
 ; ---------------------------------------------------------------------------
 
-cmd_weapons	call	sub_7DBD
+cmd_weapons	call	weapon_selector
 		ld	hl,cmd_weapons
 		push	hl
 		ld	hl,8C80h
@@ -1505,7 +1492,7 @@ loc_7B42	ex	de,hl
 
 loc_7B43	ld	hl,0
 		ld	bc,204h
-		call	sub_7E43
+		call	draw_weapon
 		jr	loc_7B0D
 ; ---------------------------------------------------------------------------
 
@@ -1582,7 +1569,7 @@ loc_7B99	dec	e
 		call	22B0h
 		pop	de
 		ld	bc,304h
-		jp	sub_7E43
+		jp	draw_weapon
 
 ; ---------------------------------------------------------------------------
 byte_7BC3	db	1,4,3,4,2,4,4,4,0FFh,0
@@ -1855,7 +1842,7 @@ loc_7D4E	ld	(hl),-1
 		pop	bc
 		ld	hl,txt_equipment
 		ld	a,b
-		call	sub_77DE
+		call	find_eqipend
 		inc	hl
 		call	console_print
 
@@ -1884,190 +1871,176 @@ byte_7D7D	db	0,40h,60h,70h,78h,7Ch,7Ah,58h
 		db	5Eh,1Eh,0Fh,0Fh,7,0,0,0
 byte_7D9D	block	20h,0
 
-sub_7DBD	ld	hl,4000h
+weapon_selector	ld	hl,4000h
 		xor	a
 		out	(254),a
-		ld	a,70h ; 'p'
-		ld	(loc_7F0E+1),a
+		ld	a,70h
+		ld	(colorize.attr+1),a
 		ld	de,gfx_equipment
 		ld	b,4
-
-loc_7DCD	ld	c,4
-
-loc_7DCF	push	bc
+.loop_col	ld	c,4
+.loop_row	push	bc
 		push	de
 		push	hl
 		ld	bc,506h
-		call	sub_7E94
+		call	draw_border
 		pop	hl
 		pop	de
 		push	hl
-		ld	a,21h ; '!'
-		call	sub_7EE8
+		ld	a,33
+		call	add_scr_hl_a
 		ld	bc,304h
-		call	sub_7E43
+		call	draw_weapon
 		pop	hl
 		pop	bc
 		ld	a,6
-		call	sub_7EE8
+		call	add_scr_hl_a
 		ld	a,c
 		dec	a
-		jr	nz,loc_7E02
+		jr	nz,.nextweapon
 		push	bc
 		ld	c,5
-		call	sub_7E71
+		call	draw_raster
 		push	de
 		push	hl
 		ld	bc,506h
-		call	sub_7E94
+		call	draw_border
 		pop	hl
 		pop	de
 		pop	bc
-
-loc_7E02	dec	c
-		jr	nz,loc_7DCF
+.nextweapon	dec	c
+		jr	nz,.loop_row
 		ld	a,86h
-		call	sub_7EE8
-		djnz	loc_7DCD
+		call	add_scr_hl_a
+		djnz	.loop_col
+
 		push	de
 		push	hl
 		ld	bc,418h
-		call	sub_7E94
+		call	draw_border
 		pop	hl
 		ld	a,l
-		add	a,18h
+		add	a,24
 		ld	l,a
 		ld	c,4
-		call	sub_7E71
+		call	draw_raster
 		push	hl
 		ld	bc,406h
-		call	sub_7E94
+		call	draw_border
 		pop	hl
-		ld	a,21h ; '!'
-		call	sub_7EE8
+		ld	a,33
+		call	add_scr_hl_a
 		pop	de
 		push	hl
 		ld	(loc_7B39+1),de
 		ld	(loc_7B43+1),hl
 		ld	a,(5C2Eh)
 		or	a
-		jr	z,loc_7E3F
-		ld	hl,48h	; 'H'
+		jr	z,.skip
+		ld	hl,48h
 		add	hl,de
 		ex	de,hl
+.skip		pop	hl
 
-loc_7E3F	pop	hl
 		ld	bc,204h
-
-sub_7E43	push	bc
+draw_weapon	push	bc
 		push	hl
 		ld	a,b
 		add	a,a
 		add	a,a
 		add	a,a
 		ld	b,a
-
-loc_7E4A	push	bc
+.loop_pix_H	push	bc
 		push	hl
 		ld	b,c
-
-loc_7E4D	ld	a,(de)
+.loop_pix_W	ld	a,(de)
 		ld	(hl),a
 		inc	l
 		inc	de
-		djnz	loc_7E4D
+		djnz	.loop_pix_W
 		pop	hl
 		call	downhl
 		pop	bc
-		djnz	loc_7E4A
+		djnz	.loop_pix_H
 		pop	hl
 		pop	bc
-		call	sub_7F05
-
-loc_7E5F	push	bc
+		call	colorize
+.loop_atr_H	push	bc
 		push	hl
 		ld	b,c
-
-loc_7E62	ld	a,(de)
+.loop_atr_W	ld	a,(de)
 		ld	(hl),a
 		inc	l
 		inc	de
-		djnz	loc_7E62
+		djnz	.loop_atr_W
 		pop	hl
-		ld	bc,20h	; ' '
+		ld	bc,32
 		add	hl,bc
 		pop	bc
-		djnz	loc_7E5F
+		djnz	.loop_atr_H
 		ret
 
-sub_7E71	push	hl
-
-loc_7E72	push	hl
-		call	sub_7F05
+draw_raster	push	hl
+.loop1		push	hl
+		call	colorize
 		inc	l
 		ld	(hl),a
 		pop	hl
 		ld	b,4
-
-loc_7E7B	ld	(hl),0AAh
+.loop2		ld	(hl),0AAh
 		inc	l
 		ld	(hl),0AAh
 		inc	h
-		ld	(hl),55h ; 'U'
+		ld	(hl),55h
 		dec	l
-		ld	(hl),55h ; 'U'
+		ld	(hl),55h
 		inc	h
-		djnz	loc_7E7B
+		djnz	.loop2
 		dec	h
 		call	downhl
 		dec	c
-		jr	nz,loc_7E72
+		jr	nz,.loop1
 		pop	hl
 		inc	l
 		inc	l
 		ret
 
-sub_7E94	ld	de,gfx_border
-		call	sub_7EAD
+draw_border	ld	de,gfx_border
+		call	draw_border_exe
 		dec	b
 		dec	b
-		jr	z,loc_7EA5
-
-loc_7E9E	push	de
-		call	sub_7EAD
+		jr	z,.next
+.loop		push	de
+		call	draw_border_exe
 		pop	de
-		djnz	loc_7E9E
-
-loc_7EA5	push	bc
+		djnz	.loop
+.next		push	bc
 		ld	bc,18h
 		ex	de,hl
 		add	hl,bc
 		ex	de,hl
 		pop	bc
 
-sub_7EAD	push	bc
+draw_border_exe	push	bc
 		push	hl
-		call	sub_7EF0
+		call	draw_char
 		ld	a,c
 		sub	2
-		jr	z,loc_7EBF
+		jr	z,.next
 		ld	b,a
-
-loc_7EB8	push	de
-		call	sub_7EF0
+.loop		push	de
+		call	draw_char
 		pop	de
-		djnz	loc_7EB8
-
-loc_7EBF	ld	bc,8
+		djnz	.loop
+.next		ld	bc,8
 		ex	de,hl
 		add	hl,bc
 		ex	de,hl
-		call	sub_7EF0
+		call	draw_char
 		pop	hl
 		ld	b,7
-
-loc_7ECB	call	downhl
-		djnz	loc_7ECB
+.downch		call	downhl
+		djnz	.downch
 		pop	bc
 
 downhl		inc	h
@@ -2087,7 +2060,7 @@ downhl		inc	h
 .nooverlap	or	a
 		ret
 
-sub_7EE8	add	a,l
+add_scr_hl_a	add	a,l
 		ld	l,a
 		ret	nc
 		ld	a,h
@@ -2095,32 +2068,31 @@ sub_7EE8	add	a,l
 		ld	h,a
 		ret
 
-sub_7EF0	push	hl
-
-loc_7EF1	ld	a,(de)
+draw_char	push	hl
+.loop		ld	a,(de)
 		cpl
 		ld	(hl),a
 		inc	de
 		inc	h
 		ld	a,h
 		and	7
-		jr	nz,loc_7EF1
+		jr	nz,.loop
 		ld	a,h
 		sub	8
 		ld	h,a
-		call	sub_7F05
+		call	colorize
 		pop	hl
 		inc	l
 		ret
 
-sub_7F05	ld	a,h
+colorize	ld	a,h
 		rrca
 		rrca
 		rrca
 		and	1Fh
 		xor	50h ; 'P'
 		ld	h,a
-loc_7F0E	ld	a,0
+.attr		ld	a,0
 		ld	(hl),a
 		ret
 
@@ -2160,28 +2132,26 @@ console_print	ld	a,(hl)
 		cp	-1
 		ret	z
 		cp	0Dh
-		jr	z,sub_7F91
+		jr	z,print_char_safe
 		cp	0Ch
-		jr	nz,loc_7F7F
+		jr	nz,.char
 		inc	a
-
-loc_7F7F	call	sub_7F91
+.char		call	print_char_safe
 		jr	console_print
 
-sub_7F84	ld	a,(hl)
-		call	sub_7F91
+print_keysym	ld	a,(hl)
+		call	print_char_safe
 		inc	hl
 		ld	a,(hl)
 		call	testsymbound
-		jr	nz,sub_7F84
+		jr	nz,print_keysym
 
-sub_7F8F	ld	a,0Dh
-
-sub_7F91	push	hl
+nextline	ld	a,0Dh
+print_char_safe	push	hl
 		push	de
 		push	bc
 		push	af
-		call	loc_7F9D
+		call	print_char
 		pop	af
 		pop	bc
 		pop	de
@@ -2190,7 +2160,7 @@ sub_7F91	push	hl
 
 ; ---------------------------------------------------------------------------
 
-loc_7F9D	ld	c,0
+print_char	ld	c,0
 		inc	c
 		dec	c
 		jr	z,loc_7FEA
@@ -2205,13 +2175,12 @@ loc_7F9D	ld	c,0
 		bit	5,c
 		jr	nz,loc_7FBF
 		ld	(loc_80F2+1),a
-
 loc_7FBA	xor	a
-		ld	(loc_7F9D+1),a
+		ld	(print_char+1),a
 		ret
 ; ---------------------------------------------------------------------------
 
-loc_7FBF	ld	(loc_7F0E+1),a
+loc_7FBF	ld	(colorize.attr+1),a
 		jr	loc_7FBA
 ; ---------------------------------------------------------------------------
 
@@ -2258,7 +2227,7 @@ loc_7FEA	cp	20h ; ' '
 		ld	c,0
 
 loc_8009	ld	a,c
-		ld	(loc_7F9D+1),a
+		ld	(print_char+1),a
 		ret
 ; ---------------------------------------------------------------------------
 
@@ -2492,7 +2461,7 @@ loc_8160	ld	bc,0
 		ld	a,b
 		call	22B0h
 		push	hl
-		call	sub_7F05
+		call	colorize
 		inc	l
 		ld	(hl),a
 		ld	bc,1Fh
@@ -2668,10 +2637,10 @@ loc_828D	push	hl
 		dec	a
 		jr	nz,loc_828D
 		pop	hl
-		call	sub_7F05
+		call	colorize
 		ex	de,hl
 		pop	hl
-		call	sub_7F05
+		call	colorize
 		ldir
 		ret
 
