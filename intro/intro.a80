@@ -4,7 +4,7 @@
 
 		org	RUNZONE
 
-intro		call	music_init
+@intro		call	music_init
 		ld	a,#CD
 		ld	(music_enabled+1),a
 		ld	(IMCALL),a
@@ -1022,7 +1022,7 @@ loc_D316	ld	sp,0
 		ld	(loc_DCC0+1),a
 		dec	a
 		ld	(loc_DEA1+1),a
-		jp	interrupt
+		jp	interrupt_std
 
 sub_D325	ld	hl,4056h
 		ld	(loc_D341+1),hl

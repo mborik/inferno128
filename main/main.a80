@@ -11,10 +11,10 @@
 
 @COREZONE	equ	24200
 @RUNZONE	equ	44000
-@BASESP		equ	interrupt
+@BASESP		equ	RUNZONE
 
-@interrupt	equ	#ABAB
-@im2vector = ((high interrupt) - 1) << 8
+@im2vector	equ	#A800
+@interrupt_base	equ	#ABAB
 
 
 	ifdef isFX
@@ -64,13 +64,19 @@ txt_equipment	db	80h,"4xCOBRA, forward firing missile\r"
 		ldir
 		xor	a
 		out	(254),a
-		ld	hl,im2vector
-		ld	de,im2vector+1
-		ld	b,1
-		ld	(hl),high interrupt
-		ld	a,h
-		ldir
+		ld	a,high im2vector
 		ld	i,a
+		ld	h,a
+		ld	d,a
+		inc	l
+		inc	e
+		inc	b
+		ld	(hl),high interrupt_base
+		ldir
+		ld	a,0C3h ; jp
+		ld	(interrupt_base),a
+		ld	hl,interrupt_std
+		ld	(interrupt_base+1),hl
 		call	intro
 
 ; test custom ROM to disable bold font
@@ -124,7 +130,7 @@ console_loop	ld	a,0
 		inc	a
 		jr	z,console_loop
 		call	demoheader
-		ld	a,r
+		call	rnd
 		call	calc_levelptr.do
 		call	sub_6E19
 		jr	nc,hard_reset
@@ -278,18 +284,16 @@ cmd_demo	xor	a
 		ld	(loadblock_ret+1),a
 		ld	a,(byte_82FD)
 		push	af
-loc_6FB7	ld	a,r
-loc_6FB9	cp	18h
+loc_6FB7	call	rnd
+loc_6FB9	cp	24
 		jr	c,loc_6FC1
-		sub	18h
+		sub	24
 		jr	loc_6FB9
-; ---------------------------------------------------------------------------
 
 loc_6FC1	inc	a
 		ld	(byte_82FD),a
 		call	cmd_info.load
 		ld	b,0
-
 loc_6FCA	ei
 		call	1F54h
 		jr	nc,loc_6FE4
@@ -302,7 +306,16 @@ loc_6FCA	ei
 		jr	nc,loc_6FE4
 		call	sub_6E27
 		jr	loc_6FB7
-; ---------------------------------------------------------------------------
+
+rnd:		ld	a,42
+		ld	c,a
+		add	a,a
+		add	a,a
+		add	a,c
+		add	a,7
+		ld	(rnd+1),a
+		ret
+ ; ---------------------------------------------------------------------------
 
 loc_6FE4	pop	af
 		ld	(byte_82FD),a
@@ -410,7 +423,7 @@ clearscr	ld	(iy+0Eh),47h ;	'G'
 
 loadblock_ex2	ld	hl,loadblock_exit
 		push	hl
-loadblock_exe	ld	a,0	; currently loaded part
+loadblock_exe	ld	(.checkloaded+1),a
 ;		ld	hl,5800h
 ;		ld	de,5801h
 ;		ld	bc,02ffh
@@ -430,7 +443,7 @@ loadblock_exe	ld	a,0	; currently loaded part
 ;		ld	(music_enabled+1),a
 ;		ld	hl,levelblocktable
 		ld	hl,levelblocktable+6
-; 		add	hl,de
+ 		add	hl,de
 ; 		ld	e,(hl)
 ; 		inc	hl
 ; 		ld	d,(hl)
@@ -483,7 +496,7 @@ loadblock_exe	ld	a,0	; currently loaded part
 ; 		halt
 ; 		djnz	.justnop
 
-		ld	a,(loadblock_exe+1)
+.checkloaded	ld	a,-1
 		ld	hl,RUNZONE+63h
 		cp	(hl)
 		ret	nz
@@ -550,7 +563,7 @@ cmd_info	ld	hl,console_loop
 		ld	hl,(RUNZONE)
 		call	z,console_print
 		call	calc_levelptr
-		ld	a,68h ; 'h'
+		ld	a,68h
 		ld	(colorize.attr+1),a
 		ld	a,(hl)
 		inc	hl
@@ -569,20 +582,19 @@ calc_levelptr	ld	a,(byte_82FD)
 		dec	a
 .do		and	3
 		ld	hl,RUNZONE+2
-		jr	z,.exit
+		ret	z
 		ld	c,a
 		ld	b,21
 .mul22x		add	a,c
 		djnz	.mul22x
 		ld	c,a
 		add	hl,bc
-.exit		or	h
 		ret
 
 ; ---------------------------------------------------------------------------
 console_input	call	sub_80BB
 		res	5,(iy+1)
-		ld	a,38h ; '8'
+		ld	a,38h
 		ld	(colorize.attr+1),a
 		xor	a
 		ld	(5B15h),a
@@ -930,7 +942,7 @@ cmd_start	call	loadblock
 		call	sub_8263
 		pop	bc
 		djnz	.rollup
-		ld	a,38h ; '8'
+		ld	a,38h
 		ld	(colorize.attr+1),a
 		ld	hl,4000h
 		ld	bc,620h
@@ -1226,7 +1238,7 @@ unk_797E	db	2
 		db	12h
 
 sub_7986	ld	bc,64h	; 'd'
-		ld	de,0FFFFh
+		ld	de,-1
 
 loc_798C	or	a
 		inc	de
@@ -2462,7 +2474,7 @@ loc_8160	ld	bc,0
 		ld	(hl),a
 		ld	bc,1Fh
 		add	hl,bc
-		cp	38h ; '8'
+		cp	38h
 		jr	z,loc_817B
 		cp	78h ; 'x'
 		jr	z,loc_817B
@@ -2778,22 +2790,9 @@ c_sets_default	db	0FEh,0DFh,1
 sub_8EF8	di
 		ld	(loc_9197+1),a
 		ld	(loc_9019+1),sp
-		ld	sp,0FFF4h
-		ld	hl,im2vector
-		ld	a,h
-		ld	i,a
-		ld	d,h
-		ld	e,l
-		inc	de
-		ld	bc,100h
-		ld	(hl),0FFh
-		ldir
-		ld	a,18h ; jr
-		ld	(0FFFFh),a
-		ld	a,0C3h ; jp
-		ld	(0FFF4h),a
-		ld	hl,loc_998B
-		ld	(0FFF5h),hl
+		ld	sp,0
+		ld	hl,interrupt_game
+		ld	(interrupt_base+1),hl
 		ld	a,1Eh
 		ld	(sub_9881+1),a
 		ld	hl,09A80h
@@ -2802,7 +2801,7 @@ loc_8F2B	ld	(hl),l
 		inc	l
 		jr	nz,loc_8F2B
 		xor	a
-		ld	(loc_998D+1),a
+		ld	(interrupt_game.fork+1),a
 		im	2
 		ei
 		ld	a,xh
@@ -3439,7 +3438,7 @@ loc_9306	ld	a,yh
 		ld	b,a
 		ld	a,(RUNZONE+156h)
 		ld	(loc_932E+1),a
-		ld	hl,loc_9A04
+		ld	hl,9A04h
 		ld	(RUNZONE+151h),hl
 
 loc_931F	ld	e,(hl)
@@ -3507,7 +3506,7 @@ loc_9366	ld	h,(ix+1)
 		jp	loc_9366
 ; ---------------------------------------------------------------------------
 
-loc_937F	ld	bc,0FFFBh
+loc_937F	ld	bc,-5
 		add	ix,bc
 		ret
 
@@ -3763,58 +3762,58 @@ loc_94EA	ld	yl,a
 		ld	h,0C0h
 		ld	l,(ix+4)
 word_94F1	dw	0
-		ld	a, (hl)
+		ld	a,(hl)
 		inc	l
-		ld	h, (hl)
-		ld	l, a
-		ld	a, (hl)
+		ld	h,(hl)
+		ld	l,a
+		ld	a,(hl)
 
-loc_94F8:	or	0
-		ld	c, a
+loc_94F8	or	0
+		ld	c,a
 		inc	hl
 
-loc_94FC:	ld	a, (hl)
+loc_94FC	ld	a,(hl)
 		or	a
-		jp	z, loc_93E0
-		ld	b, a
+		jp	z,loc_93E0
+		ld	b,a
 		inc	hl
-		ld	a, (hl)
+		ld	a,(hl)
 		inc	hl
-		add	a, yl
-		ld	e, a
-		ld	a, (hl)
+		add	a,yl
+		ld	e,a
+		ld	a,(hl)
 		inc	hl
-		ex	de, hl
-		add	a, (ix+2)
+		ex	de,hl
+		add	a,(ix+2)
 		cp	12h
-		jp	nc, loc_952E
-		ld	h, a
+		jp	nc,loc_952E
+		ld	h,a
 		xor	a
 		srl	h
 		rra
 		srl	h
 		rra
-		add	a, l
-		add	a, l
-		ld	l, a
-		ld	a, h
-		adc	a, 9Bh ; '›'
-		ld	h, a
+		add	a,l
+		add	a,l
+		ld	l,a
+		ld	a,h
+		adc	a,9Bh
+		ld	h,a
 
-loc_9522:	ld	a, (de)
-		ld	(hl), a
+loc_9522	ld	a,(de)
+		ld	(hl),a
 		inc	de
 		inc	l
-		ld	(hl), c
+		ld	(hl),c
 		inc	l
 		djnz	loc_9522
-		ex	de, hl
+		ex	de,hl
 		jr	loc_94FC
 ; ---------------------------------------------------------------------------
 
-loc_952E:	ld	l, b
-		ld	h, 0
-		add	hl, de
+loc_952E	ld	l,b
+		ld	h,0
+		add	hl,de
 		jr	loc_94FC
 
 sub_9535	ld	ix,RUNZONE+64h
@@ -4415,7 +4414,7 @@ loc_98AF	inc	e
 		ld	c,40h ; '@'
 
 loc_98B2	ld	a,(hl)
-		and	38h ; '8'
+		and	38h
 		jr	z,loc_98BF
 		cp	8
 		jr	z,loc_9900
@@ -4471,13 +4470,13 @@ loc_98F7	ld	(hl),a
 ; ---------------------------------------------------------------------------
 
 loc_98F9	ld	a,(hl)
-		and	38h ; '8'
+		and	38h
 		jr	z,loc_98B2
 		jr	loc_98AF
 ; ---------------------------------------------------------------------------
 
 loc_9900	ld	a,(hl)
-		and	38h ; '8'
+		and	38h
 		jr	z,loc_98BF
 		jr	loc_98BB
 
@@ -4487,15 +4486,15 @@ sub_9907	push	de
 		push	de
 		push	hl
 		push	ix
-		ld	(loc_9998+1),sp
+		ld	(interrupt_game.backsp+1),sp
 		ld	a,4
-		ld	(loc_998D+1),a
+		ld	(interrupt_game.fork+1),a
 		ld	a,(RUNZONE+14Ch)
 		or	a
 		jr	z,loc_9941
 		inc	a
 		ld	(RUNZONE+14Ch),a
-		ld	a,r
+		call	rnd
 		ld	e,a
 		xor	a
 		ld	d,a
@@ -4566,18 +4565,17 @@ loc_9989	jr	$
 
 ; ---------------------------------------------------------------------------
 
-loc_998B	push	af
+interrupt_game	push	af
 		ei
-loc_998D	ld	a,0
+.fork		ld	a,0
 		or	a
-		jr	nz,loc_9994
+		jr	nz,.restorestack
 		pop	af
 		ret
-; ---------------------------------------------------------------------------
 
-loc_9994	xor	a
-		ld	(loc_998D+1),a
-loc_9998	ld	sp,0
+.restorestack	xor	a
+		ld	(.fork+1),a
+.backsp		ld	sp,0
 		pop	ix
 		pop	hl
 		pop	de
@@ -4587,86 +4585,7 @@ loc_9998	ld	sp,0
 		ret
 ; ---------------------------------------------------------------------------
 
-loc_9A04	dec	hl
-		ld	(ix+0),l
-		ld	(ix+1),h
-		ld	a,r
-		and	7
-		ret	nz
-		dec	hl
-		dec	hl
-		ld	(RUNZONE+0B9Ah),hl
-		ld	a,(ix+2)
-		dec	a
-		ld	(RUNZONE+0B9Ch),a
-		ld	hl,RUNZONE+0B9Ah
-		ld	ix,RUNZONE+7Ch
-		ld	a,4
-		jp	RUNZONE+4B5h
-
-levelblocktable
-		dw	level1_scr_ptr
-		dw	level1_msx_ptr
-		dw	txt_level1_name
-		dw	level1_dat_ptr
-		dw	level2_scr_ptr
-		dw	level2_msx_ptr
-		dw	txt_level2_name
-		dw	level2_dat_ptr
-		dw	level3_scr_ptr
-		dw	level3_msx_ptr
-		dw	txt_level3_name
-		dw	level3_dat_ptr
-		dw	level4_scr_ptr
-		dw	level4_msx_ptr
-		dw	txt_level4_name
-		dw	level4_dat_ptr
-		dw	level5_scr_ptr
-		dw	level5_msx_ptr
-		dw	txt_level5_name
-		dw	level5_dat_ptr
-		dw	level6_scr_ptr
-		dw	level6_msx_ptr
-		dw	txt_level6_name
-		dw	level6_dat_ptr
-
-;;-----------------------------------------------------------------------------
-
-demoheader	ret ; TBD
-
-		include "dzx0_128k.a80"
-
-@mainblock.end
-
-;;-----------------------------------------------------------------------------
-
-		org	im2vector - (im2vector_space - music_space)
-
-@music_space	ds	1510
-
-		include "stc.a80"
-
-;;-----------------------------------------------------------------------------
-
-	if mainblock.end > music_space
-		display "Too long! ",/D,(mainblock.end-music_space)," bytes out!"
-		end
-	else
-		display /D,(music_space-mainblock.end)," bytes free for game engine"
-	endif
-
-	if $ > interrupt
-		display "Too long! ",/D,($-interrupt)," bytes out!"
-		end
-	else
-	    ifndef isFX
-		display /D,(interrupt-$)," bytes free for stack"
-	    endif
-	endif
-
-		org	#ABAB
-
-interrupt	di
+@interrupt_std	di
 		push	af
 		push	bc
 		push	de
@@ -4702,6 +4621,38 @@ interrupt	di
 		ei
 		ret
 
+; ---------------------------------------------------------------------------
+
+levelblocktable
+		dw	level1_scr_ptr
+		dw	level1_msx_ptr
+		dw	txt_level1_name
+		dw	level1_dat_ptr
+		dw	level2_scr_ptr
+		dw	level2_msx_ptr
+		dw	txt_level2_name
+		dw	level2_dat_ptr
+		dw	level3_scr_ptr
+		dw	level3_msx_ptr
+		dw	txt_level3_name
+		dw	level3_dat_ptr
+		dw	level4_scr_ptr
+		dw	level4_msx_ptr
+		dw	txt_level4_name
+		dw	level4_dat_ptr
+		dw	level5_scr_ptr
+		dw	level5_msx_ptr
+		dw	txt_level5_name
+		dw	level5_dat_ptr
+		dw	level6_scr_ptr
+		dw	level6_msx_ptr
+		dw	txt_level6_name
+		dw	level6_dat_ptr
+
+;;-----------------------------------------------------------------------------
+
+demoheader	ret ; TBD
+
 continualpagingtable
 		db	$11 ; from $10
 		db	$13 ; from $11
@@ -4712,6 +4663,29 @@ continualpagingtable
 		db	$17 ; from $16
 		db	$10 ; should not happen ($17)
 
+		include "dzx0_128k.a80"
+
+@mainblock.end
+
+;;-----------------------------------------------------------------------------
+
+		org	im2vector - (im2vector_space - music_space)
+
+@music_space	ds	1510
+
+		include "stc.a80"
+
+im2vector_space	ds	257
+
+;;-----------------------------------------------------------------------------
+
+	if mainblock.end > music_space
+		display "Too long! ",/D,(mainblock.end-music_space)," bytes out!"
+		end
+	else
+		display /D,(music_space-mainblock.end)," bytes free for game engine"
+	endif
+
 	if $ > RUNZONE
 		display "Too long! ",/D,($-RUNZONE)," bytes out!"
 		end
@@ -4721,7 +4695,6 @@ continualpagingtable
 	    endif
 	endif
 
-intro
 	module _INTRO_WRAPPER
 		include "../intro/intro.a80"
 	endmodule
