@@ -568,14 +568,15 @@ calc_levelptr	ld	a,(byte_82FD)
 		jr	z,.do
 		dec	a
 .do		and	3
+		ld	hl,RUNZONE+2
+		jr	z,.exit
 		ld	c,a
 		ld	b,21
 .mul22x		add	a,c
 		djnz	.mul22x
 		ld	c,a
-		ld	hl,RUNZONE+2
 		add	hl,bc
-		or	h
+.exit		or	h
 		ret
 
 ; ---------------------------------------------------------------------------
@@ -985,7 +986,7 @@ cmd_start_exe	ld	c,3
 		ld	hl,5C26h
 		ld	b,4
 
-draw_equipment	ld	a,(hl)
+print_equip	ld	a,(hl)
 		push	hl
 		push	bc
 		ld	hl,byte_7BC3
@@ -1016,24 +1017,24 @@ equip_found	ld	a,20
 		call	find_eqipend
 		inc	hl
 		inc	hl
-loc_77FA	ld	a,(hl)
-		call	print_char_safe
+		ld	a,(hl)
+.printloop	call	print_char_safe
 		inc	hl
 		ld	a,(hl)
-		cp	2Ch ; ','
-		jr	nz,loc_77FA
+		cp	','
+		jr	nz,.printloop
 		call	nextline
 		pop	bc
 		pop	hl
 		inc	hl
 		inc	hl
-		djnz	draw_equipment
+		djnz	print_equip
 		ld	a,44h
 		ld	(colorize.attr+1),a
 		ld	hl,4021h
-		call	sub_7993
+		call	draw_circles
 		ld	hl,403Eh
-		call	sub_7993
+		call	draw_circles
 		call	calc_levelptr
 		push	hl
 		ld	bc,0Eh
@@ -1233,25 +1234,23 @@ loc_798C	or	a
 		jr	nc,loc_798C
 		ret
 
-sub_7993	ld	c,4
-
-loc_7995	ld	b,8
-		ld	de,byte_79AB
+draw_circles	ld	c,4
+.loop		ld	b,8
+		ld	de,gfx_circle
 		push	hl
 		call	colorize
 		pop	hl
-
-loc_799F	ld	a,(de)
+.loopch		ld	a,(de)
 		ld	(hl),a
 		inc	de
 		call	downhl
-		djnz	loc_799F
+		djnz	.loopch
 		dec	c
-		jr	nz,loc_7995
+		jr	nz,.loop
 		ret
 
 ; ---------------------------------------------------------------------------
-byte_79AB	db	0,3Ch,7Eh,7Ah,7Ah,72h,3Ch,0
+gfx_circle	db	0,3Ch,7Eh,7Ah,7Ah,72h,3Ch,0
 
 sub_79B3	ld	c,a
 		add	a,a
@@ -2240,10 +2239,7 @@ loc_800E	ld	a,0
 
 loc_8019	ld	hl,loc_800E+1
 		ld	(hl),1
-		sub	0A5h
-		jp	nc,0C10h
-		add	a,0A5h
-		cp	9Eh
+		cp	32 + 126
 		jr	c,loc_802B
 		ld	a,20h ; ' '
 
@@ -2782,6 +2778,24 @@ c_sets_default	db	0FEh,0DFh,1
 sub_8EF8	di
 		ld	(loc_9197+1),a
 		ld	(loc_9019+1),sp
+		ld	sp,0FFF4h
+		ld	hl,im2vector
+		ld	a,h
+		ld	i,a
+		ld	d,h
+		ld	e,l
+		inc	de
+		ld	bc,100h
+		ld	(hl),0FFh
+		ldir
+		ld	a,18h ; jr
+		ld	(0FFFFh),a
+		ld	a,0C3h ; jp
+		ld	(0FFF4h),a
+		ld	hl,loc_998B
+		ld	(0FFF5h),hl
+		ld	a,1Eh
+		ld	(sub_9881+1),a
 		ld	hl,09A80h
 loc_8F2B	ld	(hl),l
 		res	7,(hl)
