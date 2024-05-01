@@ -1001,7 +1001,7 @@ cmd_start_exe	ld	c,3
 print_equip	ld	a,(hl)
 		push	hl
 		push	bc
-		ld	hl,byte_7BC3
+		ld	hl,weapon_order
 		ld	b,20
 .find		cp	(hl)
 		jr	z,equip_found
@@ -1509,7 +1509,7 @@ loc_7B43	ld	hl,0
 
 loc_7B4E	ld	c,a
 		ld	b,0
-		ld	hl,byte_7BC3
+		ld	hl,weapon_order
 		add	hl,bc
 		add	hl,bc
 		ld	a,(hl)
@@ -1548,7 +1548,7 @@ loc_7B6B	ex	de,hl
 ; ---------------------------------------------------------------------------
 unk_7B8C	db	0
 
-sub_7B8D	ld	hl,byte_7BC3
+sub_7B8D	ld	hl,weapon_order
 		ld	e,0
 
 loc_7B92	inc	e
@@ -1583,7 +1583,7 @@ loc_7B99	dec	e
 		jp	draw_weapon
 
 ; ---------------------------------------------------------------------------
-byte_7BC3	db	1,4,3,4,2,4,4,4,0FFh,0
+weapon_order	db	1,4,3,4,2,4,4,4,0FFh,0
 		db	0,8,5,1,9,8,8,1,0FFh,1
 		db	0Ah,2,0Dh,6,0Ch,1,7,8,0FFh,2
 		db	6,2,0Fh,2,0Eh,80h,0Bh,1,0FFh,3
@@ -2795,7 +2795,7 @@ sub_8EF8	di
 		ld	(interrupt_base+1),hl
 		ld	a,1Eh
 		ld	(sub_9881+1),a
-		ld	hl,09A80h
+		ld	hl,buffer1 + 128
 loc_8F2B	ld	(hl),l
 		res	7,(hl)
 		inc	l
@@ -2824,7 +2824,7 @@ loc_8F45	call	sub_91DD
 loc_8F59	xor	a
 		out	(254),a
 		ld	(loc_8F6D+1),sp
-		ld	sp,9F80h
+		ld	sp,buffer1 + 580h
 		ld	h,a
 		ld	l,a
 		ld	b,90h
@@ -3438,7 +3438,7 @@ loc_9306	ld	a,yh
 		ld	b,a
 		ld	a,(RUNZONE+156h)
 		ld	(loc_932E+1),a
-		ld	hl,9A04h
+		ld	hl,buffer1 + 4
 		ld	(RUNZONE+151h),hl
 
 loc_931F	ld	e,(hl)
@@ -3630,7 +3630,7 @@ loc_9438	inc	hl
 		add	a,l
 		ld	l,a
 		ld	a,h
-		adc	a,9Bh
+		adc	a,(high buffer1) + 1
 		ld	h,a
 
 loc_9450	ld	a,(de)
@@ -3671,7 +3671,7 @@ loc_9463	ld	a,20h ; ' '
 		add	a,l
 		ld	l,a
 		ld	a,h
-		adc	a,9Bh
+		adc	a,(high buffer1) + 1
 		ld	h,a
 
 loc_9482	ld	a,(de)
@@ -3742,7 +3742,7 @@ loc_94B5	inc	hl
 		add	a,l
 		ld	l,a
 		ld	a,h
-		adc	a,9Bh
+		adc	a,(high buffer1) + 1
 		ld	h,a
 		ld	a,(de)
 		ld	(hl),a
@@ -3797,7 +3797,7 @@ loc_94FC	ld	a,(hl)
 		add	a,l
 		ld	l,a
 		ld	a,h
-		adc	a,9Bh
+		adc	a,(high buffer1) + 1
 		ld	h,a
 
 loc_9522	ld	a,(de)
@@ -3883,7 +3883,7 @@ loc_9594	ld	a,l
 		push	hl
 		ld	a,yh
 		ld	l,a
-		ld	h,9Ah
+		ld	h,high buffer1
 		ld	a,c
 		and	3
 		or	l
@@ -3931,7 +3931,7 @@ loc_95D8	inc	hl
 		add	a,l
 		ld	l,a
 		ld	a,h
-		adc	a,9Bh
+		adc	a,(high buffer1) + 1
 		ld	h,a
 
 loc_95F0	ld	a,(de)
@@ -3975,7 +3975,7 @@ loc_9609	ld	a,20h ; ' '
 		add	a,l
 		ld	l,a
 		ld	a,h
-		adc	a,9Bh
+		adc	a,(high buffer1) + 1
 		ld	h,a
 
 loc_9628	ld	a,(de)
@@ -4049,7 +4049,7 @@ loc_9661	inc	hl
 		add	a,l
 		ld	l,a
 		ld	a,h
-		adc	a,9Bh
+		adc	a,(high buffer1) + 1
 		ld	h,a
 		ld	a,(de)
 		ld	(hl),a
@@ -4081,7 +4081,7 @@ loc_969D	ld	yl,a
 		push	hl
 		ld	a,yh
 		ld	l,a
-		ld	h,9Ah
+		ld	h,high buffer1
 		ld	a,c
 		and	3
 		or	l
@@ -4121,7 +4121,7 @@ loc_96C2	ld	a,(hl)
 		add	a,l
 		ld	l,a
 		ld	a,h
-		adc	a,9Bh
+		adc	a,(high buffer1) + 1
 		ld	h,a
 
 loc_96E8	ld	a,(de)
@@ -4147,7 +4147,7 @@ sub_9701	cp	0FCh
 		jr	nc,loc_9738
 		exx
 		ld	l,a
-		ld	h,9Ah
+		ld	h,high buffer1
 		ld	a,(hl)
 		push	iy
 		ld	a,(hl)
@@ -4226,16 +4226,16 @@ loc_976D	ld	hl,(RUNZONE+14Fh)
 		jp	loc_956B
 
 sub_9790	ld	(loc_9877+1),sp
-		ld	sp,0A6FEh
+		ld	sp,buffer1 - 2
 		ld	hl,loc_9877
 		push	hl
 		scf
 		push	af
-		ld	hl,9F7Fh
+		ld	hl,buffer1 + 57Fh
 		ld	de,50FFh
 		exx
-		ld	de,0AB41h
-		ld	hl,5AFFh
+		ld	de,buffer3 + 240h
+		ld	hl,5B00h - 1
 		ld	xh,12h
 
 loc_97AD	push	de
@@ -4255,7 +4255,7 @@ loc_97B6	ld	a,(hl)
 		exx
 		ld	c,a
 		ld	b,d
-		ld	d,0A7h
+		ld	d,high buffer2
 		ld	a,(de)
 		out	(254),a
 		ld	d,b
@@ -4392,7 +4392,7 @@ sub_9881	ld	a,0
 		jp	z,loc_8FF7
 		cp	1Ah
 		jr	nc,loc_98DA
-		ld	hl,09A80h
+		ld	hl,buffer1 + 128
 loc_9891	ld	a,(hl)
 		cp	9
 		jr	z,loc_98C4
@@ -4431,9 +4431,9 @@ loc_98C3	ld	(hl),a
 
 loc_98C4	inc	l
 		jr	nz,loc_9891
-		ld	hl,0A902h
+		ld	hl,buffer3 + 1
 		ld	bc,240h
-		ld	d,9Ah
+		ld	d,high buffer1
 
 loc_98CF	ld	e,(hl)
 		set	7,e
@@ -4499,7 +4499,7 @@ sub_9907	push	de
 		xor	a
 		ld	d,a
 		ld	(RUNZONE+14Eh),a
-		ld	hl,0A700h
+		ld	hl,buffer2
 		ld	c,a
 loc_992D	ld	a,(de)
 		inc	de
@@ -4550,7 +4550,7 @@ loc_996B	ld	hl,0
 		jr	nz,loc_9979
 		ld	(RUNZONE+14Eh),a
 loc_9979	ld	c,a
-		ld	hl,0A700h
+		ld	hl,buffer2
 		xor	a
 loc_997E	ld	b,c
 loc_997F	ld	(hl),a
@@ -4654,18 +4654,23 @@ levelblocktable
 demoheader	ret ; TBD
 
 continualpagingtable
-		db	$11 ; from $10
-		db	$13 ; from $11
-		db	$10 ; should not happen ($12)
-		db	$14 ; from $13
-		db	$16 ; from $14
-		db	$10 ; should not happen ($15)
-		db	$17 ; from $16
-		db	$10 ; should not happen ($17)
+		db	11h ; from $10
+		db	13h ; from $11
+		db	10h ; should not happen ($12)
+		db	14h ; from $13
+		db	16h ; from $14
+		db	10h ; should not happen ($15)
+		db	17h ; from $16
+		db	10h ; should not happen ($17)
 
 		include "dzx0_128k.a80"
 
 @mainblock.end
+
+		org	9A00h
+
+@buffer1	ds	600h
+@buffer2	ds	100h
 
 ;;-----------------------------------------------------------------------------
 
@@ -4676,6 +4681,8 @@ continualpagingtable
 		include "stc.a80"
 
 im2vector_space	ds	257
+
+@buffer3 ;	ds	2DFh
 
 ;;-----------------------------------------------------------------------------
 

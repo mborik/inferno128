@@ -7,14 +7,6 @@ ORNALEN = 33	; single ornament length
 PATTLEN = 7	; single pattern record length
 NULL = 0
 
-; bit.0 if you want to play without looping
-; bit.1 if you play looped but fadeout after few seconds
-; bit.7 is set each time when loop or fadeout was passed
-; ...or simplified:	2 - fadeout after loop
-;			1 - no loop
-;			0 - loop forever
-music_setup:	db	0
-
 ;------------------------------------------------------------------------------
 music_init:	ld	hl,music_space
 		ld	a,(hl)
@@ -513,6 +505,14 @@ freqtable:	dw	#0EF8, #0E10, #0D60, #0C80, #0BD8, #0B28, #0A88, #09F0
 		dw	#003B, #0038, #0035, #0032, #002F, #002C, #002A, #0027
 		dw	#0025, #0023, #0021, #001F, #001D, #001C, #001A, #0019
 		dw	#0017, #0016, #0015, #0013, #0012, #0011, #0010, #000F
+
+; bit.0 if you want to play without looping
+; bit.1 if you play looped but fadeout after few seconds
+; bit.7 is set each time when loop or fadeout was passed
+; ...or simplified:	2 - fadeout after loop
+;			1 - no loop
+;			0 - loop forever
+music_setup:	db	0
 
 ;------------------------------------------------------------------------------
 positions:	dw	NULL
