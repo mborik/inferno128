@@ -3381,4 +3381,4 @@ let cycle_counts_dd = [
    };
 }
 
-exports.default = Z80;
+module.exports = Z80;

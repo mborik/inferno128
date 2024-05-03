@@ -1,45 +1,15 @@
-fs = require('fs');
-path = require('path');
+const fs = require('fs');
+const path = require('path');
+const desktopMapper = require('./desktop_mapper');
 
-if (process.argv.length < 4)
-	return console.error('few arguments, run "node desktop_to_plaintext.js {source.bin} {output}"!');
+if (process.argv.length < 4) {
+	console.error('few arguments, run "node desktop_to_plaintext.js {source.bin} {output}"!');
+	process.exit(1);
+}
 
 process.removeAllListeners('warning');
 
 //-----------------------------------------------------------------------------
-
-const desktopMapper = {
-	128: 'é',
-	129: 'É',
-	130: 'ě',
-	131: 'Ě',
-	132: 'š',
-	133: 'Š',
-	134: 'č',
-	135: 'Č',
-	136: 'ř',
-	137: 'Ř',
-	138: 'ž',
-	139: 'Ž',
-	140: 'ý',
-	141: 'Ý',
-	142: 'á',
-	143: 'Á',
-	144: 'í',
-	145: 'Í',
-	146: 'ď',
-	147: 'Ď',
-	148: 'ň',
-	149: 'Ň',
-	150: 'ó',
-	151: 'Ó',
-	152: 'ť',
-	153: 'Ť',
-	154: 'ů',
-	155: 'Ů',
-	156: 'ú',
-	157: 'Ú'
-}
 
 const textBuff = fs.readFileSync(path.normalize(process.argv[2]));
 const output = Buffer.alloc(64 * 1024); // output buffer
@@ -83,12 +53,11 @@ while (p < textBuff.length) {
 		continue; // Skip them
 	}
 	else if (c >= 0xA0) { // Repeated characters
-		cnt = output[q - 1] - 0xA0; // Count
-		c = output[q - 2]; // Repeated character
-		while (cnt > 0) { // Write the character N times
+		cnt = textBuff[p - 1] - 0xA0; // Count
+		c = textBuff[p - 2]; // Repeated character
+		do { // Write the character N times
 			output[q++] = c;
-			cnt--;
-		}
+		} while (--cnt > 0);
 	}
 	else
 		output[q++] = c; // Copy character

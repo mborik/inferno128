@@ -1,9 +1,11 @@
-fs = require('fs');
-path = require('path');
-Z80 = require("./z80").default;
+const fs = require('fs');
+const path = require('path');
+const Z80 = require("./z80");
 
-if (process.argv.length < 5)
-	return console.error('few arguments, run "node depackblock.js {zxblock.bin} {loadAddr,runAddr,stackAddr,saveFrom,saveTo} {output.bin}"!');
+if (process.argv.length < 5) {
+	console.error('few arguments, run "node depackblock.js {zxblock.bin} {loadAddr,runAddr,stackAddr,saveFrom,saveTo} {output.bin}"!');
+	process.exit(1);
+}
 
 process.removeAllListeners('warning');
 
