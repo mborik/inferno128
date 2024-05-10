@@ -11,7 +11,7 @@
 
 @COREZONE	equ	24200
 @RUNZONE	equ	44000
-@BASESP		equ	RUNZONE
+@BASESP		equ	COREZONE
 
 @im2vector	equ	#A800
 @interrupt_base	equ	#ABAB
@@ -424,64 +424,30 @@ clearscr	ld	(iy+0Eh),47h ;	'G'
 loadblock_ex2	ld	hl,loadblock_exit
 		push	hl
 loadblock_exe	ld	(.checkloaded+1),a
-;		ld	hl,5800h
-;		ld	de,5801h
-;		ld	bc,02ffh
-;		ld	(hl),l
-;		ldir
 		rlca
 		rlca
-		rlca
-;		ld	d,b
-		ld	d,0
 		ld	e,a
 		xor	a
-		out	(254),a
+		ld	d,a
+		push	de
 		ld	(loadblock_run.level+1),a
+		ld	(music_enabled+1),a
 		dec	a
 		ld	(loc_7108+1),a
-;		ld	(music_enabled+1),a
-;		ld	hl,levelblocktable
-		ld	hl,levelblocktable+6
+		call	sub_6E27
+		ld	hl,txt_block_load
+		call	console_print
+		ld	hl,levelblocktable
+		pop	de
  		add	hl,de
-; 		ld	e,(hl)
-; 		inc	hl
-; 		ld	d,(hl)
-; 		inc	hl
-; 		push	hl
-; 		ex	hl,de
-; 		ld	de,$4000
-; 		call	dzx0_128k
-; 		ld	hl,5AA5h
-; 		ld	de,5AA6h
-; 		ld	bc,0014h
-; 		ld	(hl),2
-; 		ldir
-; 		pop	hl
-; 		ld	e,(hl)
-; 		inc	hl
-; 		ld	d,(hl)
-; 		inc	hl
-; 		push	hl
-; 		ex	hl,de
-; 		ld	de,music_space
-; 		call	dzx0_128k
-; 		ld	a,$10
-; 		ld	bc,page128
-; 		out	(c),a
-; 		call	music_init
-; 		im	2
-; 		ei
-; 		halt
-; 		pop	hl
-; 		ld	e,(hl)
-; 		inc	hl
-; 		ld	d,(hl)
-; 		inc	hl
-; 		push	hl
-; 		ex	hl,de
-; 		call	console_print
-; 		pop	hl
+		ld	e,(hl)
+		inc	hl
+		ld	d,(hl)
+		inc	hl
+		push	hl
+		ex	hl,de
+		call	console_print
+		pop	hl
 		ld	a,(hl)
 		inc	hl
 		ld	h,(hl)
@@ -491,11 +457,6 @@ loadblock_exe	ld	(.checkloaded+1),a
 		ld	a,$10
 		ld	bc,page128
 		out	(c),a
-; 		ld	b,100
-; .justnop	ei
-; 		halt
-; 		djnz	.justnop
-
 .checkloaded	ld	a,-1
 		ld	hl,RUNZONE+63h
 		cp	(hl)
@@ -2771,12 +2732,14 @@ txt_help	dw	7014h
 		db	"PILOT [name], WEAPONS, REDEFINE, REPORT, INFO, HELP, START and EXIT. "
 		db	"You just need to enter the first few letters of these commands.\r",-1
 
-txt_level1_name	db	"Found in New York\r",-1
-txt_level2_name	db	"The Others on the Moon\r",-1
-txt_level3_name	db	"The Empire Strikes Back\r",-1
-txt_level4_name	db	"Fourth Planet of Death\r",-1
-txt_level5_name	db	"Far Away from Paradise\r",-1
-txt_level6_name	db	"Termination on Orga\r",-1
+txt_block_load	dw	5014h
+		db	"Loading stage ",-1
+txt_stage1_name	db	"1: 'Found in New York'\r",-1
+txt_stage2_name	db	"2: 'The Others on the Moon'\r",-1
+txt_stage3_name	db	"3: 'The Empire Strikes Back'\r",-1
+txt_stage4_name	db	"4: 'Fourth Planet of Death'\r",-1
+txt_stage5_name	db	"5: 'Far Away from Paradise'\r",-1
+txt_stage6_name	db	"6: 'Termination on Orga'\r",-1
 
 c_sets_default	db	0FEh,0DFh,1
 		db	0FEh,0DFh,2
@@ -4624,34 +4587,35 @@ interrupt_game	push	af
 ; ---------------------------------------------------------------------------
 
 levelblocktable
-		dw	level1_scr_ptr
-		dw	level1_msx_ptr
-		dw	txt_level1_name
+		; dw	level1_scr_ptr
+		; dw	level1_msx_ptr
+		dw	txt_stage1_name
 		dw	level1_dat_ptr
-		dw	level2_scr_ptr
-		dw	level2_msx_ptr
-		dw	txt_level2_name
+		; dw	level2_scr_ptr
+		; dw	level2_msx_ptr
+		dw	txt_stage2_name
 		dw	level2_dat_ptr
-		dw	level3_scr_ptr
-		dw	level3_msx_ptr
-		dw	txt_level3_name
+		; dw	level3_scr_ptr
+		; dw	level3_msx_ptr
+		dw	txt_stage3_name
 		dw	level3_dat_ptr
-		dw	level4_scr_ptr
-		dw	level4_msx_ptr
-		dw	txt_level4_name
+		; dw	level4_scr_ptr
+		; dw	level4_msx_ptr
+		dw	txt_stage4_name
 		dw	level4_dat_ptr
-		dw	level5_scr_ptr
-		dw	level5_msx_ptr
-		dw	txt_level5_name
+		; dw	level5_scr_ptr
+		; dw	level5_msx_ptr
+		dw	txt_stage5_name
 		dw	level5_dat_ptr
-		dw	level6_scr_ptr
-		dw	level6_msx_ptr
-		dw	txt_level6_name
+		; dw	level6_scr_ptr
+		; dw	level6_msx_ptr
+		dw	txt_stage6_name
 		dw	level6_dat_ptr
 
 ;;-----------------------------------------------------------------------------
 
-demoheader	ret ; TBD
+demoheader	ld	hl,$ + 120
+		incbin	"demoheader.bin",10
 
 continualpagingtable
 		db	11h ; from $10

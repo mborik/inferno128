@@ -24,13 +24,6 @@ level2_msx_pg	= _fxpage
 level2_msx_ptr	= (entire128k_offset + (level2_msx_real - #C000)) >> 1
 
 		align	2
-level2_scr_real	incbin "level2/loading.pak"
-level2_scr_len	= $ - level2_scr_real
-level2_scr_pg	= _fxpage
-; special entire 128k area pointer, shifted >> 1 to fit a word
-level2_scr_ptr	= (entire128k_offset + (level2_scr_real - #C000)) >> 1
-
-		align	2
 level3_dat_real	incbin "level3/final.pak",0,#10000 - level3_dat_real
 level3_dat_snip	= $ - level3_dat_real
 level3_dat_pg	= _fxpage
@@ -57,11 +50,6 @@ level3_dat_ptr	= (entire128k_offset + (level3_dat_real - #C000)) >> 1
 		export level2_msx_len
 		export level2_msx_pg
 		export level2_msx_ptr
-
-		export level2_scr_real
-		export level2_scr_len
-		export level2_scr_pg
-		export level2_scr_ptr
 
 		export level3_dat_real
 		export level3_dat_snip
