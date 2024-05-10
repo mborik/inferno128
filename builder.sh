@@ -69,6 +69,10 @@ PAK final.bin final.pak
 PAK loading.scr loading.pak
 PAK music.stc music.pak
 
+cd ../outro
+# ASM outro.a80 -DisFX --lst=outro.lst
+PAK final.bin final.pak
+
 # banks composition
 cd ..
 rm -f bank*

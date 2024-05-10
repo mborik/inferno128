@@ -109,7 +109,6 @@ loc_6DC0	ei
 		ldir
 		call	init_pilot
 
-
 hard_reset	ld	sp,BASESP
 		call	sub_6E27
 
@@ -423,6 +422,8 @@ loadblock_exe	ld	(.checkloaded+1),a
 		ld	(loc_7108+1),a
 		ld	hl,levelblocktable
  		add	hl,de
+		xor	(hl)
+		jr	z,.outroskip
 		push	hl
 		call	sub_6E27
 		ld	hl,txt_block_load
@@ -436,13 +437,16 @@ loadblock_exe	ld	(.checkloaded+1),a
 		ex	hl,de
 		call	console_print
 		pop	hl
+		db	1 ; ld bc,*
+.outroskip	inc	hl
+		inc	hl
 		ld	a,(hl)
 		inc	hl
 		ld	h,(hl)
 		ld	l,a
 		ld	de,RUNZONE
 		call	dzx0_128k
-		ld	a,$10
+		ld	a,10h
 		ld	bc,page128
 		out	(c),a
 .checkloaded	ld	a,-1
@@ -450,6 +454,9 @@ loadblock_exe	ld	(.checkloaded+1),a
 		cp	(hl)
 		ret	nz
 		ld	(loc_7108+1),a
+		cp	6
+		ld	hl,c_pilotname
+		call	z,RUNZONE+60h
 loadblock_ret	ld	a,1
 		xor	a
 		ret
@@ -4599,6 +4606,10 @@ levelblocktable
 		; dw	level6_msx_ptr
 		dw	txt_stage6_name
 		dw	level6_dat_ptr
+		; dw	-1
+		; dw	-1
+		dw	-1
+		dw	outro_ptr
 
 ;;-----------------------------------------------------------------------------
 

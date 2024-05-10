@@ -4,3 +4,7 @@ level6_msx_real: EQU 0x0000D9A4
 level6_msx_len: EQU 0x000001A9
 level6_msx_pg: EQU 0x00000017
 level6_msx_ptr: EQU 0x0000ECD2
+outro_real: EQU 0x0000DB4E
+outro_len: EQU 0x00001C19
+outro_pg: EQU 0x00000017
+outro_ptr: EQU 0x0000EDA7

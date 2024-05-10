@@ -23,6 +23,13 @@ level6_msx_pg	= _fxpage
 ; special entire 128k area pointer, shifted >> 1 to fit a word
 level6_msx_ptr	= (entire128k_offset + (level6_msx_real - #C000)) >> 1
 
+		align	2
+outro_real	incbin "outro/final.pak"
+outro_len	= $ - outro_real
+outro_pg	= _fxpage
+; special entire 128k area pointer, shifted >> 1 to fit a word
+outro_ptr	= (entire128k_offset + (outro_real - #C000)) >> 1
+
 ;;-----------------------------------------------------------------------------
 	if $ > #10000
 		display "Too long! ",/D,($-#10000)," bytes out!"
@@ -43,3 +50,8 @@ level6_msx_ptr	= (entire128k_offset + (level6_msx_real - #C000)) >> 1
 		export level6_msx_len
 		export level6_msx_pg
 		export level6_msx_ptr
+
+		export outro_real
+		export outro_len
+		export outro_pg
+		export outro_ptr
