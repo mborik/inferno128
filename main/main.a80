@@ -209,8 +209,8 @@ txt_kempston	dw	6814h
 		db	"Kempston? (enter Y/N)\r",-1
 txt_unknown_cmd	dw	5014h
 		db	"Unknown command\r",-1
-commands	dw	cmd_password
-		db	"PAS"
+commands	dw	cmd_passcode
+		db	"COD"
 		dw	cmd_report
 		db	"REP"
 		dw	cmd_redefine
@@ -364,7 +364,7 @@ loc_70C5	ld	a,(hl)
 
 ; ---------------------------------------------------------------------------
 
-cmd_password	xor	a
+cmd_passcode	xor	a
 		ld	(loadblock_run.level+1),a
 		call	sub_70B8
 		xor	a
@@ -388,10 +388,9 @@ loc_70EA	pop	hl
 		inc	a
 		cp	1Ah
 		jr	c,loc_70D4
-		ld	hl,txt_strange
+		ld	hl,txt_unknown
 		call	console_print
-		ld	a,1
-		jr	loc_70FD
+		jp	console_loop
 
 loc_70FB	pop	hl
 		pop	af
@@ -410,17 +409,6 @@ loc_7108	cp	-1
 		jp	console_loop
 ; ---------------------------------------------------------------------------
 
-clearscr	ld	(iy+0Eh),47h ;	'G'
-		ld	hl,4000h
-		ld	de,4001h
-		ld	bc,1800h
-		ld	(hl),-1
-		ldir
-		ld	(hl),78h ; 'x'
-		ld	bc,2FFh
-		ldir
-		ret
-
 loadblock_ex2	ld	hl,loadblock_exit
 		push	hl
 loadblock_exe	ld	(.checkloaded+1),a
@@ -429,17 +417,17 @@ loadblock_exe	ld	(.checkloaded+1),a
 		ld	e,a
 		xor	a
 		ld	d,a
-		push	de
 		ld	(loadblock_run.level+1),a
 		ld	(music_enabled+1),a
 		dec	a
 		ld	(loc_7108+1),a
+		ld	hl,levelblocktable
+ 		add	hl,de
+		push	hl
 		call	sub_6E27
 		ld	hl,txt_block_load
 		call	console_print
-		ld	hl,levelblocktable
-		pop	de
- 		add	hl,de
+		pop	hl
 		ld	e,(hl)
 		inc	hl
 		ld	d,(hl)
@@ -2684,10 +2672,10 @@ txt_pilot_ranks	db	"Cadet",-1
 		db	"Major",-1
 		db	"Lieutenant",-1
 		db	"Colonel",-1
-txt_strange	dw	5014h
+txt_unknown	dw	5014h
 		db	"#?!!...#",7Fh,0Dh
 		dw	7814h
-txt_passkey	db	"Entry code: "
+txt_passkey	db	"Enter code: "
 		block	10,0
 		db	-1
 
@@ -2704,7 +2692,7 @@ txt_enem_kill	dw	5814h
 txt_enem_total	dw	5814h
 		db	"Total enemy objects in the area: ",-1
 txt_mission_end	dw	6014h
-		db	"Mission accomplished.\r"
+		db	"Mission not complished.\r"
 txt_aborted	dw	5014h
 		db	"Mission aborted!\r"
 txt_killed	dw	5014h
@@ -2729,11 +2717,11 @@ txtpos_reset	db	16h,12h,10h,15h,10h,17h,0F0h,0,-1
 
 txt_help	dw	7014h
 		db	"Use the following commands to control the console: "
-		db	"PILOT [name], WEAPONS, REDEFINE, REPORT, INFO, HELP, START and EXIT. "
+		db	"PILOT [name], WEAPONS, REDEFINE, REPORT, INFO, HELP, START or CODE. "
 		db	"You just need to enter the first few letters of these commands.\r",-1
 
 txt_block_load	dw	5014h
-		db	"Loading stage ",-1
+		db	"Entering stage ",-1
 txt_stage1_name	db	"1: 'Found in New York'\r",-1
 txt_stage2_name	db	"2: 'The Others on the Moon'\r",-1
 txt_stage3_name	db	"3: 'The Empire Strikes Back'\r",-1
