@@ -134,8 +134,9 @@ loc_CE0A	push	af
 		ld	hl,loc_CFC7+2
 		ld	(hl),0
 		ld	(loc_CF57+1),a
+endseq_ptr1	ld	hl,attrhide
 		call	sub_CE7A
-		call	testkeyifend
+endseq_ptr3	call	testkeyifend
 		pop	af
 
 loc_CE1A	add	a,1
@@ -150,8 +151,9 @@ loc_CE26	push	af
 		ld	hl,loc_CFC7+2
 		ld	(hl),80h
 		ld	(loc_CF57+1),a
+endseq_ptr2	ld	hl,attrhide
 		call	sub_CE7A
-		call	testkeyifend
+endseq_ptr4	call	testkeyifend
 		pop	af
 
 loc_CE36	sub	1
@@ -186,7 +188,22 @@ testkeyifend	xor	a
 		and	1Fh
 		ret	z
 
-introend	di
+introend	ld	a,18
+		call	enablefade+2
+		call	attrhide
+		ld	a,#CD
+		ld	(endseq_ptr1),a
+		ld	(endseq_ptr2),a
+		ld	hl,testmusicend
+		ld	(endseq_ptr3+1),hl
+		ld	(endseq_ptr4+1),hl
+		ret
+
+testmusicend	ld	a,(music_setup)
+		bit	7,a
+		ret	z
+
+		di
 		im	1
 backsp		ld	sp,0
 		xor	a
@@ -194,6 +211,37 @@ backsp		ld	sp,0
 		inc	a
 		ld	(IMCALL),a
 		jp	music_mute
+
+attrhide:	ld	hl,22528
+		ld	c,24
+.atthd2:	ld	b,32
+		push	bc
+.atthd3:	ld	a,(hl)
+		and	7
+		jr	z,.atthd4
+		dec	a
+.atthd4:	push	af
+		ld	a,(hl)
+		and	56
+		jr	z,.atthd5
+		ld	c,8
+		sub	c
+		ld	c,a
+		pop	af
+		or	c
+		jr	.atthd6
+.atthd5:	ld	a,(hl)
+		and	248
+		ld	c,a
+		pop	af
+		or	c
+.atthd6:	ld	(hl),a
+		inc	hl
+		djnz	.atthd3
+		pop	bc
+		dec	c
+		jr	nz,.atthd2
+		ret
 
 sub_CE7A	xor	a
 		ld	(loc_CFB8+1),a
