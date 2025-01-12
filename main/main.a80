@@ -97,12 +97,21 @@ txt_equipment	db	80h,"4xCOBRA, forward firing missile\r"
 		call	console_print
 		call	console_input
 		ld	a,(5B15h+1)
-		cp	59h ; 'Y'
-		jr	nz,loc_6DC0
-		ld	a,20h ; ' '
+		cp	'Y'
+		jr	nz,.difficulty
+		ld	a,32
 		ld	(cmd_redefine.testkempston+1),a
 
-loc_6DC0	ei
+.difficulty	ld	hl,txt_difficulty
+		call	console_print
+		call	console_input
+		ld	a,(5B15h+1)
+		cp	'S'
+		jr	nz,.realstart
+		ld	a,#CA ; jp z
+		ld	(storymode_set),a
+
+.realstart	ei
 		ld	hl, c_sets_default
 		ld	de,5B00h
 		ld	bc,15h
@@ -114,7 +123,7 @@ hard_reset	ld	sp,BASESP
 
 		ld	hl,txt_help
 first_hello:	call	console_print
-		ld	a,31h
+		ld	a,31h ; ld hl,*
 		ld	(first_hello),a
 
 console_loop	ld	a,0
@@ -206,6 +215,8 @@ loc_6E79	ld	hl,txt_unknown_cmd
 ; ---------------------------------------------------------------------------
 txt_kempston	dw	6814h
 		db	"Kempston? (enter Y/N)\r",-1
+txt_difficulty	dw	6814h
+		db	"Select difficulty (N=Normal S=Story)\r",-1
 txt_unknown_cmd	dw	5014h
 		db	"Unknown command\r",-1
 commands	dw	cmd_passcode
@@ -242,7 +253,7 @@ cmd_sat		ld	hl,cmd_start_exe+1
 
 cmd_report	ld	hl,txt_pilot
 		call	console_print
-		ld	a,(byte_8302)
+		ld	a,(stat_rank)
 		ld	hl,txt_pilot_ranks
 		call	find_eqipend
 		call	console_print
@@ -252,21 +263,21 @@ cmd_report	ld	hl,txt_pilot
 		call	console_print
 		ld	hl,txt_pilot_stat1
 		call	console_print
-		ld	hl,(word_82FE)
-		call	sub_7A9C
+		ld	hl,(stat_flown)
+		call	printhl
 		call	nextline
 		ld	hl,txt_pilot_stat2
 		call	console_print
-		ld	a,(byte_82FD)
+		ld	a,(stat_completed)
 		dec	a
-		call	sub_7A99
+		call	printa
 		call	nextline
 		ld	hl,txt_pilot_stat3
 		call	console_print
-		ld	hl,(word_8300)
-		call	sub_7A9C
+		ld	hl,(stat_destroyed)
+		call	printhl
 		call	nextline
-		call	sub_7A48
+		call	print_alldeco
 		jp	console_loop
 ; ---------------------------------------------------------------------------
 txt_pilot	dw	7014h
@@ -281,7 +292,7 @@ txt_pilot_stat3	db	"Number of objects destroyed: ",-1
 
 cmd_demo	xor	a
 		ld	(loadblock_ret+1),a
-		ld	a,(byte_82FD)
+		ld	a,(stat_completed)
 		push	af
 loc_6FB7	call	rnd
 loc_6FB9	cp	24
@@ -290,7 +301,7 @@ loc_6FB9	cp	24
 		jr	loc_6FB9
 
 loc_6FC1	inc	a
-		ld	(byte_82FD),a
+		ld	(stat_completed),a
 		call	cmd_info.load
 		ld	b,0
 loc_6FCA	ei
@@ -317,7 +328,7 @@ rnd:		ld	a,42
  ; ---------------------------------------------------------------------------
 
 loc_6FE4	pop	af
-		ld	(byte_82FD),a
+		ld	(stat_completed),a
 		ld	a,1
 		ld	(loadblock_ret+1),a
 		jp	hard_reset
@@ -394,7 +405,7 @@ loc_70EA	pop	hl
 loc_70FB	pop	hl
 		pop	af
 
-loc_70FD	ld	(byte_82FD),a
+loc_70FD	ld	(stat_completed),a
 		or	a
 		jr	z,loc_7104
 		dec	a
@@ -478,7 +489,7 @@ loc_71BA	xor	a
 
 ; ---------------------------------------------------------------------------
 
-loadblock	ld	a,(byte_82FD)
+loadblock	ld	a,(stat_completed)
 		or	a
 		jr	z,.zero
 		dec	a
@@ -513,7 +524,7 @@ cmd_info	ld	hl,console_loop
 .load		ld	a,30h ; '0'
 		ld	(colorize.attr+1),a
 		call	loadblock
-		ld	a,(byte_82FD)
+		ld	a,(stat_completed)
 		dec	a
 		and	3
 		ld	hl,(RUNZONE)
@@ -532,7 +543,7 @@ cmd_info	ld	hl,console_loop
 cmd_exit	rst	0
 		rst	0
 
-calc_levelptr	ld	a,(byte_82FD)
+calc_levelptr	ld	a,(stat_completed)
 		or	a
 		jr	z,.do
 		dec	a
@@ -895,7 +906,7 @@ cmd_start	call	loadblock
 		ld	hl,40A0h
 		ld	a,20h
 		ld	b,12h
-		call	sub_8263
+		call	rollup.do
 		pop	bc
 		djnz	.rollup
 		ld	a,38h
@@ -997,7 +1008,7 @@ equip_found	ld	a,20
 		inc	hl
 		inc	hl
 		djnz	print_equip
-		ld	a,44h
+		ld	a,104q
 		ld	(colorize.attr+1),a
 		ld	hl,4021h
 		call	draw_circles
@@ -1005,7 +1016,7 @@ equip_found	ld	a,20
 		call	draw_circles
 		call	calc_levelptr
 		push	hl
-		ld	bc,0Eh
+		ld	bc,14
 		add	hl,bc
 		push	hl
 		pop	ix
@@ -1015,31 +1026,17 @@ equip_found	ld	a,20
 		push	af
 		call	sub_6E27
 		pop	af
-		jp	nc,loc_79FB
+		jp	nc,end_aborted
+		or	a
+storymode_set	ld	hl,end_storymode
 		push	af
-		ld	hl,(word_82FE)
+		ld	hl,(stat_flown)
 		inc	hl
-		ld	(word_82FE),hl
-		ld	hl,(word_8300)
-		push	hl
-		ld	bc,(5CB1h)
-		ld	b,0
-		add	hl,bc
-		ld	(word_8300),hl
-		call	sub_7986
-		pop	hl
-		push	de
-		call	sub_7986
-		pop	hl
+		ld	(stat_flown),hl
+		call	calc_destroyed
+		pop	af
 		or	a
-		sbc	hl,de
-		jr	z,loc_785F
-		ld	hl,byte_8304+6
-		set	7,(hl)
-
-loc_785F	pop	af
-		or	a
-		jp	z,loc_79E5
+		jp	z,end_killed
 		ld	hl,txt_mission_end
 		call	console_print
 		ld	a,70h ; 'p'
@@ -1058,21 +1055,20 @@ loc_785F	pop	af
 		inc	hl
 		ld	d,(hl)
 		inc	hl
-
 loc_7882	ex	de,hl
 		push	af
 		call	console_print
 		ld	hl,txt_enem_total
 		call	console_print
 		ld	a,(5CB0h)
-		call	sub_7A99
+		call	printa
 		call	nextline
 		ld	hl,txt_enem_kill
 		call	console_print
 		ld	a,(5CB1h)
-		call	sub_7A99
+		call	printa
 		call	nextline
-		ld	hl,txt_danger
+		ld	hl,txt_success
 		call	console_print
 		ld	a,(5CB1h)
 		ld	e,a
@@ -1088,39 +1084,38 @@ loc_78BF	or	a
 		sbc	hl,bc
 		jr	nc,loc_78BF
 		push	af
-		call	sub_7A99
+		call	printa
 		ld	hl,txt_percent
-
-sub_78CC	call	console_print
+		call	console_print
 		pop	af
 		ld	hl,txt_result_1
-		cp	14h
+		cp	20 ; %
 		jr	c,loc_78F8
 		ld	hl,txt_result_2
-		cp	28h ; '('
+		cp	40 ; %
 		jr	c,loc_78F8
 		ld	hl,txt_result_3
-		cp	3Ch ; '<'
+		cp	60 ; %
 		jr	c,loc_78F8
 		ld	hl,txt_result_4
-		cp	50h ; 'P'
+		cp	80 ; %
 		jr	c,loc_78F8
-		cp	5Ah ; 'Z'
+		cp	90 ; %
 		jr	c,loc_78F5
-		ld	hl,byte_8304
+		ld	hl,decorations_map
 		set	7,(hl)
 
 loc_78F5	ld	hl,txt_result_5
 
 loc_78F8	call	console_print
 		pop	af
-		ld	a,(byte_82FD)
+		ld	a,(stat_completed)
 		jp	nz,loc_7978
 		inc	a
-		ld	(byte_82FD),a
+		ld	(stat_completed),a
 		dec	a
 		push	af
-		ld	ix,unk_8303
+		ld	ix,decorations_map-1
 		cp	18h
 		jr	nz,loc_7914
 		set	7,(ix+5)
@@ -1147,7 +1142,6 @@ loc_7933	cp	(hl)
 		inc	hl
 		djnz	loc_7933
 		jr	loc_793F
-; ---------------------------------------------------------------------------
 
 loc_793B	set	7,(ix+2)
 
@@ -1158,7 +1152,7 @@ loc_7940	sub	3
 		jr	nz,loc_7940
 		ld	hl,txt_ranked
 		call	console_print
-		ld	hl,byte_8302
+		ld	hl,stat_rank
 		inc	(hl)
 		ld	a,(hl)
 		ld	hl,txt_pilot_ranks
@@ -1166,34 +1160,35 @@ loc_7940	sub	3
 		call	console_print
 		call	nextline
 
-loc_795D	call	sub_7A04
+loc_795D	call	print_newdeco
 		xor	a
 		ld	(loadblock_run.level+1),a
 		call	loadblock_run
 
 loc_7967	call	nextline
-		ld	a,(byte_82FD)
+		ld	a,(stat_completed)
 		cp	19h
 		jp	c,console_loop
 		call	sub_71AB
 		jp	cmd_start
+
 ; ---------------------------------------------------------------------------
 
 loc_7978	xor	a
-		call	sub_7A04
+		call	print_newdeco
 		jr	loc_7967
 
 ; ---------------------------------------------------------------------------
 unk_797E	db	2
 		db	5
 		db	9
-		db	0Bh
-		db	0Dh
-		db	0Fh
-		db	11h
-		db	12h
+		db	11
+		db	13
+		db	15
+		db	17
+		db	18
 
-sub_7986	ld	bc,64h	; 'd'
+sub_7986	ld	bc,100
 		ld	de,-1
 
 loc_798C	or	a
@@ -1258,46 +1253,73 @@ loc_79E2	ld	(de),a
 
 ; ---------------------------------------------------------------------------
 
-loc_79E5	ld	hl,txt_killed
+end_killed	ld	hl,txt_killed
 		call	console_print
 		ld	a,1
 		ld	(console_loop+1),a
 		ld	a,80h
-		ld	(byte_830B),a
-		call	sub_7A04
+		ld	(decorations_map+7),a
+		call	print_newdeco
 		jp	cmd_report
-; ---------------------------------------------------------------------------
 
-loc_79FB	ld	hl,txt_aborted
+end_storymode	ld	hl,txt_destroyed
+		call	console_print
+		ld	a,1
+		ld	(console_loop+1),a
+		call	calc_destroyed
+		inc	hl
+		inc	(hl)
+		set	7,(hl)
+		call	print_newdeco
+		jp	console_loop
+
+end_aborted	ld	hl,txt_aborted
 		call	console_print
 		jp	console_loop
 
-sub_7A04	ld	hl,byte_8304
-		xor	a
-		ld	(loc_7A14+1),a
+calc_destroyed	ld	hl,(stat_destroyed)
+		push	hl
+		ld	bc,(5CB1h)
+		ld	b,0
+		add	hl,bc
+		ld	(stat_destroyed),hl
+		call	sub_7986
+		pop	hl
+		push	de
+		call	sub_7986
+		pop	hl
+		or	a
+		sbc	hl,de
+		ld	hl,decorations_map+6
+		ret	z
+		set	7,(hl)
+		ret
 
-loc_7A0B	bit	7,(hl)
+; ---------------------------------------------------------------------------
+
+print_newdeco	ld	hl,decorations_map
+		xor	a
+		ld	(.counter+1),a
+.loop		bit	7,(hl)
 		res	7,(hl)
 		push	hl
-		jr	z,loc_7A40
+		jr	z,.skip2next
 		inc	(hl)
 		push	af
-
-loc_7A14	ld	a,0
+.counter	ld	a,0
 		or	a
-		jr	nz,loc_7A23
+		jr	nz,.nointrotxt
 		inc	a
-		ld	(loc_7A14+1),a
+		ld	(.counter+1),a
 		ld	hl,txt_recv_award
 		call	console_print
 
-loc_7A23	ld	a,60h ; '`'
+.nointrotxt	ld	a,140q
 		ld	(colorize.attr+1),a
 		ld	b,5
-
-loc_7A2A	ld	a,20h ; ' '
+.println	ld	a,' '
 		call	print_char_safe
-		djnz	loc_7A2A
+		djnz	.println
 		pop	af
 		push	af
 		ld	hl,txt_awards
@@ -1305,47 +1327,43 @@ loc_7A2A	ld	a,20h ; ' '
 		call	console_print
 		call	nextline
 		pop	af
-
-loc_7A40	pop	hl
+.skip2next	pop	hl
 		inc	hl
 		inc	a
 		cp	8
-		jr	c,loc_7A0B
+		jr	c,.loop
 		ret
 
-sub_7A48	ld	hl,byte_8304
+print_alldeco	ld	hl,decorations_map
 		xor	a
-		ld	(loc_7A56+1),a
-
-loc_7A4F	ld	c,(hl)
+		ld	(.counter+1),a
+.loop		ld	c,(hl)
 		inc	c
 		dec	c
 		push	hl
-		jr	z,loc_7A91
+		jr	z,.skip2next
 		push	af
-
-loc_7A56	ld	a,0
+.counter	ld	a,0
 		or	a
-		jr	nz,loc_7A65
+		jr	nz,.nointrotxt
 		inc	a
-		ld	(loc_7A56+1),a
+		ld	(.counter+1),a
 		ld	hl,txt_prt_award
 		call	console_print
 
-loc_7A65	ld	a,60h ; '`'
+.nointrotxt	ld	a,60h ; '`'
 		ld	(colorize.attr+1),a
 		ld	b,5
-
-loc_7A6C	ld	a,20h ; ' '
+.println	ld	a,20h ; ' '
 		call	print_char_safe
-		djnz	loc_7A6C
+		djnz	.println
 		pop	af
 		pop	hl
 		push	hl
 		ld	l,(hl)
 		ld	h,0
 		push	af
-		call	sub_7A9C
+		call	printhl
 		ld	a,78h ; 'x'
 		call	print_char_safe
 		pop	af
@@ -1355,47 +1373,41 @@ loc_7A6C	ld	a,20h ; ' '
 		call	console_print
 		call	nextline
 		pop	af
-
-loc_7A91	pop	hl
+.skip2next	pop	hl
 		inc	hl
 		inc	a
 		cp	8
-		jr	c,loc_7A4F
+		jr	c,.loop
 		ret
 
-sub_7A99	ld	l,a
+printa		ld	l,a
 		ld	h,0
-
-sub_7A9C	ld	c,20h ; ' '
-		ld	de,2710h
-		call	sub_7AB9
-		ld	de,3E8h
-		call	sub_7AB9
-		ld	de,64h	; 'd'
-		call	sub_7AB9
-		ld	e,0Ah
-		call	sub_7AB9
+printhl		ld	c,' '
+		ld	de,10000
+		call	.digit
+		ld	de,1000
+		call	.digit
+		ld	de,100
+		call	.digit
+		ld	e,10
+		call	.digit
 		ld	e,1
-		ld	c,30h ; '0'
-
-sub_7AB9	ld	a,2Fh ; '/'
-
-loc_7ABB	inc	a
+		ld	c,'0'
+.digit		ld	a,'0'-1
+.digitloop	inc	a
 		or	a
 		sbc	hl,de
-		jr	nc,loc_7ABB
+		jr	nc,.digitloop
 		add	hl,de
-		cp	30h ; '0'
-		jr	nz,loc_7ACD
+		cp	'0'
+		jr	nz,.digitpad
 		ld	a,c
-
-loc_7AC7	cp	20h ; ' '
+.digitsafe	cp	' '
 		ret	z
 		jp	print_char_safe
-; ---------------------------------------------------------------------------
 
-loc_7ACD	ld	c,30h ; '0'
-		jr	loc_7AC7
+.digitpad	ld	c,'0'
+		jr	.digitsafe
 
 ; ---------------------------------------------------------------------------
 
@@ -2331,8 +2343,8 @@ loc_80C3	ld	a,0
 loc_80DA	ld	(loc_80C3+1),a
 		ld	a,0A2h
 		ld	(loc_8160+2),a
-		call	sub_825C
-		call	sub_825C
+		call	rollup
+		call	rollup
 		pop	de
 		pop	hl
 		ret
@@ -2552,44 +2564,40 @@ print_zx_char	exx
 .buffer		block	12,-1
 ; ---------------------------------------------------------------------------
 
-sub_825C	ld	a,1Eh
-		ld	b,14h
+rollup		ld	a,30
+		ld	b,20
 		ld	hl,4041h
-
-sub_8263	ld	(loc_8286+1),a
-
-loc_8266	push	hl
-		call	sub_82A6
+.do		ld	(copyrow+1),a
+.loop		push	hl
+		call	downhl_attr
 		pop	de
 		push	bc
 		push	hl
-		call	loc_8286
+		call	copyrow
 		pop	hl
 		pop	bc
-		djnz	loc_8266
+		djnz	.loop
 		ld	c,8
 
-loc_8276	ld	a,(loc_8286+1)
+.clearlastrow	ld	a,(copyrow+1)
 		ld	b,a
 		ld	e,l
-
-loc_827B	ld	(hl),-1
+.fill		ld	(hl),-1
 		inc	l
-		djnz	loc_827B
+		djnz	.fill
 		ld	l,e
 		inc	h
 		dec	c
-		jr	nz,loc_8276
+		jr	nz,.clearlastrow
 		ret
 
 ; ---------------------------------------------------------------------------
 
-loc_8286	ld	bc,0
+copyrow		ld	bc,0
 		push	hl
 		push	de
 		ld	a,8
-
-loc_828D	push	hl
+.loop		push	hl
 		push	de
 		push	bc
 		ldir
@@ -2599,7 +2607,7 @@ loc_828D	push	hl
 		inc	h
 		inc	d
 		dec	a
-		jr	nz,loc_828D
+		jr	nz,.loop
 		pop	hl
 		call	colorize
 		ex	de,hl
@@ -2608,36 +2616,34 @@ loc_828D	push	hl
 		ldir
 		ret
 
-sub_82A6	ld	a,l
-		add	a,20h ; ' '
+downhl_attr	ld	a,l
+		add	a,32
 		ld	l,a
 		ret	nc
 		ld	a,h
 		add	a,8
 		ld	h,a
-		cp	58h ; 'X'
+		cp	58h
 		ret	nz
-		ld	h,40h ; '@'
+		ld	h,40h
 		ret
 
 ; ---------------------------------------------------------------------------
 init_pilot	ld	hl,c_pilot_def
 		ld	de,c_pilotname
-		ld	bc,0Ch
+		ld	bc,12
 		ldir
 		ex	de,hl
-		ld	b,14h
-
-loc_82CF	ld	(hl),c
+		ld	b,20
+.clearbuf	ld	(hl),c
 		inc	hl
-		djnz	loc_82CF
+		djnz	.clearbuf
 		ld	(hl),1
 		inc	hl
-		ld	b,0Fh
-
-loc_82D8	ld	(hl),c
+		ld	b,15
+.clearstat	ld	(hl),c
 		inc	hl
-		djnz	loc_82D8
+		djnz	.clearstat
 		ret
 
 c_pilot_def	db	"NoNamePilot\r"
@@ -2645,17 +2651,15 @@ c_pilot_def	db	"NoNamePilot\r"
 ; ---------------------------------------------------------------------------
 c_pilotname	db	"NoNamePilot\r"
 		block	20,0
-byte_82FD	db	1
-word_82FE	dw	0
 
-word_8300	dw	0
+stat_completed	db	1
+stat_flown	dw	0
+stat_destroyed	dw	0
+stat_rank	db	0
 
-byte_8302	db	0
+		db	0
+decorations_map	block	8,0
 
-unk_8303	db	0
-byte_8304	db	0,0,0,0,0,0,0
-
-byte_830B	db	0
 		db	0
 txt_awards	db	"Silver Star",-1
 		db	"Gold Star",-1
@@ -2679,6 +2683,7 @@ txt_pilot_ranks	db	"Cadet",-1
 		db	"Major",-1
 		db	"Lieutenant",-1
 		db	"Colonel",-1
+		db	"General",-1
 txt_unknown	dw	5014h
 		db	"#?!!...#",7Fh,0Dh
 		dw	7814h
@@ -2692,18 +2697,20 @@ txt_result_3	db	"average\r"
 txt_result_4	db	"excellent\r"
 txt_result_5	db	"expert\r"
 txt_percent	db	" % - ",-1
-txt_danger	dw	6814h
-		db	"Hazardousness achieved ",-1
+txt_success	dw	6814h
+		db	"Success rate achieved ",-1
 txt_enem_kill	dw	5814h
 		db	"Enemy objects destroyed: ",-1
 txt_enem_total	dw	5814h
 		db	"Total enemy objects in the area: ",-1
 txt_mission_end	dw	6014h
-		db	"Mission not complished.\r"
+		db	"Mission not accomplished.\r"
 txt_aborted	dw	5014h
 		db	"Mission aborted!\r"
 txt_killed	dw	5014h
 		db	"Battleship destroyed - you're dead!\r"
+txt_destroyed	dw	5014h
+		db	"Battleship destroyed! Mission must be repeated.\r"
 
 c_colorbar	db	2,42h,6,6,46h,46h,44h,44h,44h,44h,4,4,4,41h,3,3
 		db	43h,43h,5,5,45h,45h,7,7,47h,47h,42h,6,6,46h,46h,44h
@@ -2725,7 +2732,7 @@ txtpos_reset	db	16h,12h,10h,15h,10h,17h,0F0h,0,-1
 txt_help	dw	7014h
 		db	"Use the following commands to control the console: "
 		db	"PILOT [name], WEAPONS, REDEFINE, REPORT, INFO, HELP, START or CODE. "
-		db	"You just need to enter the first few letters of these commands.\r",-1
+		db	"You may just enter the first few letters of these commands.\r",-1
 
 txt_block_load	dw	5014h
 		db	"Entering stage ",-1
