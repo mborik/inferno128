@@ -16,6 +16,8 @@
 @im2vector	equ	#A800
 @interrupt_base	equ	#ABAB
 
+L1F54_BREAK_KEY	equ	#1F54
+
 
 	ifdef isFX
 		display "Composing game engine"
@@ -86,7 +88,7 @@ txt_equipment	db	80h,"4xCOBRA, forward firing missile\r"
 		xor	a
 		ld	(print_zx_char.bold),a
 
-.standardROM	call	sub_6E27
+.standardROM	call	console_clear
 		ld	iy,5C3Ah
 		ld	(iy+30h),0
 		ld	(iy+1),0CCh
@@ -119,7 +121,7 @@ txt_equipment	db	80h,"4xCOBRA, forward firing missile\r"
 		call	init_pilot
 
 hard_reset	ld	sp,BASESP
-		call	sub_6E27
+		call	console_clear
 
 		ld	hl,txt_help
 first_hello:	call	console_print
@@ -133,27 +135,30 @@ console_loop	ld	a,0
 		xor	a
 		ld	(console_loop+1),a
 		call	console_input
-		jp	nz,loc_6E46
-		ld	a,(loc_7108+1)
+		jp	nz,console_testcmd
+
+	if 0 ; no demo after console inactivity
+		ld	a,(current_stage+1)
 		inc	a
-		jr	z,console_loop
+		jr	nz,console_loop
 		call	demoheader
 		call	rnd
 		call	calc_levelptr.do
-		call	sub_6E19
+		call	game_demo
 		jr	nc,hard_reset
-		call	sub_6E27
-		jp	console_loop
+		call	console_clear
+	endif
+		jr	console_loop
 
-sub_6E19	ld	bc,0Eh
+game_demo	ld	bc,14
 		add	hl,bc
 		push	hl
 		pop	ix
 		xor	a
-		call	sub_8EF8
-		jp	1F54h
+		call	game_engine
+		jp	L1F54_BREAK_KEY
 
-sub_6E27	ld	hl,4000h
+console_clear	ld	hl,4000h
 		ld	bc,1820h
 		xor	a
 		out	(254),a
@@ -168,50 +173,46 @@ sub_6E27	ld	hl,4000h
 
 ; ---------------------------------------------------------------------------
 
-loc_6E46	ld	a,(5B15h)
+console_testcmd	ld	a,(5B15h)
 		or	a
 		jp	z,console_loop
 		ld	hl,commands
-
-loc_6E50	ld	e,(hl)
+.loopcmds	ld	e,(hl)
 		inc	hl
 		ld	d,(hl)
 		inc	hl
 		ld	a,e
 		or	d
-		jr	z,loc_6E79
+		jr	z,.unknowncmd
 		push	de
 		ld	de,5B15h
 		ld	a,(5B15h)
 		inc	de
 		cp	4
-		jr	c,loc_6E66
+		jr	c,.stripto3
 		ld	a,3
-
-loc_6E66	push	hl
+.stripto3	push	hl
 		ld	b,a
-
-loc_6E68	ld	a,(de)
+.compare	ld	a,(de)
 		cp	(hl)
-		jr	nz,loc_6E72
+		jr	nz,.notfound
 		inc	hl
 		inc	de
-		djnz	loc_6E68
+		djnz	.compare
 		pop	hl
 		ret
-; ---------------------------------------------------------------------------
 
-loc_6E72	pop	hl
+.notfound	pop	hl
 		inc	hl
 		inc	hl
 		inc	hl
 		pop	de
-		jr	loc_6E50
-; ---------------------------------------------------------------------------
+		jr	.loopcmds
 
-loc_6E79	ld	hl,txt_unknown_cmd
+.unknowncmd	ld	hl,txt_unknown_cmd
 		call	console_print
 		jp	console_loop
+
 ; ---------------------------------------------------------------------------
 txt_kempston	dw	6814h
 		db	"Kempston? (enter Y/N)\r",-1
@@ -294,28 +295,28 @@ cmd_demo	xor	a
 		ld	(loadblock_ret+1),a
 		ld	a,(stat_completed)
 		push	af
-loc_6FB7	call	rnd
-loc_6FB9	cp	24
-		jr	c,loc_6FC1
+.loop		call	rnd
+.overflow	cp	24
+		jr	c,.exec
 		sub	24
-		jr	loc_6FB9
+		jr	.overflow
 
-loc_6FC1	inc	a
+.exec		inc	a
 		ld	(stat_completed),a
 		call	cmd_info.load
 		ld	b,0
-loc_6FCA	ei
-		call	1F54h
+.waitfor	ei
+		call	L1F54_BREAK_KEY
 		jr	nc,loc_6FE4
 		halt
 		halt
-		djnz	loc_6FCA
+		djnz	.waitfor
 		call	demoheader
 		call	calc_levelptr
-		call	sub_6E19
+		call	game_demo
 		jr	nc,loc_6FE4
-		call	sub_6E27
-		jr	loc_6FB7
+		call	console_clear
+		jr	.loop
 
 rnd:		ld	a,42
 		ld	c,a
@@ -378,45 +379,44 @@ cmd_passcode	xor	a
 		ld	(loadblock_run.level+1),a
 		call	sub_70B8
 		xor	a
-loc_70D4	push	af
+.loop		push	af
 		push	hl
 		call	sub_79B3
 		pop	hl
 		push	hl
 		ld	b,10
 		ld	de,txt_passkey+0Dh
-loc_70E0	ld	a,(de)
+.compare	ld	a,(de)
 		cp	(hl)
 		inc	hl
 		inc	de
-		jr	nz,loc_70EA
-		djnz	loc_70E0
-		jr	loc_70FB
+		jr	nz,.notfound
+		djnz	.compare
+		jr	.found
 
-loc_70EA	pop	hl
+.notfound	pop	hl
 		pop	af
 		inc	a
 		cp	1Ah
-		jr	c,loc_70D4
+		jr	c,.loop
 		ld	hl,txt_unknown
 		call	console_print
 		jp	console_loop
 
-loc_70FB	pop	hl
+.found		pop	hl
 		pop	af
-
-loc_70FD	ld	(stat_completed),a
+		ld	(stat_completed),a
 		or	a
-		jr	z,loc_7104
+		jr	z,.calcstage
 		dec	a
-loc_7104	rrca
+.calcstage	rrca
 		rrca
 		and	3Fh
-
-loc_7108	cp	-1
+current_stage	cp	-1
 		jr	nz,loadblock_ex2
 		call	loadblock_run
 		jp	console_loop
+
 ; ---------------------------------------------------------------------------
 
 loadblock_ex2	ld	hl,loadblock_exit
@@ -430,13 +430,13 @@ loadblock_exe	ld	(.checkloaded+1),a
 		ld	(loadblock_run.level+1),a
 		ld	(music_enabled+1),a
 		dec	a
-		ld	(loc_7108+1),a
+		ld	(current_stage+1),a
 		ld	hl,levelblocktable
  		add	hl,de
 		xor	(hl)
 		jr	z,.outroskip
 		push	hl
-		call	sub_6E27
+		call	console_clear
 		ld	hl,txt_block_load
 		call	console_print
 		pop	hl
@@ -464,7 +464,7 @@ loadblock_exe	ld	(.checkloaded+1),a
 		ld	hl,RUNZONE+63h
 		cp	(hl)
 		ret	nz
-		ld	(loc_7108+1),a
+		ld	(current_stage+1),a
 		cp	6
 		ld	hl,c_pilotname
 		call	z,RUNZONE+60h
@@ -475,16 +475,16 @@ loadblock_ret	ld	a,1
 loadblock_exit	call	loadblock_run
 		jp	hard_reset
 
-sub_71AB	xor	a
+waitkey		xor	a
 		in	a,(254)
 		cpl
 		and	1Fh
-		jr	nz,loc_71BA
-		call	sub_7731
+		jr	nz,.skip
+		call	getdefkeys_map
 		ld	a,d
 		or	a
-		jr	z,sub_71AB
-loc_71BA	xor	a
+		jr	z,waitkey
+.skip		xor	a
 		ret
 
 ; ---------------------------------------------------------------------------
@@ -496,12 +496,12 @@ loadblock	ld	a,(stat_completed)
 .zero		rrca
 		rrca
 		and	3Fh ; '?'
-		ld	hl,loc_7108+1
+		ld	hl,current_stage+1
 		cp	(hl)
 		call	nz,loadblock_exe
 		jp	nz,hard_reset
 		call	loadblock_run
-		jp	sub_6E27
+		jp	console_clear
 
 loadblock_run	call	calc_levelptr
 .level		ld	a,0
@@ -703,15 +703,15 @@ loc_750A	ld	hl,0
 
 ; ---------------------------------------------------------------------------
 
-cmd_redefine	ld	hl,3E8h
+cmd_redefine	ld	hl,1000
 		ld	c,0
-.waitkey	in	a,(1Fh)
+.wait4release	in	a,(1Fh)
 		or	c
 		ld	c,a
 		dec	hl
 		ld	a,h
 		or	l
-		jr	nz,.waitkey
+		jr	nz,.wait4release
 		ld	a,c
 
 .testkempston	cp	0
@@ -873,32 +873,29 @@ txt_redf_wepa	db	"weapon activation:\r"
 txt_redf_for	db	"    - ",-1
 
 ; ---------------------------------------------------------------------------
-sub_7731	ld	hl,5B00h
+getdefkeys_map	ld	hl,5B00h
 		ld	de,7
-
-loc_7737	ld	c,(hl)
+.loop7		ld	c,(hl)
 		inc	hl
 		ld	b,(hl)
 		inc	hl
 		in	a,(c)
 		bit	7,c
-		jr	z,loc_7742
+		jr	z,.skip1
 		cpl
-
-loc_7742	and	(hl)
+.skip1		and	(hl)
 		inc	hl
-		jr	z,loc_7748
+		jr	z,.skip2
 		set	7,d
-
-loc_7748	srl	d
+.skip2		srl	d
 		dec	e
-		jr	nz,loc_7737
+		jr	nz,.loop7
 		ret
 
 ; ---------------------------------------------------------------------------
 
 cmd_start	call	loadblock
-		ld	a,(loc_7108+1)
+		ld	a,(current_stage+1)
 		inc	a
 		jp	z,hard_reset
 		ld	b,18
@@ -1021,10 +1018,10 @@ equip_found	ld	a,20
 		push	hl
 		pop	ix
 		ld	a,c
-		call	sub_8EF8
+		call	game_engine
 		pop	hl
 		push	af
-		call	sub_6E27
+		call	console_clear
 		pop	af
 		jp	nc,end_aborted
 		or	a
@@ -1169,7 +1166,7 @@ loc_7967	call	nextline
 		ld	a,(stat_completed)
 		cp	19h
 		jp	c,console_loop
-		call	sub_71AB
+		call	waitkey
 		jp	cmd_start
 
 ; ---------------------------------------------------------------------------
@@ -1264,11 +1261,8 @@ end_killed	ld	hl,txt_killed
 
 end_storymode	ld	hl,txt_destroyed
 		call	console_print
-		ld	a,1
-		ld	(console_loop+1),a
 		call	calc_destroyed
 		inc	hl
-		inc	(hl)
 		set	7,(hl)
 		call	print_newdeco
 		jp	console_loop
@@ -1708,7 +1702,7 @@ loc_7CAD	ld	a,(de)
 		pop	hl
 		call	downhl
 		djnz	loc_7CAD
-		call	sub_7731
+		call	getdefkeys_map
 		pop	hl
 		bit	4,d
 		ret	nz
@@ -2336,7 +2330,7 @@ loc_80C3	ld	a,0
 		ld	(5ADEh),a
 		ld	a,(loadblock_ret+1)
 		or	a
-		call	nz,sub_71AB
+		call	nz,waitkey
 		xor	a
 		ld	(5ADEh),a
 
@@ -2710,7 +2704,7 @@ txt_aborted	dw	5014h
 txt_killed	dw	5014h
 		db	"Battleship destroyed - you're dead!\r"
 txt_destroyed	dw	5014h
-		db	"Battleship destroyed! Mission must be repeated.\r"
+		db	"Battleship destroyed! We rescued you from the shipwreck.\rMission must be repeated.\r"
 
 c_colorbar	db	2,42h,6,6,46h,46h,44h,44h,44h,44h,4,4,4,41h,3,3
 		db	43h,43h,5,5,45h,45h,7,7,47h,47h,42h,6,6,46h,46h,44h
@@ -2752,7 +2746,7 @@ c_sets_default	db	0FEh,0DFh,1
 		db	0FEh,7Fh,8
 		block	64h,0
 
-sub_8EF8	di
+game_engine	di
 		ld	(loc_9197+1),a
 		ld	(loc_9019+1),sp
 		ld	sp,0
@@ -2857,7 +2851,7 @@ loc_8FE0	cp	0
 		ld	hl,4287h
 		call	nz,sub_902C
 
-loc_8FEB	call	1F54h
+loc_8FEB	call	L1F54_BREAK_KEY
 		jr	nc,loc_9019
 		ld	a,(5CB0h)
 		dec	a
