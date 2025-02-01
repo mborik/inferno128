@@ -21,38 +21,38 @@ Závěrem posílám pozdravy všem svým příznivcům, obdivovatelům, odpůrc�
 Se slovy "Bijte tu verbež orgaidskou" se s vámi loučím a přeji mnoho úspěchů ve hře, hodně trpělivosti, štěstí, nápadů a podobně.
 
 
-Welcome onboard the TTF RAINA fighter carrier. You have been assigned to the newly formed PEACEMAKER unit. We are approaching the Earth, which is occupied half by Orgaids. The war between the Orgaids and the Federation of Terran Planets (FTP) been going on for several years. Earth's troops are (hopefully) permanently on the retreat for now, clearing out one planet after another. At the time the war began, the Orgaids had a significant technological advantage - they had been preparing for war for a long time. We have now managed to develop some new weapons that are scientifically beyond Orgaid weapons. One of the greatest hopes is the new PEACEMAKER battleship.
-Since there are many rookies among the pilots aboard the RAINA, it doesn't hurt to review some of the principles of effective and "safe" combat (a.k.a. the Pilot's Ten Rules):
-1) Take advantage of the features of the landscape (you can sometimes take cover from rockets and missiles using terrain elevations).
-2) Look for enemy weaknesses (enemy combat vehicles are designed for offensive combat and therefore have little or no protection from the sides).
-3) Choose weapons for each mission that are appropriate for the mission (tactical support will equip you with the weapons you would need, but in flight you may find that other weapons would be better for the mission, so don't be afraid to return to base and re-arm your battleship).
-4) Don't get out of focus (there is a solution to every situation, but you have to find it).
-5) Those who run away in time usually win (if you use a linear engine, you can "run away" from missiles and guided missiles, also in a situation where you lose your shield it is wise to have it refilled).
-6) Let the enemies shoot each other (there will be a huge amount of machinery deployed against you, it often happens that Orgaids in the heat of battle will even hit their own lines, combat skill is all about cleverly turning the enemy's power against itself).
-7) Orgaids are suicidal (Orgaid pilots have an artificially weakened instinct for self-preservation and often perform maneuvers that end in self-destruction, sometimes you just have to wait for a while).
-8) Protect yourself and the battleship (if the battleship is seriously damaged in combat, return to base immediately - we don't need heroes!).
-9) Shoot less rather than more (the plasma cannon fires the most devastating shots when it's fully charged, so always wait for a while to keep it charged!).
-10) Plasma disrupts the shield (the plasma blast momentarily changes the structure of matter, so the blast can break through solid objects).
-Well, that's it! We've reached orbit and we're preparing to descend...
-So, to start the game, press any key, unless you want to keep reading the following text, which is not essential for playing the game.
-I see, you're interested, so here it is: The game was made between the fall of 1992 and the spring of 1993, so I hope that shows in the game. The game was inspired by a lot of other games (R-Type, Zynaps, Astro Marine Corps Uridium, Wing Commander (PC), Elite, Academy, Tau Ceti, Dan Dare, Action Force, Quazatro, F-117 Stealh Fighter, and I'm sure that I forgot many others). I simply wanted to try to create a game that I would enjoy playing and that would at least come close to the above.
-I used my Speccy with Didaktik D40 disc drive, Prometheus assembler, Desktop, Pressor VI, Art Studio and Screen Top wide-screen editor. Miroslav Hlavička (SCALEX) used Orfeus and Bzyk's SoundTracker...
-George K. and Láďa Schön worked with me on the graphics of the whole game. George K. designed and drew the foundation of New York location, Láďa Schön drew the foundation of the planet NGC32/4, I drew the planets Violet and Orga. However, the final design of these planets is my own work. The planet Zynaps was created using graphics from the eponymous game - it's my tribute to its authors, because it's my favourite shooter game.
-I've played EVERY level by myself several times to the end and I claim that the game is playable (for those who want to claim that it isn't). It takes some practice though, thinking and finding ways to shoot those little bastards (there's always more than one way). There's even a sort of cheat mode built-in, but please don't use it. You'll miss out a lot of fun (ahem, it's something to do with the satellite or something like that...?)
-So you don't think I'm being mean to you, here's how to finish the very first mission. You can take notes, it's easy:
+Welcome aboard the TTF RAINA. You have been assigned to the newly formed PEACEMAKER unit. We are approaching Earth, half of which is occupied by Orgaids. The war between the Federation of Terran Planets (FTP) and the Orgaids has been going on for several years. Earth's forces are (hopefully) permanently on the retreat, losing planet after planet. By the time the war began, the Orgaids had a significant technological advantage - they had been preparing for war for some time. We have now managed to develop some new weapons that are technologically superior to the Orgaid's. One of the most promising is the new PEACEMAKER fighter (see the pilot's manual for more information).
+As there are many novice pilots aboard RAINA, it doesn't hurt to review some of the principles of effective and "safe" combat (also known as the pilot's ten commandments):
+1) Use the landscape to your advantage (you can sometimes take cover from missiles and rockets behind terrain elevations).
+2) Look for the enemy's weaknesses (enemy combat vehicles are designed for offensive combat and therefore have little or no armour on the sides).
+3) Choose the right weapons for each mission (Tactical Support will equip you with the weapons you need, but you may find that other weapons would be better in flight, so return to base and rearm).
+4) Don't despair (there is a solution to every situation, but you have to find it).
+5) Escape in time, live to fight another day (if you use a linear engine, you can "escape" even from missiles and guided missiles, also, in a situation where you lose your shield, it is wise to have it refilled).
+6) Let the enemies shoot at one another (there will be a huge amount of machinery deployed against you, in the heat of the battle, the Orgaids may even hit their own ranks, the mastery of combat lies in cleverly turning the enemy's power against itself).
+7) Orgaids are suicidal (Orgaid pilots have an artificially weakened instinct for self-preservation and often perform manoeuvres that end in self-destruction, sometimes you just have to wait a while).
+8) Protect yourself and the battleship (if the battleship is seriously damaged in battle, return to base immediately - there's no need for dead heroes!).
+9) Fire less, not more (the plasma cannon fires its most devastating shots when it's fully charged, so always wait for it to recharge!).
+10) Plasma disrupts integrity (the plasma blast temporarily alters the structure of matter, allowing the blast to pass through solid objects).
+Well, that's it! We've reached orbit and are preparing to descend...
+To start the game, press any key, unless you want to continue reading the following text, which is not essential for playing the game.
+I can see you're interested, so here we go: The game was written between autumn 1992 and spring 1993, so it didn't take me three weeks like some other people, but I hope it shows in the game. During this time I also worked on many other programs (PRESSOR VI, the disk version of SCREEN TOP, utilities for KUD 3, LQ printing from DESKTOP on EPSON LX series compatible 9-pin dot matrix printers, and the ZXM subscriber database). The game was inspired by many other games (of course I didn't invent everything, in case you're wondering, they were games: R-TYPE, ZYNAPS, ASTRO MARINE CORPS I and II, URIDIUM, WING COMMANDER (PC), ELITE, ACADEMY, TAU CETI, DAN DARE I, II and III, ACTION FORCE I and II, QUAZATRON, F-117 STEALTH FIGHTER, and certainly many others I've seen, both positively (i.e. how to do it) and negatively (i.e. how definitely not to do it)). I just wanted to try and make a game that I would enjoy playing (which I do, I really do play my game occasionally) and that would at least come close to those mentioned above (how I managed that, you'll have to judge for yourself). I've received a variety of feedback on the quality of the game, ranging from the best (Pavel M.: it's the HIT of the year, I keep coming back to it because it's great) to the worst (Jan F.: it's ugly, the sounds are awful, the program is user-unfriendly, the graphics are really awful, it's just generally dumbed down, etc. etc. etc. etc., just if I'm not up to it, I shouldn't get into it....). Personally, I think it's one of the best pieces of software I've ever created....
+I used my brain, chair, Speccy, Didaktik D40 disc drive, tv, PROMETHEUS assembler, DESKTOP, PRESSOR VI, ART STUDIO and SCREEN TOP wide-screen editor by George K., Láďa Schön (a.k.a. LS), Miroslav Hlavička (SCALEX), ORFEUS, and Bzyk's SOUNDTRACKER, DEVAST ACE, patience, imagination, passion, hands...
+George K. and Láďa Schön worked with me on the graphics of the whole game. George K. designed and drew the basis of New York level, Láďa Schön drew the foundation of the Moon, the planet NGC32/4, I drew the planets Violet and Orga. However, the final look of these planets is my own work. The planet Zynaps was created using graphics from the eponymous game - it's a kind of my tribute to its authors. ZYNAPS is my favourite shooter game.
+I've played EVERY level to the end several times, and I claim that the game is playable (for those who want to claim that it isn't). It does take some practice though, thinking and finding ways to shoot the little bastards (there's always more than one way). Anyone who disagrees should try one of the aforementioned games and think again. I also got some feedback about the difficulty: (Pavel M.: At first I was a bit annoyed, but then I got the hang of it, everything is just right, Tonda M.: R-TYPE is harder, Jan F.: it's impossible to play). There's even a kind of cheat mode built in, but I won't reveal it! (but don't look for it, you'll miss out on a lot of fun, ahem, it has something to do with the satellite or something...?)
+I'll tell you how to complete the very first mission, you can take notes, it's easy:
 1) activate the ENERGY block right after you start
-2) shoot the three houses on the bottom right
+2) destroy the three houses on the bottom right
 3) launch the GLADIATOR, make sure it doesn't smash on something
 4) destroy the 1st balloon with the GLADIATOR
 5) destroy the 2nd balloon
 6) destroy the 1st helicopter and the 3rd balloon
 7) smash the GLADIATOR into a cloud
 8) activate the TRIDENT and use it to destroy the 4th balloon
-9) next up is the 2nd helicopter, you need to get above it so that you're out of its range but so that you can hit it with either the lower or upper shot - destroy it
+9) next up is the 2nd helicopter, you need to get above it so that you're out of its range but close enough to hit it with either the lower or upper shot - destroy it
 10) destroy the 3rd helicopter in the same way, you can also fly around it and destroy it from behind
 11) destroy the 5th balloon
 12) destroy the 4th and 5th helicopter
 13) now you are near the Statue of Liberty, the objective of today's mission has been achieved, you can destroy it
-14) go back to the RAINA, on the way you can destroy what you missed on the flight there - but watch the fuel level
-15) now you can land on RAINA, the landing pad is at the bottom of the RAINA (it's marked with indicators)
-With the words: "Beat that Orgaid scumbags!" I wish you good luck, lots of patience, success, good ideas and so on.
+14) fly back to RAINA, on the way back you can destroy what you missed during the flight there - but keep an eye on the fuel level
+15) now you can land on RAINA, the landing pad is at the bottom of RAINA (it's marked with indicators)
+With the words: "Beat the Orgaid bastards!" I wish you good luck, lots of patience, success, good ideas and so on.
